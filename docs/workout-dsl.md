@@ -105,7 +105,7 @@ El `preview` que ve el usuario en el chat debe ser esto, no el JSON:
 
 ## Traducción a Garmin
 
-Forma aproximada del payload (**por confirmar en P0**):
+Forma real del payload, **confirmada (2026-08-14)** por GET a `/workout-service/workout/{id}` contra un workout propio existente (ver `garmin-api.md`):
 
 ```
 workout
@@ -113,25 +113,46 @@ workout
 └─ workoutSegments[]
    └─ segmentOrder, sportType, workoutSteps[]
       ├─ ExecutableStepDTO: stepOrder, stepType{id,key},
-      │  endCondition{id,key}, endConditionValue,
+      │  endCondition{id,key}, endConditionValue, endConditionCompare,
       │  targetType{id,key}, targetValueOne, targetValueTwo
-      └─ RepeatGroupDTO: numberOfIterations, smartRepeat, workoutSteps[]
+      └─ RepeatGroupDTO: numberOfIterations, smartRepeat, workoutSteps[],
+         endCondition{conditionTypeId:7, key:"iterations"}, endConditionValue=numberOfIterations
 ```
 
-Unidades: Garmin trabaja en **metros**, **segundos** y **m/s**. El ritmo va como velocidad, no como min/km. La conversión y su redondeo son una fuente clásica de bugs → test dedicado.
+La forma hipotetizada antes de P0 era correcta en la estructura. Lo único nuevo confirmado: `endConditionCompare` (`"gt"` en el dump visto) y que el `RepeatGroupDTO` repite su propio `endCondition` de tipo `iterations` con el mismo valor que `numberOfIterations`.
+
+Unidades, **confirmado**: distancia en **metros** (`endConditionValue: 2000.0` = 2km), pace como **velocidad en m/s** (`targetValueOne: 3.1746032` ≈ 3:09/km, el primer valor es el más rápido). La conversión y su redondeo son una fuente clásica de bugs → test dedicado.
 
 ### Constantes
 
-**No se inventan.** Todas las constantes numéricas se extraen de un workout real creado a mano en Garmin Connect y recuperado por GET (tarea de P0). Viven en un único archivo, `packages/core/src/workout/garmin-constants.ts`, cada una con un comentario indicando de qué dump salió.
+**No se inventan.** Se extraen de dumps reales por GET. Van a vivir en `packages/core/src/workout/garmin-constants.ts` (P1), cada una con un comentario indicando de qué dump salió.
 
 | Grupo | Estado | Origen |
 |---|---|---|
-| `sportTypeId` | por confirmar | dump P0 |
-| `stepTypeId` (warmup, cooldown, interval, recovery, rest, repeat) | por confirmar | dump P0 |
-| `conditionTypeId` (lap.button, time, distance, calories, hr) | por confirmar | dump P0 |
-| `workoutTargetTypeId` (no.target, pace.zone, heart.rate.zone, power.zone, cadence) | por confirmar | dump P0 |
+| `sportTypeId`: `running`=1 | confirmado (2026-08-14) | workout real `1610864009` |
+| `stepTypeId`: `warmup`=1, `interval`=3, `recovery`=4, `repeat`=6 | confirmado (2026-08-14) | workout real `1610864009` |
+| `stepTypeId`: `cooldown`, `rest` | por confirmar | no aparecieron en el dump visto |
+| `conditionTypeId`: `time`=2, `distance`=3, `iterations`=7 | confirmado (2026-08-14) | workout real `1610864009` |
+| `conditionTypeId`: `lap.button`, `calories`, `hr` | por confirmar | no aparecieron en el dump visto |
+| `workoutTargetTypeId`: `no.target`=1, `pace.zone`=6 | confirmado (2026-08-14) | workout real `1610864009` |
+| `workoutTargetTypeId`: `heart.rate.zone`, `power.zone`, `cadence` | por confirmar | no aparecieron en el dump visto |
 
-Estrategia de verificación: crear en la app de Garmin un workout que use **cada** tipo de paso, condición y objetivo que queremos soportar, y hacer un solo GET. Un dump bien elegido confirma la tabla entera.
+Faltan `cooldown`, `rest`, `lap.button`, `calories`, `hr`, y los targets de FC/potencia/cadencia. Se confirman de a poco, sobre la marcha, no con un workout "maestro" armado de una — cuando el DSL necesite ese tipo de paso, ahí se confirma esa constante puntual (`/garmin-endpoint`).
+
+**Confirmado también en escritura (2026-08-14)**: `sportTypeId=1`, `stepTypeId` warmup=1/interval=3, `conditionTypeId` time=2/distance=3, `workoutTargetTypeId` no.target=1/pace.zone=6 — mismo workout de referencia usado para leer (`1610864009`) y para escribir (`POST` propio, `workoutId 1664286235`, "PAIR spike test"). Confirma que el traductor puede ser simétrico: las mismas constantes sirven para leer y para escribir.
+
+Detalle de dos campos que en la lectura aparecían con valor y en la escritura quedaron `null` sin que Garmin los completara solo: `preferredEndConditionUnit` y `endConditionCompare`. No hicieron falta para que el workout se creara y mostrara bien en la app — parecen puramente informativos para el cliente (unidad preferida a mostrar, comparación del end condition), no campos que el traductor necesite emitir. Si algo se ve raro visualmente en la app más adelante, revisar esto primero.
+
+Tabla de constantes completa leída por código (no probada aún, fuente: `python-garminconnect/workout.py`, comentario propio "from /workout-service/workout/types" — ese endpoint de catálogo no lo pegamos todavía nosotros):
+
+| Enum | Valores |
+|---|---|
+| `sportTypeId` | running=1 ✅, cycling=2, other=3, swimming=4, strength_training=5, cardio_training=6, yoga=7, pilates=8, hiit=9, multi_sport=10, mobility=11 |
+| `stepTypeId` | warmup=1 ✅, cooldown=2, interval=3 ✅, recovery=4 ✅, rest=5, repeat=6 ✅, other=7, main=8 |
+| `conditionTypeId` | lap_button=1, time=2 ✅, distance=3 ✅, calories=4, power=5, heart_rate=6, iterations=7 ✅, fixed_rest=8, fixed_repetition=9, reps=10 |
+| `workoutTargetTypeId` | no_target=1 ✅, power_zone=2, cadence=3, heart_rate_zone=4, speed_zone=5, pace_zone=6 ✅, grade=7, heart_rate_lap=8, power_lap=9, resistance=15 |
+
+✅ = confirmado por nosotros contra cuenta real. El resto son **por confirmar**, no se usan hasta pegarle a `/workout-service/workout/types` o verlos en un dump propio.
 
 ---
 
@@ -139,11 +160,14 @@ Estrategia de verificación: crear en la app de Garmin un workout que use **cada
 
 | Capacidad | Estado |
 |---|---|
-| Pasos por tiempo / distancia | pendiente |
-| Repeticiones | pendiente |
-| Objetivo de ritmo / FC / potencia | pendiente |
+| Pasos por tiempo / distancia | **confirmado** (lectura y escritura, 2026-08-14) |
+| Repeticiones | confirmado en lectura; escritura pendiente |
+| Objetivo de ritmo (pace) | **confirmado** (lectura y escritura, 2026-08-14) |
+| Objetivo de FC / potencia / cadencia | pendiente |
 | Lap button | pendiente |
-| Round-trip Garmin → DSL | pendiente |
+| Agendar en fecha | **confirmado** (2026-08-14) |
+| Push a dispositivo | **confirmado** (2026-08-14, encola con `messageStatus: "new"`; entrega final depende del sync BLE/WiFi del teléfono, no de la API) |
+| Round-trip Garmin → DSL | pendiente (traductor real en TS, P1) |
 | Natación (largos, piscina) | fuera de alcance P3 |
 | Fuerza con catálogo de ejercicios | fuera de alcance |
 

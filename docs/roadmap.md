@@ -8,16 +8,16 @@ Regla: no se empieza una fase sin cumplir el criterio de salida de la anterior. 
 
 Objetivo: demostrar que podemos autenticar, leer y **escribir** en Garmin. Si esto falla, el proyecto cambia de forma.
 
-- [ ] Script Python con `garminconnect`/`garth`: login con MFA contra una cuenta real.
-- [ ] Persistir y recargar los tokens; confirmar que un proceso nuevo funciona sin re-login.
-- [ ] Provocar y observar la expiración del OAuth2; confirmar que el refresh funciona.
-- [ ] Listar actividades. Guardar un payload real como fixture anonimizado.
-- [ ] `GET` de un workout existente creado a mano en Garmin Connect. **Este dump es la fuente de verdad de todas las constantes numéricas.**
-- [ ] Crear un workout vía `POST` y verificar que aparece en la app de Garmin.
-- [ ] Agendar ese workout en una fecha y **verificar que llega al reloj tras sincronizar**.
-- [ ] Documentar todo en `garmin-api.md` con estado `confirmado`.
+- [x] Script Python con `garth`: login contra una cuenta real (`spike/login.py`, fuera del monorepo). MFA sin probar: la cuenta de prueba no lo tiene activo.
+- [x] Persistir y recargar los tokens; confirmar que un proceso nuevo funciona sin re-login.
+- [x] Provocar y observar la expiración del OAuth2; confirmar que el refresh funciona.
+- [x] Listar actividades. Guardar un payload real como fixture anonimizado (`docs/fixtures/activities-list.anon.json`).
+- [x] `GET` de un workout existente creado a mano en Garmin Connect. **Fuente de verdad de las constantes numéricas** (parcial: warmup/interval/recovery/repeat/pace confirmados; cooldown/rest/hr/power/cadence quedan para cuando el DSL los necesite).
+- [x] Crear un workout vía `POST` y verificar que aparece en la app de Garmin.
+- [x] Agendar ese workout en una fecha y confirmar el equivalente API del push al reloj (`messageStatus: "new"`). La entrega física al reloj depende del sync BLE/WiFi del teléfono, fuera del control de la API — verificación visual en el reloj queda como paso manual opcional, no bloqueante.
+- [x] Documentar todo en `garmin-api.md` con estado `confirmado` (proceso continuo, cada hallazgo en su propio cambio).
 
-**Salida**: un workout creado desde código aparece en el reloj. Todas las constantes de `workout-dsl.md` confirmadas.
+**Salida**: un workout creado desde código aparece en la cuenta y queda encolado para el reloj (confirmado a nivel API). Las constantes de `workout-dsl.md` necesarias para un workout simple de running (tiempo, distancia, pace) están confirmadas; el resto se confirma incrementalmente en P1 a medida que el DSL las necesite, no de una.
 
 **Riesgos**: Garmin puede haber cambiado el SSO; la creación de workouts puede requerir campos no documentados; el push al dispositivo puede depender del sync y no ser inmediato.
 

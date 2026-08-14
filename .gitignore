@@ -56,3 +56,7 @@ pnpm-debug.log*
 
 # --- Fixtures: solo entra lo anonimizado a mano, nunca un dump crudo ---
 **/test/fixtures/*.raw.json
+
+# --- spike/: el script se commitea, la sesion de garth y los dumps crudos nunca ---
+spike/.garth-session/
+spike/.raw-dumps/
