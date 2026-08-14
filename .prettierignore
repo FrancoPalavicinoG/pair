@@ -1,0 +1,6 @@
+**/*.md
+pnpm-lock.yaml
+spike/**
+.claude/**
+docs/fixtures/**
+packages/db/drizzle/**

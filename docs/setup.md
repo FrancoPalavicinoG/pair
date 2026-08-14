@@ -1,21 +1,23 @@
 # Setup — creación del monorepo desde cero
 
-Se ejecuta una vez, en P1. Después queda como referencia para reproducir el entorno.
+Se ejecutó por primera vez en P1 (2026-08-14). Después queda como referencia para reproducir el entorno.
 
-Fija las versiones reales en este archivo el día que lo ejecutes; lo de aquí son las versiones objetivo, no las verificadas.
+**Versiones reales verificadas (2026-08-14)**: Node 20.19.0, pnpm 10.33.4. No Node 22 LTS disponible en la máquina de desarrollo (solo `node@20` vía Homebrew); Node 20 sigue siendo válido para lo que necesita el proyecto, se documenta acá como la versión real en vez de forzar una instalación extra sin necesidad concreta.
+
+**Cambio de alcance (P1, MVP)**: se decidió arrancar sin Turborepo ni Redis/BullMQ — ver `docs/roadmap.md`, sección P1. Se agregan cuando el volumen o la necesidad de reproducibilidad lo pidan, no antes.
 
 ## 0. Requisitos
 
-- Node 22 LTS + corepack (`corepack enable`), pnpm 9
+- Node 20+ + corepack (`corepack enable`), pnpm (10.x verificado)
 - Python 3.12 + `uv`
-- Docker (Postgres y Redis en local)
+- Docker (Postgres en local; Redis se suma cuando entre BullMQ, no en el MVP de P1)
 
 ## 1. Raíz del monorepo
 
 ```bash
 mkdir pair && cd pair && git init
 pnpm init
-pnpm add -Dw turbo typescript @types/node vitest prettier eslint
+pnpm add -Dw typescript @types/node prettier eslint typescript-eslint
 ```
 
 `pnpm-workspace.yaml`:
@@ -28,9 +30,7 @@ packages:
 
 `services/garmin-auth` queda fuera del workspace: no es un paquete Node.
 
-`turbo.json`: tareas `build`, `dev`, `lint`, `typecheck`, `test`, con `db:generate` y `db:migrate` marcadas `"cache": false`.
-
-Scripts en la raíz que envuelven turbo: `dev`, `build`, `typecheck`, `lint`, `test`, y `db:*` delegando a `packages/db`.
+Sin Turborepo por ahora: scripts de npm normales en el `package.json` raíz (`typecheck` → `pnpm -r --if-present run typecheck`, `lint` → `eslint .`, `format` → `prettier --check .`, `db:*` delegando a `packages/db`). Si el número de paquetes o la necesidad de cachear tareas lo justifica más adelante, se suma Turborepo como cambio deliberado, no de entrada.
 
 ## 2. `packages/config`
 
@@ -109,20 +109,21 @@ Cada servicio valida las suyas al arrancar y falla ruidosamente si falta una. `.
 
 `ENCRYPTION_MASTER_KEY` se genera una vez y se guarda fuera del repo. Perderla significa que todos los usuarios reconectan Garmin desde cero.
 
-## 9. Orden de arranque en local
+## 9. Orden de arranque en local (P1)
 
 ```bash
-docker compose up -d              # postgres + redis
+docker compose up -d              # postgres (redis se suma con BullMQ, más adelante)
 pnpm db:migrate
 cd services/garmin-auth && uv run fastapi dev app/main.py   # :8000
-pnpm dev                          # web :3000, mcp :3001
+pnpm sync --user X                # script de sync incremental, sin apps/web ni apps/mcp todavía
 ```
 
-## 10. Verificación del scaffold
+`apps/web`, `apps/mcp` y `pnpm dev` llegan en P2/P3 — no forman parte del arranque local de P1.
 
-- [ ] `pnpm typecheck` limpio en todo el workspace
-- [ ] `pnpm test` corre (aunque no haya tests aún)
-- [ ] `apps/web` importa un tipo de `@pair/core` y compila
+## 10. Verificación del scaffold (P1)
+
+- [x] `pnpm typecheck` limpio en todo el workspace
+- [x] `pnpm lint` y `pnpm format` limpios
 - [ ] Una migración vacía aplica y revierte
 - [ ] `services/garmin-auth` responde a `/health`
-- [ ] `.gitignore` cubre `.env*`, `node_modules`, `.next`, `.turbo`, `__pycache__`, `.venv`
+- [x] `.gitignore` cubre `.env*`, `node_modules`, `.next`, `__pycache__`, `.venv`
