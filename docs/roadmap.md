@@ -23,17 +23,20 @@ Objetivo: demostrar que podemos autenticar, leer y **escribir** en Garmin. Si es
 
 ---
 
-## P1 — Gateway y datos
+## P1 — Gateway y datos (MVP)
 
-- [ ] Monorepo pnpm + Turborepo, tooling compartido.
-- [ ] `services/garmin-auth` reducido a `POST /login`, `POST /mfa`, `POST /refresh`.
-- [ ] `packages/core`: cliente REST TS con Bearer, refresh transparente, rate limiter, errores tipados.
-- [ ] `packages/db`: schema Drizzle + migraciones.
-- [ ] Cifrado de tokens en reposo con clave por usuario.
-- [ ] Sync incremental con BullMQ: actividades y métricas diarias.
-- [ ] Fixtures y tests del parser sin red.
+Objetivo: el gateway funcionando de punta a punta con la infraestructura mínima. Nada de colas, cache ni suites de test todavía — eso se agrega cuando el volumen real lo pida, no antes (ver "Escala objetivo" en `CLAUDE.md`).
+
+- [ ] Monorepo: pnpm workspaces + `packages/config` (tsconfig/eslint/prettier compartido). Sin Turborepo por ahora: scripts de npm normales en el `package.json` raíz.
+- [ ] `packages/db`: schema mínimo (`users`, `garmin_credentials`, `activities`, `daily_metrics`) + migraciones. Postgres local con docker-compose. Sin Redis (no hace falta sin BullMQ).
+- [ ] Cifrado de tokens en reposo con clave por usuario — no negociable aunque el resto sea mínimo.
+- [ ] `services/garmin-auth` reducido a `POST /login`, `POST /mfa`, `POST /refresh`, con el workaround de `garth` confirmado en P0 (0.6.3 + User-Agent de navegador).
+- [ ] `packages/core`: cliente REST TS con Bearer, refresh transparente, rate limiter simple en memoria (sin colas), errores tipados.
+- [ ] Script de sync incremental, TS plano sin BullMQ: actividades y métricas diarias por fecha.
 
 **Salida**: `pnpm sync --user X` llena la DB desde cero y en incremental sin superar el rate limit.
+
+**Diferido, no ahora**: BullMQ + Redis (colas reales), Turborepo (cache/orquestación), suite de tests con fixtures. Se agregan cuando el volumen o la necesidad de reproducibilidad lo pidan — no antes.
 
 ---
 
