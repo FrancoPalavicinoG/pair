@@ -1,0 +1,58 @@
+# --- Secretos y credenciales (regla dura del proyecto, ver CLAUDE.md) ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+
+# --- Node / TypeScript / pnpm ---
+node_modules/
+.pnpm-store/
+dist/
+build/
+*.tsbuildinfo
+.turbo/
+
+# --- Next.js (apps/web) ---
+.next/
+out/
+next-env.d.ts
+.vercel/
+
+# --- MCP server build (apps/mcp) ---
+apps/mcp/dist/
+
+# --- Testing / coverage ---
+coverage/
+.nyc_output/
+
+# --- Python / uv (services/garmin-auth) ---
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# --- Base de datos y datos locales ---
+*.dump
+*.pgdump
+/postgres-data/
+/redis-data/
+
+# --- Logs ---
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# --- Editor / OS ---
+.DS_Store
+.idea/
+*.swp
+
+# --- Claude Code: config local, no compartida con el equipo ---
+.claude/settings.local.json
+
+# --- Fixtures: solo entra lo anonimizado a mano, nunca un dump crudo ---
+**/test/fixtures/*.raw.json
