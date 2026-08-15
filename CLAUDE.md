@@ -94,6 +94,7 @@ Estas no se negocian. Si una tarea parece requerir romperlas, para y pregunta.
 Detalle operativo en el `CLAUDE.md` de cada paquete. Los invariantes:
 
 - La contraseña de Garmin y el código MFA existen solo en memoria durante la petición. Nunca en DB, logs, estado de cliente ni fixtures.
+- La contraseña propia de PAIR (auth de usuario, P2) se guarda siempre hasheada (argon2 o bcrypt), nunca en texto plano ni reversible. No es lo mismo que la contraseña de Garmin de la regla anterior.
 - Los tokens se cifran en reposo con clave derivada por usuario; la clave maestra vive en el entorno, nunca en la DB. En código se referencian por `credential_id`.
 - El sidecar `garmin-auth` solo es accesible desde la red interna, con secreto compartido entre servicios.
 - Aislamiento multiusuario: toda query filtra por el `user_id` de la sesión. Nunca se acepta un identificador de usuario desde el cliente ni desde los argumentos de una tool MCP.
