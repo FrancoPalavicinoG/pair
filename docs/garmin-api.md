@@ -43,6 +43,7 @@ Base de las llamadas de datos: `https://connectapi.garmin.com`, con `Authorizati
 - Endpoint de perfil, **confirmado (2026-08-14)**: `GET /userprofile-service/socialProfile`. `garth.client.username` expone `userProfile["userName"]`. En la cuenta probada, `userName` es igual al email de login (no asumir que siempre difiere; falta confirmar `displayName` por separado).
 - Persistencia de sesión: `garth.save(dir)` escribe `oauth1_token.json` y `oauth2_token.json` **en texto plano** en `dir` (`garth/http.py: Client.dump`). No es apto para producción tal cual; en el spike de P0 el directorio vive fuera del repo y nunca se commitea.
 - Versión de `garth` fijada para el spike de P0: **0.6.3** (la 0.8.0 está rota para logins nuevos, ver "Roturas y cambios").
+- **Confirmado (2026-08-14, P1)**: `services/garmin-auth` real (FastAPI) probado contra la cuenta real. `POST /login` con credenciales válidas responde `status: success` directo (esta cuenta no tiene MFA, ese camino sigue sin probar). `POST /refresh` con el par OAuth1 emite un OAuth2 nuevo con `jti` distinto, igual que en el spike de P0. Login con credenciales inválidas/vacías: Garmin devuelve **401** en el POST de `/sso/signin` (no una página de error con 200), y `services/garmin-auth` lo traduce a `INVALID_CREDENTIALS`.
 
 ---
 
