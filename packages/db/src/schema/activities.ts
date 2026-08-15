@@ -11,17 +11,14 @@ export const activities = pgTable(
     garminActivityId: bigint("garmin_activity_id", { mode: "number" }).notNull(),
     name: text("name"),
     sportType: text("sport_type"),
-    /** Instante real (de startTimeGMT). Para queries y orden. */
+    // Instante real, de startTimeGMT.
     startTimeUtc: timestamp("start_time_utc", { withTimezone: true }).notNull(),
-    /**
-     * Hora local tal como la reporta Garmin, sin convertir. Un entrenamiento
-     * de las 6am importa como "6am", no como su UTC (ver packages/db/CLAUDE.md).
-     */
+    // Hora local tal como la reporta Garmin, sin convertir.
     startTimeLocal: timestamp("start_time_local", { withTimezone: false }).notNull(),
     durationSeconds: real("duration_seconds"),
     distanceMeters: real("distance_meters"),
     calories: real("calories"),
-    /** Payload crudo de Garmin. La API no es oficial: si algo se rompe, esto es la única fuente. */
+    // Payload crudo de Garmin.
     raw: jsonb("raw").notNull(),
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

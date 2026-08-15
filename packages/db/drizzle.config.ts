@@ -1,8 +1,6 @@
 import { defineConfig } from "drizzle-kit";
 
-// Config de tooling, no código de la app: el loader CJS de drizzle-kit no
-// resuelve bien el import cross-package hacia @pair/core acá. Error plano
-// a propósito (excepción deliberada a la regla de packages/core/errors.ts).
+// Config de tooling: el loader de drizzle-kit no resuelve el import a @pair/core.
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
   throw new Error("DATABASE_URL is required to run drizzle-kit");

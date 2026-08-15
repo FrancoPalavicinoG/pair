@@ -14,10 +14,12 @@
   "dependencies": {
     "drizzle-orm": "^0.38.0",
     "postgres": "^3.4.0",
+    "libsodium-wrappers": "^0.7.15",
     "@pair/core": "workspace:*"
   },
   "devDependencies": {
     "@pair/config": "workspace:*",
+    "@types/libsodium-wrappers": "^0.7.14",
     "drizzle-kit": "^0.30.0",
     "typescript": "^5.7.0"
   }

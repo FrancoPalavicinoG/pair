@@ -19,7 +19,8 @@
     "@types/node": "^20.19.0",
     "prettier": "^3.4.0",
     "eslint": "^9.17.0",
-    "typescript-eslint": "^8.18.0"
+    "typescript-eslint": "^8.18.0",
+    "tsx": "^4.19.0"
   },
   "prettier": "./packages/config/prettier.config.js"
 }

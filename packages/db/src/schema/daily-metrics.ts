@@ -1,11 +1,7 @@
 import { pgTable, timestamp, uuid, integer, jsonb, date, unique } from "drizzle-orm/pg-core";
 import { users } from "./users";
 
-/**
- * Una fila por usuario y día. Solo las columnas que el dashboard va a
- * filtrar/ordenar están normalizadas; el resto vive en `raw` hasta que
- * haga falta sacarlo de ahí (ver packages/db/CLAUDE.md).
- */
+// Una fila por usuario y día; el resto de las métricas vive en raw.
 export const dailyMetrics = pgTable(
   "daily_metrics",
   {

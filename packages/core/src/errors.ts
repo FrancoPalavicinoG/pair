@@ -1,4 +1,4 @@
-/** Nunca uses `throw new Error(...)` en el proyecto: extendé PairError. */
+// Clase base de todos los errores del proyecto.
 export abstract class PairError extends Error {
   abstract readonly code: string;
 
@@ -8,12 +8,17 @@ export abstract class PairError extends Error {
   }
 }
 
-/** Falta o es inválida una variable de entorno u otra configuración de arranque. */
+// Falta o es inválida una variable de entorno u otra configuración de arranque.
 export class ConfigError extends PairError {
   readonly code = "CONFIG_ERROR";
 }
 
-/** Fallo al leer o escribir en la base de datos. */
+// Fallo al leer o escribir en la base de datos.
 export class DatabaseError extends PairError {
   readonly code = "DATABASE_ERROR";
+}
+
+// Fallo al cifrar o descifrar un payload (clave equivocada, ciphertext corrupto).
+export class DecryptionError extends PairError {
+  readonly code = "DECRYPTION_ERROR";
 }
