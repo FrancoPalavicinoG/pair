@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: pair
+      POSTGRES_PASSWORD: pair
+      POSTGRES_DB: pair
+    ports:
+      # 5433 en el host: el 5432 default puede estar tomado por un Postgres
+      # nativo fuera de Docker (pasó en el setup inicial de este repo).
+      - "5433:5432"
+    volumes:
+      - pair_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  pair_postgres_data:
