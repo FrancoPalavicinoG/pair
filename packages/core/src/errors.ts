@@ -22,3 +22,14 @@ export class DatabaseError extends PairError {
 export class DecryptionError extends PairError {
   readonly code = "DECRYPTION_ERROR";
 }
+
+// Garmin devolvio un error HTTP (incluye el status en `status` si se conoce).
+export class GarminApiError extends PairError {
+  readonly code = "GARMIN_API_ERROR";
+  readonly status?: number;
+
+  constructor(message: string, options?: { cause?: unknown; status?: number }) {
+    super(message, options);
+    this.status = options?.status;
+  }
+}
