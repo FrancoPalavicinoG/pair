@@ -14,7 +14,7 @@ Tu Garmin Connect, a tu manera. Sube la foto de un entrenamiento o pídeselo a C
 ## Stack
 
 - **Backend / MCP**: TypeScript, `@modelcontextprotocol/sdk` sobre Streamable HTTP
-- **Frontend**: Next.js 15
+- **Frontend**: Next.js 16
 - **Base de datos**: Postgres + Drizzle
 - **Validación**: Zod en cada borde del sistema
 - **Auth Garmin**: sidecar Python (FastAPI + `garth`), solo resuelve el SSO
@@ -28,7 +28,7 @@ pair/
 ├─ .claude/
 │  └─ commands/        garmin-endpoint, new-mcp-tool
 ├─ apps/
-│  ├─ web/              Next.js 15: dashboard, onboarding, consentimiento OAuth
+│  ├─ web/              Next.js 16: dashboard, onboarding, consentimiento OAuth
 │  └─ mcp/              Servidor MCP remoto + Authorization Server OAuth
 ├─ services/
 │  └─ garmin-auth/      FastAPI + garth: login, MFA y refresh de tokens

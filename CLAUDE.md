@@ -24,7 +24,7 @@ Nada de lo que está fuera de la fase actual debe implementarse sin discutirlo p
 Monorepo pnpm workspaces. TypeScript en todo, salvo un sidecar Python mínimo. Sin Turborepo por ahora (ver `docs/roadmap.md`, P1 MVP).
 
 ```
-apps/web/                Next.js 15 (App Router): dashboard, onboarding, pantalla de consentimiento OAuth (P2, en construcción)
+apps/web/                Next.js 16 (App Router): dashboard, onboarding, pantalla de consentimiento OAuth (P2, en construcción)
 apps/mcp/                Servidor MCP remoto (Streamable HTTP) + Authorization Server OAuth (P3, no existe aún)
 services/garmin-auth/    FastAPI + garth. SOLO login, MFA y refresh de tokens.
 packages/db/             Drizzle: schema, migraciones, repositorios

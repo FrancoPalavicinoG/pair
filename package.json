@@ -8,7 +8,7 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit && pnpm -r --if-present run typecheck",
-    "lint": "eslint .",
+    "lint": "eslint . && pnpm -r --if-present run lint",
     "format": "prettier --check .",
     "db:generate": "pnpm --filter @pair/db run generate",
     "db:migrate": "pnpm --filter @pair/db run migrate",

@@ -3,6 +3,8 @@ import base from "./packages/config/eslint.config.js";
 export default [
   ...base,
   {
-    ignores: ["spike/**", "**/dist/**", "**/.turbo/**"],
+    // apps/web tiene su propia config de eslint (eslint-config-next); no la
+    // relintamos acá con la generica.
+    ignores: ["spike/**", "**/dist/**", "**/.turbo/**", "**/.next/**", "apps/web/**"],
   },
 ];
