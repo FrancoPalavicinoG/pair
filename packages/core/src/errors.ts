@@ -18,6 +18,11 @@ export class DatabaseError extends PairError {
   readonly code = "DATABASE_ERROR";
 }
 
+// Se busco algo (usuario, sesion) que no existe.
+export class NotFoundError extends PairError {
+  readonly code = "NOT_FOUND";
+}
+
 // Fallo al cifrar o descifrar un payload (clave equivocada, ciphertext corrupto).
 export class DecryptionError extends PairError {
   readonly code = "DECRYPTION_ERROR";

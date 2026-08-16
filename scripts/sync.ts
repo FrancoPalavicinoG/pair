@@ -1,5 +1,5 @@
 import {
-  getOrCreateUser,
+  getExistingUser,
   loadCredentials,
   saveCredentials,
   performLogin,
@@ -69,7 +69,7 @@ async function main() {
     process.exit(1);
   }
 
-  const user = await getOrCreateUser(email);
+  const user = await getExistingUser(email);
   let creds = await loadCredentials(user.id);
   if (!creds) {
     console.log("Sin credenciales guardadas. Login interactivo.");

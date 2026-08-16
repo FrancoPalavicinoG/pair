@@ -1,6 +1,5 @@
 import {
   findUserByEmail,
-  createUser,
   findCredentialsByUserId,
   upsertCredentials,
   findMostRecentActivityId,
@@ -11,7 +10,7 @@ import {
   open,
   type GarminCredentialStatus,
 } from "@pair/db";
-import { createGarminClient, createRateLimiter, GarminApiError } from "@pair/core";
+import { createGarminClient, createRateLimiter, GarminApiError, NotFoundError } from "@pair/core";
 
 const GARMIN_AUTH_URL = process.env.GARMIN_AUTH_URL ?? "http://localhost:8000";
 const GARMIN_AUTH_SHARED_SECRET = process.env.GARMIN_AUTH_SHARED_SECRET ?? "";
@@ -77,10 +76,12 @@ export async function performMfa(sessionId: string, code: string): Promise<Store
   return { oauth1: result.oauth1, oauth2: result.oauth2 };
 }
 
-export async function getOrCreateUser(email: string) {
-  const existing = await findUserByEmail(email);
-  if (existing) return existing;
-  return createUser(email);
+export async function getExistingUser(email: string) {
+  const user = await findUserByEmail(email);
+  if (!user) {
+    throw new NotFoundError(`No user with email ${email}. Sign up first via apps/web.`);
+  }
+  return user;
 }
 
 export async function loadCredentials(userId: string): Promise<StoredCredentials | null> {

@@ -8,8 +8,8 @@ export async function findUserByEmail(email: string) {
   return user ?? null;
 }
 
-export async function createUser(email: string) {
-  const [created] = await db.insert(users).values({ email }).returning();
+export async function createUser(email: string, passwordHash: string) {
+  const [created] = await db.insert(users).values({ email, passwordHash }).returning();
   if (!created) throw new DatabaseError("Failed to create user");
   return created;
 }

@@ -24,6 +24,7 @@ pnpm db:studio
 
 ## Grupos de tablas
 
-Construidas en P1 (MVP): `users` (mínimo, sin auth propia todavía), `garmin_credentials` (cifrado), `activities`, `daily_metrics`.
+Construidas en P1: `users`, `garmin_credentials` (cifrado), `activities`, `daily_metrics`.
+Construidas en P2: `sessions` (auth propia, revocable — el id de la fila es el token de la cookie).
 
-El resto llega por fase, no antes: `sessions`/auth propia (P2), `workouts`/`workout_schedules` (P3), `oauth_clients`/`oauth_tokens`/`mcp_audit_log` (P3), `dashboard_layouts`/`custom_metrics` (P4). No crear estas tablas de antemano.
+El resto llega por fase, no antes: `workouts`/`workout_schedules` (P3), `oauth_clients`/`oauth_tokens`/`mcp_audit_log` (P3), `dashboard_layouts`/`custom_metrics` (P4). No crear estas tablas de antemano.
