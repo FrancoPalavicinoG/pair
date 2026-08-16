@@ -66,6 +66,7 @@ pnpm db:studio
 - Errores: nunca `throw new Error("algo falló")`. Usa las clases de `packages/core/src/errors.ts` con causa y código.
 - Nombres en inglés en el código, comentarios y docs en español.
 - Componentes React: server components por defecto, `"use client"` solo cuando hace falta interactividad.
+- Diseño visual de `apps/web` (paleta, tipografía, voz, gráficos, motion): sigue `docs/style.md`. No inventar patrones visuales nuevos dentro de un componente; si falta uno, agregarlo ahí primero.
 - Tests: Vitest. Todo lo que traduce (DSL → Garmin) o parsea (Garmin → dominio) va con test de fixture. Fixtures reales anonimizados en `packages/core/test/fixtures/`.
 
 ---

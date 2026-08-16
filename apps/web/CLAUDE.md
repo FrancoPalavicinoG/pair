@@ -2,6 +2,8 @@
 
 Next.js 16 (App Router), React 19, TypeScript, Tailwind. Es el dashboard y el punto de entrada de todo usuario no técnico.
 
+Todo componente y toda decisión visual sigue `docs/style.md` (paleta, tipografía, voz, componentes, sistema de color de gráficos, motion). Antes de construir un componente nuevo, leer la sección relevante ahí. Si hace falta un patrón visual que ese documento no cubre, no improvisarlo en el componente: agregarlo ahí primero.
+
 ## Superficies
 
 | Ruta | Qué es |
