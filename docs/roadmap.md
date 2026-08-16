@@ -27,14 +27,14 @@ Objetivo: demostrar que podemos autenticar, leer y **escribir** en Garmin. Si es
 
 Objetivo: el gateway funcionando de punta a punta con la infraestructura mínima. Nada de colas, cache ni suites de test todavía — eso se agrega cuando el volumen real lo pida, no antes (ver "Escala objetivo" en `CLAUDE.md`).
 
-- [ ] Monorepo: pnpm workspaces + `packages/config` (tsconfig/eslint/prettier compartido). Sin Turborepo por ahora: scripts de npm normales en el `package.json` raíz.
-- [ ] `packages/db`: schema mínimo (`users`, `garmin_credentials`, `activities`, `daily_metrics`) + migraciones. Postgres local con docker-compose. Sin Redis (no hace falta sin BullMQ).
-- [ ] Cifrado de tokens en reposo con clave por usuario — no negociable aunque el resto sea mínimo.
-- [ ] `services/garmin-auth` reducido a `POST /login`, `POST /mfa`, `POST /refresh`, con el workaround de `garth` confirmado en P0 (0.6.3 + User-Agent de navegador).
-- [ ] `packages/core`: cliente REST TS con Bearer, refresh transparente, rate limiter simple en memoria (sin colas), errores tipados.
-- [ ] Script de sync incremental, TS plano sin BullMQ: actividades y métricas diarias por fecha.
+- [x] Monorepo: pnpm workspaces + `packages/config` (tsconfig/eslint/prettier compartido). Sin Turborepo por ahora: scripts de npm normales en el `package.json` raíz.
+- [x] `packages/db`: schema mínimo (`users`, `garmin_credentials`, `activities`, `daily_metrics`) + migraciones. Postgres local con docker-compose. Sin Redis (no hace falta sin BullMQ).
+- [x] Cifrado de tokens en reposo con clave por usuario — no negociable aunque el resto sea mínimo. AES-256-GCM (`node:crypto`), no libsodium (bug de empaquetado con ESM, ver `docs/architecture.md`).
+- [x] `services/garmin-auth` reducido a `POST /login`, `POST /mfa`, `POST /refresh`, con el workaround de `garth` confirmado en P0 (0.6.3 + User-Agent de navegador).
+- [x] `packages/core`: cliente REST TS con Bearer, refresh transparente, rate limiter simple en memoria (sin colas), errores tipados.
+- [x] Script de sync incremental, TS plano sin BullMQ: actividades y métricas diarias por fecha.
 
-**Salida**: `pnpm sync --user X` llena la DB desde cero y en incremental sin superar el rate limit.
+**Salida, confirmada (2026-08-15) contra cuenta real**: `pnpm sync --user X` corrido dos veces. Primera vez (DB vacía para ese usuario): 500 actividades + 31 días de métricas, ~57 pedidos a Garmin, 47.6s, sin ningún 429. Segunda vez, inmediatamente después: 0 actividades nuevas, 1 día (hoy, que siempre se re-sincroniza), 2.9s — 16x más rápido, prueba directa de que el incremental evita el refetch completo. P1 cerrada.
 
 **Diferido, no ahora**: BullMQ + Redis (colas reales), Turborepo (cache/orquestación), suite de tests con fixtures. Se agregan cuando el volumen o la necesidad de reproducibilidad lo pidan — no antes.
 
