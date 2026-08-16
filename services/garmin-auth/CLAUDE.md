@@ -18,14 +18,18 @@ Tres endpoints y nada más:
 
 **Si te piden añadir un endpoint que devuelva datos de Garmin (actividades, workouts, métricas), para y pregunta.** Eso va en `packages/core`, en TypeScript. Ese es el punto entero de la ADR 0001.
 
+## Estructura
+
+Sigue Controller-Service-Repository (ver `docs/architecture.md`), sin Repository porque no hay DB: `app/controllers/auth_controller.py` (rutas) llama a `app/services/garmin_service.py` (garth, incluida la máquina de estados de MFA en memoria).
+
 ## Reglas
 
 - La contraseña y el código MFA nunca se persisten, ni se loguean, ni entran en un mensaje de error. Existen solo en memoria durante la petición.
 - La sesión MFA vive en memoria con TTL de 5 minutos. No va a DB, no sobrevive a un reinicio.
-- El servicio no tiene base de datos. No cifra ni almacena: devuelve tokens y olvida. Quien cifra y guarda es la web.
+- El servicio no tiene base de datos. No cifra ni almacena: devuelve tokens y olvida. Quien cifra y guarda es quien lo llama (hoy `scripts/sync.ts`, más adelante la web).
 - Solo accesible desde la red interna. Nunca expuesto a internet.
 - Autenticación entre servicios con secreto compartido en cabecera; verificar en cada request.
-- Errores de Garmin traducidos a códigos estables (`INVALID_CREDENTIALS`, `MFA_REQUIRED`, `MFA_INVALID`, `RATE_LIMITED`, `SSO_CHANGED`). `SSO_CHANGED` es la señal de que Garmin rompió el flujo: debe ser inconfundible en los logs.
+- Errores de Garmin traducidos a códigos estables (`INVALID_CREDENTIALS`, `MFA_INVALID`, `RATE_LIMITED`, `SSO_CHANGED`, `SESSION_EXPIRED`). `SSO_CHANGED` es la señal de que Garmin rompió el flujo: debe ser inconfundible en los logs.
 - Fijar la versión de `garth`. Actualizarla es un cambio deliberado, con prueba manual de login real.
 
 ## Comandos

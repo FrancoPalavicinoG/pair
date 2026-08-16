@@ -19,7 +19,7 @@ export const garminCredentials = pgTable(
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    // JSON con oauth1 + oauth2 (garth), cifrado con libsodium secretbox.
+    // JSON con oauth1 + oauth2 (garth), cifrado con AES-256-GCM.
     credentialsCiphertext: encryptedPayload("credentials_ciphertext").notNull(),
     status: text("status").notNull().default("active").$type<GarminCredentialStatus>(),
     lastRefreshedAt: timestamp("last_refreshed_at", { withTimezone: true }),

@@ -7,14 +7,21 @@
     "node": ">=20"
   },
   "scripts": {
-    "typecheck": "pnpm -r --if-present run typecheck",
+    "typecheck": "tsc --noEmit && pnpm -r --if-present run typecheck",
     "lint": "eslint .",
     "format": "prettier --check .",
     "db:generate": "pnpm --filter @pair/db run generate",
     "db:migrate": "pnpm --filter @pair/db run migrate",
-    "db:studio": "pnpm --filter @pair/db run studio"
+    "db:studio": "pnpm --filter @pair/db run studio",
+    "sync": "tsx scripts/sync.ts"
+  },
+  "dependencies": {
+    "@pair/core": "workspace:*",
+    "@pair/db": "workspace:*",
+    "drizzle-orm": "^0.38.0"
   },
   "devDependencies": {
+    "@pair/config": "workspace:*",
     "typescript": "^5.7.0",
     "@types/node": "^20.19.0",
     "prettier": "^3.4.0",

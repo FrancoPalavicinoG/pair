@@ -1,64 +1,60 @@
-import sodium from "libsodium-wrappers";
+import { createCipheriv, createDecipheriv, createHmac, randomBytes } from "node:crypto";
 import { ConfigError, DecryptionError } from "@pair/core";
 import type { EncryptedPayload } from "./schema/garmin-credentials";
 
-let cachedMasterKey: Uint8Array | undefined;
+const KEY_BYTES = 32; // AES-256
+const IV_BYTES = 12; // estandar para GCM
+const AUTH_TAG_BYTES = 16;
+
+let cachedMasterKey: Buffer | undefined;
 
 // Lee ENCRYPTION_MASTER_KEY y la cachea en memoria del proceso.
-async function getMasterKey(): Promise<Uint8Array> {
-  await sodium.ready;
+function getMasterKey(): Buffer {
   if (cachedMasterKey) return cachedMasterKey;
 
   const raw = process.env.ENCRYPTION_MASTER_KEY;
   if (!raw) {
     throw new ConfigError("ENCRYPTION_MASTER_KEY is not set");
   }
-  const key = sodium.from_base64(raw, sodium.base64_variants.ORIGINAL);
-  if (key.length !== sodium.crypto_generichash_KEYBYTES) {
-    throw new ConfigError(
-      `ENCRYPTION_MASTER_KEY must decode to ${sodium.crypto_generichash_KEYBYTES} bytes`,
-    );
+  const key = Buffer.from(raw, "base64");
+  if (key.length !== KEY_BYTES) {
+    throw new ConfigError(`ENCRYPTION_MASTER_KEY must decode to ${KEY_BYTES} bytes`);
   }
   cachedMasterKey = key;
   return key;
 }
 
 // Deriva una subclave por usuario a partir de la master key.
-function deriveUserKey(masterKey: Uint8Array, userId: string): Uint8Array {
-  return sodium.crypto_generichash(
-    sodium.crypto_secretbox_KEYBYTES,
-    sodium.from_string(userId),
-    masterKey,
-  );
+function deriveUserKey(masterKey: Buffer, userId: string): Buffer {
+  return createHmac("sha256", masterKey).update(userId).digest();
 }
 
-// Cifra el plaintext con la subclave del usuario.
-export async function seal(plaintext: string, userId: string): Promise<EncryptedPayload> {
-  const masterKey = await getMasterKey();
-  const userKey = deriveUserKey(masterKey, userId);
+// Cifra el plaintext con la subclave del usuario (AES-256-GCM).
+export function seal(plaintext: string, userId: string): EncryptedPayload {
+  const userKey = deriveUserKey(getMasterKey(), userId);
+  const iv = randomBytes(IV_BYTES);
 
-  const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
-  const ciphertext = sodium.crypto_secretbox_easy(sodium.from_string(plaintext), nonce, userKey);
+  const cipher = createCipheriv("aes-256-gcm", userKey, iv);
+  const ciphertext = Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]);
+  const authTag = cipher.getAuthTag();
 
-  const combined = new Uint8Array(nonce.length + ciphertext.length);
-  combined.set(nonce, 0);
-  combined.set(ciphertext, nonce.length);
-
-  return sodium.to_base64(combined, sodium.base64_variants.ORIGINAL) as EncryptedPayload;
+  return Buffer.concat([iv, authTag, ciphertext]).toString("base64") as EncryptedPayload;
 }
 
 // Descifra el payload con la subclave del usuario.
-export async function open(payload: EncryptedPayload, userId: string): Promise<string> {
-  const masterKey = await getMasterKey();
-  const userKey = deriveUserKey(masterKey, userId);
+export function open(payload: EncryptedPayload, userId: string): string {
+  const userKey = deriveUserKey(getMasterKey(), userId);
+  const combined = Buffer.from(payload, "base64");
 
-  const combined = sodium.from_base64(payload, sodium.base64_variants.ORIGINAL);
-  const nonce = combined.slice(0, sodium.crypto_secretbox_NONCEBYTES);
-  const ciphertext = combined.slice(sodium.crypto_secretbox_NONCEBYTES);
+  const iv = combined.subarray(0, IV_BYTES);
+  const authTag = combined.subarray(IV_BYTES, IV_BYTES + AUTH_TAG_BYTES);
+  const ciphertext = combined.subarray(IV_BYTES + AUTH_TAG_BYTES);
 
   try {
-    const plaintext = sodium.crypto_secretbox_open_easy(ciphertext, nonce, userKey);
-    return sodium.to_string(plaintext);
+    const decipher = createDecipheriv("aes-256-gcm", userKey, iv);
+    decipher.setAuthTag(authTag);
+    const plaintext = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
+    return plaintext.toString("utf8");
   } catch (cause) {
     throw new DecryptionError("Failed to decrypt payload: wrong key or corrupted ciphertext", {
       cause,

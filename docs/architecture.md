@@ -36,6 +36,20 @@
 
 `packages/core` es el único que conoce Garmin. `apps/mcp` y `apps/web` son dos frontales sobre el mismo núcleo. Si una funcionalidad existe en el MCP pero no en la web, es porque no se ha expuesto, no porque esté implementada dos veces.
 
+## Controller-Service-Repository
+
+Todo punto de entrada del proyecto (script de CLI, tool de MCP, ruta de la web) sigue este patrón, sin importar si corre como servicio HTTP o como script. Misma convención de carpetas en TypeScript y en Python, para reconocer la capa con solo mirar dónde vive el archivo:
+
+- **`controllers/`**: la parte fina de entrada. Parsea el input (flags de CLI, body de un request, argumentos de una tool MCP) y llama al Service. Nunca contiene lógica de negocio.
+  - `scripts/sync.ts` (CLI, todavía sin carpeta propia por ser un solo archivo)
+  - `services/garmin-auth/app/controllers/auth_controller.py` (rutas `/login`, `/mfa`, `/refresh`)
+- **`services/`**: la lógica real (qué está desactualizado, cuándo refrescar, cómo armar el cliente de Garmin, la máquina de estados de MFA). No sabe de CLI, HTTP ni MCP. Llama al Repository y a `packages/core`.
+  - `scripts/services/garmin-sync-service.ts` — vive junto al único controller que lo usa; se promueve a un paquete compartido recién cuando un segundo controller (una tool de MCP, una ruta de la web) lo necesite, no antes.
+  - `services/garmin-auth/app/services/garmin_service.py`
+- **`repositories/`**: único lugar que escribe queries de Drizzle. Todo lo demás llama funciones con nombre (`findUserByEmail`, `insertActivity`), nunca importa el cliente `db` ni las tablas.
+  - `packages/db/src/repositories/`
+  - `services/garmin-auth` no tiene esta capa: no tiene DB, solo el estado efímero de MFA en memoria (dentro de su `services/garmin_service.py`, no en una carpeta `repositories/` porque no persiste nada).
+
 ## Flujo: conectar Garmin
 
 1. Usuario entra a `/settings/garmin` en la web.
@@ -43,7 +57,7 @@
 3. `apps/web` → `services/garmin-auth POST /login`.
 4. Si Garmin pide MFA, el sidecar devuelve `mfa_required` + un `session_id` efímero (in-memory, TTL corto). La web pide el código y llama a `POST /mfa`.
 5. El sidecar devuelve tokens OAuth1 (larga vida) y OAuth2 (corta vida).
-6. `apps/web` cifra los tokens y los guarda en `garmin_credentials` por usuario. Cifrado sobre (libsodium secretbox con clave por usuario, clave maestra fuera de la DB); la columna nunca guarda el valor en claro.
+6. `apps/web` cifra los tokens y los guarda en `garmin_credentials` por usuario. Cifrado sobre (AES-256-GCM con clave por usuario derivada de una master key, master key fuera de la DB); la columna nunca guarda el valor en claro. Elegido en vez de `libsodium-wrappers` por un bug de empaquetado de esa librería con ESM nativo de Node (confirmado en P1); `node:crypto` da la misma garantía (cifrado autenticado) sin dependencias externas.
 7. Sync inicial encolado en BullMQ.
 
 ## Flujo: conectar Claude (MCP)

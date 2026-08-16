@@ -14,25 +14,28 @@ Caso de uso guía: el entrenador manda una foto del entrenamiento → Claude la 
 
 ## Estado
 
-Fase actual: **P0 (spike de autenticación)**. Ver `docs/roadmap.md`.
+Fase actual: **P1 (gateway y datos), MVP**. Ver `docs/roadmap.md`.
 Nada de lo que está fuera de la fase actual debe implementarse sin discutirlo primero.
 
 ---
 
 ## Arquitectura
 
-Monorepo pnpm + Turborepo. TypeScript en todo, salvo un sidecar Python mínimo.
+Monorepo pnpm workspaces. TypeScript en todo, salvo un sidecar Python mínimo. Sin Turborepo por ahora (ver `docs/roadmap.md`, P1 MVP).
 
 ```
-apps/web/                Next.js 15 (App Router) — dashboard, onboarding, pantalla de consentimiento OAuth
-apps/mcp/                Servidor MCP remoto (Streamable HTTP) + Authorization Server OAuth
-services/garmin-auth/    FastAPI + garth. SOLO login, MFA y refresh de tokens. ~150 líneas.
-packages/db/             Drizzle: schema, migraciones, cliente
-packages/core/           DSL de workouts (Zod), traductor a JSON de Garmin, cliente REST de Garmin en TS
+apps/web/                Next.js 15 (App Router) — dashboard, onboarding, pantalla de consentimiento OAuth (P2, no existe aún)
+apps/mcp/                Servidor MCP remoto (Streamable HTTP) + Authorization Server OAuth (P3, no existe aún)
+services/garmin-auth/    FastAPI + garth. SOLO login, MFA y refresh de tokens.
+packages/db/             Drizzle: schema, migraciones, repositorios
+packages/core/           Cliente REST de Garmin en TS, rate limiter, errores tipados (DSL de workouts llega en P3)
 packages/config/         tsconfig, eslint, prettier compartidos
+scripts/                 sync.ts: script de sync incremental (CLI)
 ```
 
 **Regla de fronteras**: `services/garmin-auth` devuelve tokens y nada más. Toda llamada de datos a Garmin se hace desde `packages/core` en TypeScript con el bearer. Si te encuentras añadiendo un endpoint de datos al sidecar Python, párate y pregunta.
+
+**Patrón interno: Controller-Service-Repository.** Todo punto de entrada (script, tool de MCP, ruta de la web) separa Controller (input/output, sin lógica) / Service (lógica de negocio) / Repository (acceso a la DB, solo `packages/db/src/repositories/`). Misma convención de carpetas en TS y en Python. Detalle en `docs/architecture.md`.
 
 Detalle de componentes, flujos y despliegue en `docs/architecture.md`. Cómo se crea cada paquete desde cero en `docs/setup.md`.
 
@@ -41,15 +44,16 @@ Detalle de componentes, flujos y despliegue en `docs/architecture.md`. Cómo se 
 ## Comandos
 
 ```bash
-pnpm dev              # todos los servicios en paralelo
-pnpm dev --filter web # solo la web
-pnpm typecheck        # tsc --noEmit en todo el monorepo
-pnpm test             # vitest
+pnpm sync --user <email>  # sync incremental contra Garmin (P1)
+pnpm typecheck             # tsc --noEmit en todo el monorepo
 pnpm lint
-pnpm db:generate      # genera migración desde el schema de Drizzle
-pnpm db:migrate       # aplica migraciones
+pnpm format
+pnpm db:generate           # genera migración desde el schema de Drizzle
+pnpm db:migrate            # aplica migraciones
 pnpm db:studio
 ```
+
+`pnpm dev` y `pnpm test` llegan cuando existan `apps/web`/`apps/mcp` y una suite de tests (no en el MVP de P1).
 
 ---
 

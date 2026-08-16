@@ -1,0 +1,7 @@
+{
+  "extends": "@pair/config/tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["scripts"]
+}

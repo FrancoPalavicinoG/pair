@@ -57,7 +57,7 @@ Los paths listados salen de leer los wrappers, no de nuestra verificación. **Co
 | Actividades | listar con paginación | GET | **confirmado** (2026-08-14) | `GET /activitylist-service/activities/search/activities?limit=&start=`. Fixture anonimizada: `docs/fixtures/activities-list.anon.json` |
 | Actividades | detalle por id | GET | por confirmar | `GET /activity-service/activity/{activity_id}` (leído en `garth/data/activity.py`, sin probar). Payload grande, guardar en `raw` |
 | Actividades | splits / laps / detalles GPS | GET | por confirmar | Endpoints separados del detalle |
-| Métricas | resumen diario del usuario | GET | por confirmar | Por fecha |
+| Métricas | resumen diario del usuario | GET | por confirmar | `GET /usersummary-service/usersummary/daily/{displayName}?calendarDate=YYYY-MM-DD` (leído en `python-garminconnect/__init__.py: get_user_summary`, sin probar). Requiere `displayName` (de `/userprofile-service/socialProfile`, no el email) |
 | Métricas | sueño diario | GET | por confirmar | Estructura distinta al resumen |
 | Métricas | HRV, body battery, stress | GET | por confirmar | Endpoints separados |
 | Workouts | listar | GET | **confirmado** (2026-08-14) | `GET /workout-service/workouts?start=&limit=`. 21 workouts reales en la cuenta probada |

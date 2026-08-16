@@ -1,3 +1,3 @@
-export * from "./schema/index";
-export * from "./client";
+export * from "./repositories/index";
 export * from "./crypto";
+export type { GarminCredentialStatus, EncryptedPayload } from "./schema/garmin-credentials";
