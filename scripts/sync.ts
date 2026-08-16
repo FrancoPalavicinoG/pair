@@ -9,7 +9,7 @@ import {
   syncDailyMetrics,
   getDisplayName,
   type StoredCredentials,
-} from "./services/garmin-sync-service";
+} from "@pair/sync";
 
 function readLine(prompt: string): Promise<string> {
   process.stdout.write(prompt);

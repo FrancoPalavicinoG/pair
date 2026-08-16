@@ -8,15 +8,9 @@ importers:
 
   .:
     dependencies:
-      '@pair/core':
+      '@pair/sync':
         specifier: workspace:*
-        version: link:packages/core
-      '@pair/db':
-        specifier: workspace:*
-        version: link:packages/db
-      drizzle-orm:
-        specifier: ^0.38.0
-        version: 0.38.4(postgres@3.4.9)
+        version: link:packages/sync
     devDependencies:
       '@pair/config':
         specifier: workspace:*
@@ -82,6 +76,22 @@ importers:
       drizzle-kit:
         specifier: ^0.30.0
         version: 0.30.6
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+
+  packages/sync:
+    dependencies:
+      '@pair/core':
+        specifier: workspace:*
+        version: link:../core
+      '@pair/db':
+        specifier: workspace:*
+        version: link:../db
+    devDependencies:
+      '@pair/config':
+        specifier: workspace:*
+        version: link:../config
       typescript:
         specifier: ^5.7.0
         version: 5.9.3

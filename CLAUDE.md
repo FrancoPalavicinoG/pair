@@ -24,13 +24,14 @@ Nada de lo que está fuera de la fase actual debe implementarse sin discutirlo p
 Monorepo pnpm workspaces. TypeScript en todo, salvo un sidecar Python mínimo. Sin Turborepo por ahora (ver `docs/roadmap.md`, P1 MVP).
 
 ```
-apps/web/                Next.js 15 (App Router) — dashboard, onboarding, pantalla de consentimiento OAuth (P2, no existe aún)
+apps/web/                Next.js 15 (App Router): dashboard, onboarding, pantalla de consentimiento OAuth (P2, en construcción)
 apps/mcp/                Servidor MCP remoto (Streamable HTTP) + Authorization Server OAuth (P3, no existe aún)
 services/garmin-auth/    FastAPI + garth. SOLO login, MFA y refresh de tokens.
 packages/db/             Drizzle: schema, migraciones, repositorios
 packages/core/           Cliente REST de Garmin en TS, rate limiter, errores tipados (DSL de workouts llega en P3)
+packages/sync/           Service de sync: login/refresh de credenciales, trae actividades y métricas diarias
 packages/config/         tsconfig, eslint, prettier compartidos
-scripts/                 sync.ts: script de sync incremental (CLI)
+scripts/                 sync.ts: Controller de CLI sobre packages/sync
 ```
 
 **Regla de fronteras**: `services/garmin-auth` devuelve tokens y nada más. Toda llamada de datos a Garmin se hace desde `packages/core` en TypeScript con el bearer. Si te encuentras añadiendo un endpoint de datos al sidecar Python, párate y pregunta.

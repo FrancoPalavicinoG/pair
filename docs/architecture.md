@@ -44,7 +44,7 @@ Todo punto de entrada del proyecto (script de CLI, tool de MCP, ruta de la web) 
   - `scripts/sync.ts` (CLI, todavía sin carpeta propia por ser un solo archivo)
   - `services/garmin-auth/app/controllers/auth_controller.py` (rutas `/login`, `/mfa`, `/refresh`)
 - **`services/`**: la lógica real (qué está desactualizado, cuándo refrescar, cómo armar el cliente de Garmin, la máquina de estados de MFA). No sabe de CLI, HTTP ni MCP. Llama al Repository y a `packages/core`.
-  - `scripts/services/garmin-sync-service.ts` — vive junto al único controller que lo usa; se promueve a un paquete compartido recién cuando un segundo controller (una tool de MCP, una ruta de la web) lo necesite, no antes.
+  - `packages/sync` — promovido en P2 cuando `apps/web` se volvió el segundo controller que lo necesita (además de `scripts/sync.ts`). Antes de eso vivía junto al único controller que lo usaba.
   - `services/garmin-auth/app/services/garmin_service.py`
 - **`repositories/`**: único lugar que escribe queries de Drizzle. Todo lo demás llama funciones con nombre (`findUserByEmail`, `insertActivity`), nunca importa el cliente `db` ni las tablas.
   - `packages/db/src/repositories/`

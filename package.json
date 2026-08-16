@@ -16,9 +16,7 @@
     "sync": "tsx scripts/sync.ts"
   },
   "dependencies": {
-    "@pair/core": "workspace:*",
-    "@pair/db": "workspace:*",
-    "drizzle-orm": "^0.38.0"
+    "@pair/sync": "workspace:*"
   },
   "devDependencies": {
     "@pair/config": "workspace:*",
