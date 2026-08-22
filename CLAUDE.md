@@ -87,6 +87,7 @@ Estas no se negocian. Si una tarea parece requerir romperlas, para y pregunta.
 
 ## Cómo quiero trabajar contigo
 
+- **Spec antes de plan.** Para cada ítem de `docs/roadmap.md`, primero un spec corto en `docs/specs/` (plantilla en `docs/specs/TEMPLATE.md`: objetivo, alcance, diseño, checklist, preguntas abiertas) que revisamos juntos. El spec queda en el repo como memoria de qué se construyó y por qué; recién después entra plan mode para el cómo (archivo por archivo) de esa sesión puntual, que no hace falta persistir.
 - **Plan antes de código.** Para cualquier cambio que toque más de un archivo, usa plan mode y espera aprobación.
 - Si una decisión tiene alternativas razonables, no elijas en silencio: propón A/B con el trade-off en dos líneas y pregunta. Si es estructural y la aprobamos, refléjala en `docs/architecture.md` en el mismo cambio.
 - Respuestas breves. Sin resúmenes de lo que acabas de hacer si ya se ve en el diff.
