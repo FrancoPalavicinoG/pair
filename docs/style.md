@@ -32,11 +32,11 @@ Sistema de color de gráficos — detalle de uso en la sección Gráficos:
 
 Hasta 2026-08-16 esta sección decía "ember es exclusivo de pair": solo aparecía en una recomendación o un cambio que pair había hecho, y estaba prohibido en cualquier affordance de interacción (botón, foco, selección). Esa regla queda reemplazada por esta (2026-08-17).
 
-Ember es el acento de lo interactivo y accionable: botón primario, ítem activo o seleccionado (tab, opción de menú, toggle marcado), foco de teclado. No hace falta que pair haya actuado para usarlo — es el color por defecto de "esto se puede accionar", no la firma exclusiva del agente.
+Ember es el acento de lo interactivo y accionable: botón primario, ítem activo o seleccionado (tab, opción de menú, toggle marcado), foco de teclado. No hace falta que pair haya actuado para usarlo: es el color por defecto de "esto se puede accionar", no la firma exclusiva del agente.
 
-Lo que sigue sin tocar: ember no es color de dato ni de estado del sistema. La rampa ordinal, los hues de identidad de gráfico y la paleta de status (`--status-ready`, `--status-attn`) siguen siendo las únicas fuentes de color ahí — mezclar ember rompe la separación bajo daltonismo simulado ya validada (ver Gráficos). Dentro de un gráfico o una stat tile, una marca en ember sigue significando específicamente "esto es lo que pair señala": ya no es la única razón por la que ember aparece en pantalla, pero sigue siendo la única razón por la que aparece ahí.
+Lo que sigue sin tocar: ember no es color de dato ni de estado del sistema. La rampa ordinal, los hues de identidad de gráfico y la paleta de status (`--status-ready`, `--status-attn`) siguen siendo las únicas fuentes de color ahí: mezclar ember rompe la separación bajo daltonismo simulado ya validada (ver Gráficos). Dentro de un gráfico o una stat tile, una marca en ember sigue significando específicamente "esto es lo que pair señala": ya no es la única razón por la que ember aparece en pantalla, pero sigue siendo la única razón por la que aparece ahí.
 
-Sin la regla de exclusividad, el límite pasa a ser de cantidad, no de contexto: ember en cada acción primaria y cada estado activo está bien; ember como fondo de superficie completo, ícono decorativo o color de texto de cuerpo no — sigue siendo acento, no color base.
+Sin la regla de exclusividad, el límite pasa a ser de cantidad, no de contexto: ember en cada acción primaria y cada estado activo está bien; ember como fondo de superficie completo, ícono decorativo o color de texto de cuerpo no. Sigue siendo acento, no color base.
 
 ## Tipografía
 
@@ -85,7 +85,7 @@ Viven sobre `--panel` (superficie oscura), nunca directo sobre `--lcd`. Monoespa
 - **Texto / contraseña**: fondo `--panel`, texto `--bone`, borde 1px sutil que pasa a ember en foco (`:focus-within`). El cursor parpadea **solo** cuando el input está vacío y sin foco — es señal de "en espera", no de carga; desaparece apenas hay texto o foco real.
 - **Código MFA**: 6 casillas cuadradas separadas, mono, centradas, mismo tratamiento de foco (borde ember) que el resto.
 - **Select**: mismo fondo oscuro, sin flecha nativa del navegador — chevron propio en mono (`›` rotado 90°), borde a ember en foco.
-- **Lista tipo menú** (ej. selector de conector): opciones con un marcador `›` a la izquierda; en la opción activa el marcador pasa a ember, y el fondo de esa fila puede pasar a `--panel` para reforzar la selección — evaluar caso a caso, no es obligatorio en cada lista.
+- **Lista tipo menú** (ej. selector de conector): opciones con un marcador `›` a la izquierda; en la opción activa el marcador pasa a ember, y el fondo de esa fila puede pasar a `--panel` para reforzar la selección: evaluar caso a caso, no es obligatorio en cada lista.
 - **Toggle**: checkbox real oculto + label con `[ ]` / `[×]` en mono; el bracket pasa a ember cuando está marcado.
 - **Autocompletado fantasma**: texto ya escrito en `--ink`, sugerencia en `--graphite` a ~55% opacidad, con un hint `tab` en una cápsula chica de borde sutil.
 
@@ -94,7 +94,7 @@ Viven sobre `--panel` (superficie oscura), nunca directo sobre `--lcd`. Monoespa
 - **Outline** (acción secundaria, ej. "Edit"): borde 1px `--ink` o `--rule`, fondo transparente, texto `--ink` o `--graphite`.
 - **Primary**: relleno ember, texto `--bone`. Es la acción principal de la vista (login, signup, conectar Garmin, submit de un form) y se habilita apenas la acción es válida de tomar.
 - **Confirm** (escritura a Garmin): mismo look que Primary, con un gate extra. Regla dura del proyecto (`CLAUDE.md` raíz, regla 4): toda escritura a Garmin pasa por preview → confirm, así que este botón **solo** se habilita una vez que hay un preview generado. Antes de eso está inerte: borde `--rule-soft`, texto grafito apagado, `cursor: not-allowed`, no clickeable.
-- Nunca colapsar el flujo de escritura a Garmin a un solo botón, y nunca saltarse el gate de preview en Confirm — ese gate es del flujo de escritura, no una restricción de color.
+- Nunca colapsar el flujo de escritura a Garmin a un solo botón, y nunca saltarse el gate de preview en Confirm: ese gate es del flujo de escritura, no una restricción de color.
 
 ### Foco / interacción — nunca el color nativo del sistema
 
@@ -107,7 +107,7 @@ Anatomía: label (mono, mayúscula chica, graphite) → valor (Archivo `wght 800
 - Monocromas por defecto (línea graphite sobre fondo transparente que hereda el de la tile) — los hues vívidos del sistema de gráficos no se duplican acá. Extenderlos a las tiles fue una decisión que se probó y se revirtió por dos motivos: rompía la separación validada bajo daltonismo simulado (ver techo de hues en Gráficos), y diluía el significado de "un color por gráfico".
 - El delta de una tile solo pasa a `--ember` cuando esa métrica es la que pair está comentando activamente — como mucho una tile así por vista. Esa tile además pasa toda su superficie a `--panel` (label, valor y fondo incluidos) para que se lea como "la que tiene algo que decir".
 - **Hover**: la tile completa —fondo, label, valor y el área de la curva, todo junto, sin una franja con fondo propio— pasa a `--panel` con transición de 250ms. Es preview de interacción, nunca recolorea el delta a ember: hover es affordance de UI, no una señal de que pair hizo algo.
-- **Cierre (`×`)**: botón en la esquina superior derecha, oculto (`opacity: 0`) hasta hover o foco del contenedor (`:focus-within`), color `--graphite` → `--ink` en su propio hover. Nunca ember — no es la acción primaria de la vista, y reservar ember para esa evita que compita visualmente con lo que sí importa. Es el patrón que va a usar el dashboard configurable (P4) para sacar un widget de la vista.
+- **Cierre (`×`)**: botón en la esquina superior derecha, oculto (`opacity: 0`) hasta hover o foco del contenedor (`:focus-within`), color `--graphite` → `--ink` en su propio hover. Nunca ember: no es la acción primaria de la vista, y reservar ember para esa evita que compita visualmente con lo que sí importa. Es el patrón que va a usar el dashboard configurable (P4) para sacar un widget de la vista.
 
 ### Gráficos
 
