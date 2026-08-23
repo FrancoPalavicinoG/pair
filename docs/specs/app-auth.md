@@ -1,7 +1,7 @@
 # Spec: Auth propia de PAIR (email + password)
 
 Roadmap: P2 (Web app), primer ítem ("Auth propia de PAIR: email + password")
-Estado: draft
+Estado: hecho
 
 ## Objetivo
 
