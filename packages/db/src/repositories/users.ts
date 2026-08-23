@@ -8,6 +8,11 @@ export async function findUserByEmail(email: string) {
   return user ?? null;
 }
 
+export async function findUserById(id: string) {
+  const [user] = await db.select().from(users).where(eq(users.id, id));
+  return user ?? null;
+}
+
 export async function createUser(email: string, passwordHash: string) {
   const [created] = await db.insert(users).values({ email, passwordHash }).returning();
   if (!created) throw new DatabaseError("Failed to create user");

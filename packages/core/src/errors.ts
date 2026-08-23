@@ -13,6 +13,11 @@ export class ConfigError extends PairError {
   readonly code = "CONFIG_ERROR";
 }
 
+// Fallo de autenticacion propia de PAIR: credenciales invalidas, email ya registrado o input invalido.
+export class AuthError extends PairError {
+  readonly code = "AUTH_ERROR";
+}
+
 // Fallo al leer o escribir en la base de datos.
 export class DatabaseError extends PairError {
   readonly code = "DATABASE_ERROR";
