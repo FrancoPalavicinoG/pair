@@ -1,0 +1,137 @@
+{
+  "activityId": 10000000001,
+  "activityUUID": {
+    "uuid": "00000000-0000-0000-0000-000000000001"
+  },
+  "activityName": "CrossFit",
+  "userProfileId": 100000001,
+  "isMultiSportParent": false,
+  "activityTypeDTO": {
+    "typeId": 180,
+    "typeKey": "hiit",
+    "parentTypeId": 29,
+    "isHidden": false,
+    "restricted": false,
+    "trimmable": false
+  },
+  "eventTypeDTO": {
+    "typeId": 9,
+    "typeKey": "uncategorized",
+    "sortOrder": 10
+  },
+  "accessControlRuleDTO": {
+    "typeId": 2,
+    "typeKey": "private"
+  },
+  "timeZoneUnitDTO": {
+    "unitId": 132,
+    "unitKey": "America/Santiago",
+    "factor": 0,
+    "timeZone": "America/Santiago"
+  },
+  "metadataDTO": {
+    "isOriginal": true,
+    "deviceApplicationInstallationId": 1000001,
+    "agentApplicationInstallationId": null,
+    "agentString": null,
+    "fileFormat": {
+      "formatId": 7,
+      "formatKey": "fit"
+    },
+    "associatedCourseId": null,
+    "lastUpdateDate": "2026-08-23T17:03:06.0",
+    "uploadedDate": "2026-08-23T17:03:05.0",
+    "videoUrl": null,
+    "hasPolyline": false,
+    "hasChartData": true,
+    "hasHrTimeInZones": true,
+    "hasPowerTimeInZones": false,
+    "userInfoDto": {
+      "userProfilePk": 100000001,
+      "displayname": "00000000-0000-0000-0000-000000000002",
+      "fullname": "Anon",
+      "profileImageUrlLarge": null,
+      "profileImageUrlMedium": null,
+      "profileImageUrlSmall": null,
+      "userPro": false
+    },
+    "childIds": [],
+    "childActivityTypes": [],
+    "sensors": null,
+    "activityImages": [],
+    "manufacturer": "GARMIN",
+    "diveNumber": null,
+    "lapCount": 1,
+    "associatedWorkoutId": null,
+    "isAtpActivity": null,
+    "deviceMetaDataDTO": {
+      "deviceId": "0000000001",
+      "deviceTypePk": 36889,
+      "deviceVersionPk": 1000001
+    },
+    "hasIntensityIntervals": false,
+    "hasSplits": false,
+    "eBikeMaxAssistModes": null,
+    "eBikeBatteryUsage": null,
+    "eBikeBatteryRemaining": null,
+    "eBikeAssistModeInfoDTOList": null,
+    "hasRunPowerWindData": null,
+    "calendarEventInfo": null,
+    "groupRideUUID": null,
+    "hasHeatMap": false,
+    "personalRecord": false,
+    "manualActivity": false,
+    "autoCalcCalories": false,
+    "favorite": false,
+    "runPowerWindDataEnabled": null,
+    "elevationCorrected": false,
+    "trimmed": false,
+    "gcj02": false
+  },
+  "summaryDTO": {
+    "startTimeLocal": "2026-08-23T11:52:45.0",
+    "startTimeGMT": "2026-08-23T15:52:45.0",
+    "distance": 0,
+    "duration": 3784.958,
+    "movingDuration": 3784.958,
+    "elapsedDuration": 4142.918,
+    "averageSpeed": 0,
+    "averageMovingSpeed": 0,
+    "calories": 771,
+    "bmrCalories": 103,
+    "averageHR": 157,
+    "maxHR": 186,
+    "minHR": 113,
+    "trainingEffect": 3.299999952316284,
+    "anaerobicTrainingEffect": 2,
+    "aerobicTrainingEffectMessage": "IMPROVING_AEROBIC_BASE_8",
+    "anaerobicTrainingEffectMessage": "MAINTAINING_ANAEROBIC_BASE_1",
+    "totalExerciseReps": 0,
+    "activeSets": 1,
+    "waterEstimated": 880,
+    "trainingEffectLabel": "AEROBIC_BASE",
+    "activityTrainingLoad": 142.44273376464844,
+    "minActivityLapDuration": 3784.958,
+    "moderateIntensityMinutes": 7,
+    "vigorousIntensityMinutes": 56,
+    "steps": 0,
+    "differenceBodyBattery": -14
+  },
+  "splitSummaries": [
+    {
+      "distance": 0,
+      "duration": 3784.958,
+      "movingDuration": 3784.958,
+      "averageSpeed": 0,
+      "calories": 771,
+      "bmrCalories": 103,
+      "averageHR": 157,
+      "maxHR": 186,
+      "totalExerciseReps": 0,
+      "splitType": "WORKOUT_ROUND",
+      "noOfSplits": 1,
+      "maxDistance": 0,
+      "maxDistanceWithPrecision": 0
+    }
+  ]
+}
