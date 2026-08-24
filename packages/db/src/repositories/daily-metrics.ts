@@ -1,8 +1,17 @@
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import { db } from "../client";
 import { dailyMetrics } from "../schema/daily-metrics";
 
 export type DailyMetricsRow = typeof dailyMetrics.$inferInsert;
+
+export async function findTodayMetrics(userId: string) {
+  const today = new Date().toISOString().slice(0, 10); // mismo formato que ya usa la columna "date"
+  const [row] = await db
+    .select()
+    .from(dailyMetrics)
+    .where(and(eq(dailyMetrics.userId, userId), eq(dailyMetrics.date, today)));
+  return row ?? null;
+}
 
 export async function findMostRecentMetricsDate(userId: string): Promise<string | null> {
   const [row] = await db

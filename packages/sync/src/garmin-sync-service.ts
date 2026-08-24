@@ -11,7 +11,13 @@ import {
   updateSyncStatus,
   type GarminCredentialStatus,
 } from "@pair/db";
-import { createGarminClient, createRateLimiter, GarminApiError, NotFoundError } from "@pair/core";
+import {
+  createGarminClient,
+  createRateLimiter,
+  GarminApiError,
+  NotFoundError,
+  activityDetailSchema,
+} from "@pair/core";
 
 const GARMIN_AUTH_URL = process.env.GARMIN_AUTH_URL ?? "http://localhost:8000";
 const GARMIN_AUTH_SHARED_SECRET = process.env.GARMIN_AUTH_SHARED_SECRET ?? "";
@@ -210,6 +216,15 @@ export async function getDisplayName(client: ReturnType<typeof createGarminClien
     "/userprofile-service/socialProfile",
   );
   return profile.displayName;
+}
+
+export async function fetchActivityDetail(userId: string, garminActivityId: number) {
+  const creds = await loadCredentials(userId);
+  if (!creds) throw new NotFoundError("No Garmin credentials found for user");
+  const client = createSyncClient(userId, creds, () => {});
+  const raw = await client.connectapi(`/activity-service/activity/${garminActivityId}`);
+  const parsed = activityDetailSchema.parse(raw);
+  return parsed.summaryDTO;
 }
 
 export async function runFullSync(userId: string): Promise<void> {
