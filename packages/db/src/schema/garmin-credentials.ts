@@ -1,4 +1,4 @@
-import { pgTable, timestamp, uuid, text, unique, customType } from "drizzle-orm/pg-core";
+import { pgTable, timestamp, uuid, text, unique, customType, boolean } from "drizzle-orm/pg-core";
 import { users } from "./users";
 
 // Solo seal() en crypto.ts produce un valor válido de este tipo.
@@ -23,6 +23,8 @@ export const garminCredentials = pgTable(
     credentialsCiphertext: encryptedPayload("credentials_ciphertext").notNull(),
     status: text("status").notNull().default("active").$type<GarminCredentialStatus>(),
     lastRefreshedAt: timestamp("last_refreshed_at", { withTimezone: true }),
+    lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }),
+    syncInProgress: boolean("sync_in_progress").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },

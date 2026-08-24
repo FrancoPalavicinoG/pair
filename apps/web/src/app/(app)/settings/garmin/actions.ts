@@ -1,9 +1,11 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { performLogin, performMfa, saveCredentials } from "@pair/sync";
+import { after } from "next/server";
+import { performLogin, performMfa, saveCredentials, runFullSync } from "@pair/sync";
 import { requireSession } from "@/lib/session";
 import { GarminApiError } from "@pair/core";
+import { updateSyncStatus } from "@pair/db";
 
 export type GarminConnectState =
   | undefined
@@ -32,6 +34,8 @@ export async function connectGarminAction(
       throw err;
     }
     await saveCredentials(session.userId, creds, "active");
+    await updateSyncStatus(session.userId, { syncInProgress: true });
+    after(() => runFullSync(session.userId));
     redirect("/dashboard");
   } else {
     // Paso credenciales
@@ -53,7 +57,8 @@ export async function connectGarminAction(
       return { status: "mfa_required", sessionId: result.sessionId };
     } 
     await saveCredentials(session.userId, result.creds, "active");
+    await updateSyncStatus(session.userId, { syncInProgress: true });
+    after(() => runFullSync(session.userId));
     redirect("/dashboard");
-
   }
 }

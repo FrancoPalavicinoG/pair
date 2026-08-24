@@ -14,6 +14,16 @@ export async function findCredentialsByUserId(userId: string) {
   return row ?? null;
 }
 
+export async function updateSyncStatus(
+  userId: string,
+  fields: Partial<{ lastSyncedAt: Date; syncInProgress: boolean; status: GarminCredentialStatus }>,
+): Promise<void> {
+  await db
+    .update(garminCredentials)
+    .set(fields)
+    .where(eq(garminCredentials.userId, userId));
+}
+
 export async function upsertCredentials(
   userId: string,
   ciphertext: EncryptedPayload,

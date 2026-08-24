@@ -1,0 +1,2 @@
+ALTER TABLE "garmin_credentials" ADD COLUMN "last_synced_at" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "garmin_credentials" ADD COLUMN "sync_in_progress" boolean DEFAULT false NOT NULL;

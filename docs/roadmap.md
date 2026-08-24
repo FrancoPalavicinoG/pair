@@ -45,7 +45,7 @@ Objetivo: el gateway funcionando de punta a punta con la infraestructura mínima
 - [x] Auth propia de PAIR: email + password (simple para MVP, sin dependencia de un proveedor de email; magic link/passkeys quedan para después si hace falta). Spec: `docs/specs/app-auth.md`.
 - [x] Onboarding: conectar Garmin con MFA desde la UI. Spec: `docs/specs/app-garmin-connect.md`.
 - [ ] Dashboard v1: lista de actividades, detalle, métricas diarias.
-- [ ] Estado de sincronización visible y reconexión cuando las credenciales expiran.
+- [x] Estado de sincronización visible y reconexión cuando las credenciales expiran. Spec: `docs/specs/app-sync-status.md`.
 
 **Salida**: un amigo se registra solo, conecta su Garmin y ve sus datos sin ayuda.
 

@@ -8,6 +8,7 @@ import {
   upsertDailyMetrics,
   seal,
   open,
+  updateSyncStatus,
   type GarminCredentialStatus,
 } from "@pair/db";
 import { createGarminClient, createRateLimiter, GarminApiError, NotFoundError } from "@pair/core";
@@ -209,4 +210,23 @@ export async function getDisplayName(client: ReturnType<typeof createGarminClien
     "/userprofile-service/socialProfile",
   );
   return profile.displayName;
+}
+
+export async function runFullSync(userId: string): Promise<void> {
+  try {
+    const creds = await loadCredentials(userId);
+    if (!creds) throw new NotFoundError("No Garmin credentials found for user");
+    const client = createSyncClient(userId, creds, () => {});
+    const displayName = await getDisplayName(client);
+    await syncActivities(userId, client);
+    await syncDailyMetrics(userId, displayName, client);
+    await updateSyncStatus(userId, { lastSyncedAt: new Date(), syncInProgress: false });
+  } catch (err) {
+    if (err instanceof GarminApiError) {
+      await updateSyncStatus(userId, { syncInProgress: false, status: "expired" });
+    } else {
+      await updateSyncStatus(userId, { syncInProgress: false });
+      throw err;
+    }
+  }
 }
