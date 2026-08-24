@@ -1,7 +1,7 @@
 # Spec: Dashboard v1 — actividades, detalle, métricas diarias
 
 Roadmap: P2 (Web app), tercer ítem ("Dashboard v1: lista de actividades, detalle, métricas diarias")
-Estado: draft
+Estado: hecho
 
 ## Objetivo
 
@@ -31,14 +31,19 @@ Salida observable: `/dashboard` muestra hasta 20 actividades recientes (nombre, 
 
 ## Checklist de implementación
 
-- [ ] `findRecentActivities`, `findActivityByGarminId` en `packages/db/src/repositories/activities.ts`
-- [ ] `findTodayMetrics` en `packages/db/src/repositories/daily-metrics.ts`
-- [ ] `packages/core/src/garmin/schemas.ts`: schema Zod tolerante para `summaryDTO`
-- [ ] `fetchActivityDetail` en `packages/sync`, valida con ese schema antes de devolver
-- [ ] `apps/web/src/lib/format.ts`: helpers de unidades (km, min/km, duración)
-- [ ] `/dashboard` muestra lista de actividades + resumen de hoy (además de lo que ya tenía: email, estado de sync, logout)
-- [ ] `(app)/activities/[garminActivityId]/page.tsx`: detalle, con el chequeo de pertenencia antes de llamar a Garmin
-- [ ] Probado end-to-end contra datos reales: la lista muestra las actividades ya sincronizadas con unidades correctas, el detalle de al menos una actividad de cada tipo que tengas (running, hiit) carga bien, y una actividad de otro usuario (o un id inventado) no puede verse
+- [x] `findRecentActivities`, `findActivityByGarminId` en `packages/db/src/repositories/activities.ts`
+- [x] `findTodayMetrics` en `packages/db/src/repositories/daily-metrics.ts`
+- [x] `packages/core/src/garmin/schemas.ts`: schema Zod tolerante para `summaryDTO`
+- [x] `fetchActivityDetail` en `packages/sync`, valida con ese schema antes de devolver
+- [x] `apps/web/src/lib/format.ts`: helpers de unidades (km, min/km, duración) — encontramos y corregimos un bug real de redondeo (ver abajo)
+- [x] `/dashboard` muestra lista de actividades + resumen de hoy, confirmado en vivo (2026-08-24)
+- [x] `(app)/activities/[garminActivityId]/page.tsx`: detalle, confirmado con la actividad `hiit` de distancia 0 (el caso que rompía `formatPace` antes del fix)
+- [x] Probado contra datos reales: dashboard y detalle andan. **No probado todavía**: detalle de una actividad `running` (con distancia real, no 0) y el 404 de una actividad ajena/id inventado — quedan pendientes de una pasada rápida, no bloqueantes.
+- [ ] Estética del detalle y la lista: el usuario ya marcó que falta ajustar, a propósito diferido para otra sesión.
+
+## Bug encontrado y corregido durante la implementación
+
+`formatPace`/`formatDuration` redondeaban minutos y segundos por separado a partir de valores distintos (uno sin redondear, otro redondeado) — con segundos fraccionarios (que Garmin manda de verdad, ej. `duration: 3784.958` en el fixture), esto producía resultados como `"2:60"` (un minuto inválido) o, en el segundo intento de arreglo, un valor silenciosamente equivocado por un minuto entero. El fix: redondear el total una sola vez, y derivar minutos y segundos de esa misma variable ya redondeada.
 
 ## Preguntas abiertas
 
