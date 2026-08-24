@@ -2,6 +2,8 @@
 
 Regla: no se empieza una fase sin cumplir el criterio de salida de la anterior. El orden está elegido para que el riesgo se descubra temprano, no para que se vea bonito antes.
 
+**Reordenamiento (2026-08-24)**: P4 pasa antes que P3. Con P2 cerrado, el dashboard solo refleja lo que Garmin Connect ya muestra — no hay ningún aporte propio todavía. Se prioriza construir eso (P4: widgets, métricas derivadas, comparación plan vs. ejecutado) antes de invertir en MCP/conectores (P3), que no le suma nada a la app si el dashboard de abajo no tiene valor propio. `docs/specs/mcp-oauth-server.md` queda escrito (investigación real ya hecha) pero pausado, no descartado.
+
 ---
 
 ## P0 — Spike de autenticación ⬅ fase actual
