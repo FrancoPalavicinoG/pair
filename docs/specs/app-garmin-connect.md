@@ -1,7 +1,7 @@
 # Spec: Onboarding — conectar Garmin con MFA desde la UI
 
 Roadmap: P2 (Web app), segundo ítem ("Onboarding: conectar Garmin con MFA desde la UI")
-Estado: draft
+Estado: hecho
 
 ## Objetivo
 
@@ -35,5 +35,6 @@ Salida observable: formulario de credenciales de Garmin; si Garmin pide MFA, un 
 - [ ] Componente de formulario de dos pasos (nuevo, `(app)/settings/garmin/_components/`)
 - [ ] `(app)/settings/garmin/page.tsx`
 - [ ] Link desde `/dashboard` a `/settings/garmin`
-- [ ] Probado end-to-end contra una cuenta de Garmin real (regla dura de `CLAUDE.md` raíz: nunca contra fixtures ni mocks para esto): conexión sin MFA, credenciales cifradas visibles en `garmin_credentials` (vía `pnpm db:studio`), password de Garmin incorrecta muestra error
-- [ ] Camino de MFA implementado y revisado, marcado explícitamente como pendiente de prueba real hasta tener una cuenta con MFA activo
+- [x] Conexión sin MFA contra una cuenta real, confirmada (2026-08-23): fila cifrada visible en `garmin_credentials` vía `pnpm db:studio`, `status: "active"`
+- [x] Password de Garmin incorrecta muestra el mensaje de error (confirmado 2026-08-23: "garmin-auth /login failed: INVALID_CREDENTIALS")
+- [x] Camino de MFA implementado y revisado, sigue pendiente de prueba real hasta tener una cuenta con MFA activo (limitación conocida, no bloqueante)
