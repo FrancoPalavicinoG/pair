@@ -78,6 +78,16 @@ Objetivo: el gateway funcionando de punta a punta con la infraestructura mínima
 
 ---
 
+## P5 — Perfil de usuario
+
+- [ ] Datos físicos básicos (altura, peso): sync desde Garmin cuando esté disponible, edición manual como fallback.
+- [ ] Zonas de esfuerzo por deporte: ritmo de carrera, FTP de ciclismo — sync desde Garmin cuando esté disponible, manual si no.
+- [ ] 1RM por ejercicio de fuerza, carga manual (números sueltos, no depende del catálogo de ejercicios de Garmin — eso sigue fuera de alcance).
+
+**Salida**: el traductor DSL de P3 puede resolver targets relativos ("85% de tu máximo", "zona 3 de ritmo") a valores absolutos sin pedirle el número al usuario en cada workout.
+
+---
+
 ## Fuera de alcance por ahora
 
 Producto público, planes de pago, app móvil, integraciones con Strava/TrainingPeaks, entrenamientos de fuerza con ejercicios detallados (el catálogo de ejercicios de Garmin es un proyecto en sí mismo).

@@ -22,6 +22,13 @@
       "when": 1787538533370,
       "tag": "0002_flimsy_blue_marvel",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1787692544071,
+      "tag": "0003_mighty_shooting_star",
+      "breakpoints": true
     }
   ]
 }
