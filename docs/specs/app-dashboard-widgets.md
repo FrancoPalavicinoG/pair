@@ -31,18 +31,20 @@ Salida observable: en `/dashboard`, tres secciones (actividades recientes, métr
 - **Layout guardado en `dashboard_layouts`** (nueva tabla, un row por usuario, `unique().on(userId)`): una columna `widgets: jsonb`, array de `{ key: WidgetKey, visible: boolean }` **en el orden en que se muestran** — el orden del array es el orden visual, no hace falta una columna de posición separada.
 - **Server Components pasados como `children` a un Client Component**, patrón confirmado en los docs de Next.js (no algo inventado): la página (`(app)/dashboard/page.tsx`) sigue siendo Server Component — lee el layout guardado, renderiza cada widget visible **en el servidor** (con sus datos reales), y pasa esos nodos ya renderizados a un Client Component nuevo que solo maneja el drag-and-drop. El widget en sí nunca se vuelve a buscar ni renderizar en el cliente, solo se reordena visualmente.
 - **`dnd-kit` para el drag-and-drop** — primera librería de interacción rica del proyecto, dependencia nueva en `apps/web`. Al soltar, un Server Action (`updateDashboardLayout(userId, widgets)`) persiste el nuevo orden en `dashboard_layouts`.
-- **Mostrar/ocultar**: un toggle simple (checkbox) por widget, mismo Server Action que el reordenamiento — cualquier cambio de layout (orden o visibilidad) es una sola escritura a la misma fila.
+- **Ocultar**: botón `×` por tarjeta (patrón ya definido en `docs/style.md`, oculto hasta hover/foco), Server Action `updateDashboardLayout` — misma escritura que el reordenamiento.
+- **Mostrar de nuevo**: vista propia, `/dashboard/widgets` — lista todos los widgets del registry con su estado actual y un toggle (patrón "Toggle" de `docs/style.md`) por fila, Server Action `toggleWidgetVisibility(key)` independiente. No es un control secundario en el dashboard: el usuario edita su dashboard como quiera desde una pantalla dedicada.
 - **Estética**: el dashboard entero pasa a tener el tratamiento visual real de `docs/style.md` (hoy son cajas con `border` genérico) — cada widget como una tarjeta reconocible, con un handle de arrastre visible, siguiendo el sistema de la app (glyphs mono, paleta, foco a ember). Lo escribo yo, mismo criterio que el resto del proyecto.
 
 ## Checklist de implementación
 
-- [ ] Schema + migración: `dashboard_layouts` (`userId` único, `widgets: jsonb`)
-- [ ] `packages/db/src/repositories/dashboard-layouts.ts`: get/upsert
-- [ ] `findWeeklySummary(userId)` en `packages/db/src/repositories/activities.ts`
+- [x] Schema + migración: `dashboard_layouts` (`userId` único, `widgets: jsonb`)
+- [x] `packages/db/src/repositories/dashboard-layouts.ts`: get/upsert
+- [x] `findWeeklySummary(userId)` en `packages/db/src/repositories/activities.ts`
 - [ ] Tres archivos de widget (`_components/widgets/`): `recent-activities.tsx`, `today-metrics.tsx` (extraídos), `weekly-summary.tsx` (nuevo)
 - [ ] `WIDGET_REGISTRY` + lógica de la página: leer layout, renderizar visibles en orden
 - [ ] Client Component de drag-and-drop (`dnd-kit`) que recibe los widgets ya renderizados como `children`
-- [ ] Server Action `updateDashboardLayout`
+- [ ] Server Actions `updateDashboardLayout` y `toggleWidgetVisibility`
+- [ ] Vista `/dashboard/widgets` para volver a mostrar un widget oculto
 - [ ] Estética: tarjetas de widget + handle de arrastre según `docs/style.md`
 - [ ] Probado en vivo: reordenar persiste después de recargar, ocultar/mostrar funciona, un usuario sin `dashboard_layouts` todavía (primera vez) ve los tres widgets en un orden por defecto razonable
 

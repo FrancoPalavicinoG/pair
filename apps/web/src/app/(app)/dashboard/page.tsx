@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { requireSession } from "@/lib/session";
-import {
-  findUserById,
-  findCredentialsByUserId,
-  findRecentActivities,
-  findTodayMetrics,
-} from "@pair/db";
+import { findUserById, findCredentialsByUserId } from "@pair/db";
 import { logout, syncNowAction } from "./actions";
 import { SyncStatusPoller } from "./_components/sync-status-poller";
-import { formatDistance, formatDuration } from "@/lib/format";
+import {
+  getEffectiveLayout,
+  WIDGET_REGISTRY,
+  type WidgetKey,
+} from "./_components/widgets/registry";
+import { DashboardLayoutEditor, type WidgetItem } from "./_components/dashboard-layout-editor";
 
 export default async function DashboardPage() {
   const session = await requireSession();
@@ -30,8 +30,24 @@ export default async function DashboardPage() {
     syncStatus = "synced";
   }
 
-  const activities = await findRecentActivities(session.userId, 20);
-  const todayMetrics = await findTodayMetrics(session.userId);
+  const layout = await getEffectiveLayout(session.userId);
+  const knownLayout = layout.filter((w) => w.key in WIDGET_REGISTRY) as {
+    key: WidgetKey;
+    visible: boolean;
+  }[];
+
+  const visibleWidgets: WidgetItem[] = [];
+  const hiddenKeys: WidgetKey[] = [];
+
+  for (const w of knownLayout) {
+    if (w.visible) {
+      const registryEntry = WIDGET_REGISTRY[w.key];
+      const node = await registryEntry.render(session.userId);
+      visibleWidgets.push({ key: w.key, label: registryEntry.label, node });
+    } else {
+      hiddenKeys.push(w.key);
+    }
+  }
 
   return (
     <main className="flex min-h-full flex-1 flex-col items-center justify-center px-4 py-16">
@@ -85,49 +101,14 @@ export default async function DashboardPage() {
           </>
         )}
 
-        {todayMetrics && (
-          <div className="space-y-2 border border-rule-soft p-4 text-left">
-            <p className="font-mono text-xs uppercase tracking-[0.1em] text-graphite">Today</p>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-ink">
-              {todayMetrics.steps != null && <p>{todayMetrics.steps} steps</p>}
-              {todayMetrics.restingHeartRate != null && (
-                <p>{todayMetrics.restingHeartRate} bpm resting</p>
-              )}
-              {todayMetrics.sleepSeconds != null && (
-                <p>{formatDuration(todayMetrics.sleepSeconds)} sleep</p>
-              )}
-              {todayMetrics.bodyBattery != null && <p>{todayMetrics.bodyBattery} body battery</p>}
-            </div>
-          </div>
-        )}
+        <DashboardLayoutEditor initialWidgets={visibleWidgets} hiddenKeys={hiddenKeys} />
 
-        {activities.length > 0 && (
-          <div className="space-y-2 text-left">
-            <p className="font-mono text-xs uppercase tracking-[0.1em] text-graphite">
-              Recent activities
-            </p>
-            <ul className="space-y-1">
-              {activities.map((activity) => (
-                <li key={activity.id}>
-                  <Link
-                    href={`/activities/${activity.garminActivityId}`}
-                    className="flex items-center justify-between gap-3 border border-rule-soft px-3 py-2 text-sm text-ink transition-colors hover:border-ink"
-                  >
-                    <span className="truncate">
-                      {activity.name ?? activity.sportType ?? "Activity"}
-                    </span>
-                    <span className="shrink-0 text-graphite">
-                      {activity.distanceMeters != null ? formatDistance(activity.distanceMeters) : ""}
-                      {activity.durationSeconds != null
-                        ? ` · ${formatDuration(activity.durationSeconds)}`
-                        : ""}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        <Link
+          href="/dashboard/widgets"
+          className="block text-center font-mono text-xs uppercase tracking-[0.1em] text-graphite transition-colors hover:text-ink"
+        >
+          Edit widgets
+        </Link>
 
         <form action={logout}>
           <button
