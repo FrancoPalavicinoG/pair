@@ -39,7 +39,7 @@ export default async function DashboardPage() {
     if (w.visible) {
       const registryEntry = WIDGET_REGISTRY[w.key];
       const node = await registryEntry.render(session.userId);
-      visibleWidgets.push({ key: w.key, label: registryEntry.label, node });
+      if (node) visibleWidgets.push({ key: w.key, label: registryEntry.label, node });
     } else {
       hiddenKeys.push(w.key);
     }
