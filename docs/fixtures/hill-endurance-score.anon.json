@@ -1,0 +1,38 @@
+{
+  "hillScore": {
+    "userProfilePK": 10000001,
+    "deviceId": 1000000001,
+    "calendarDate": "2026-08-27",
+    "strengthScore": 33,
+    "enduranceScore": 11,
+    "hillScoreClassificationId": 2,
+    "overallScore": 28,
+    "hillScoreFeedbackPhraseId": 4,
+    "vo2Max": 47,
+    "vo2MaxPreciseValue": 47.4,
+    "primaryTrainingDevice": true
+  },
+  "enduranceScore": {
+    "userProfilePK": 10000001,
+    "deviceId": 1000000001,
+    "calendarDate": "2026-08-27",
+    "overallScore": 5996,
+    "classification": 3,
+    "feedbackPhrase": 55,
+    "primaryTrainingDevice": true,
+    "gaugeLowerLimit": 3570,
+    "classificationLowerLimitIntermediate": 5100,
+    "classificationLowerLimitTrained": 5800,
+    "classificationLowerLimitWellTrained": 6600,
+    "classificationLowerLimitExpert": 7300,
+    "classificationLowerLimitSuperior": 8100,
+    "classificationLowerLimitElite": 8800,
+    "gaugeUpperLimit": 10560,
+    "contributors": [
+      { "activityTypeId": 180, "group": null, "contribution": 47.73 },
+      { "activityTypeId": null, "group": 1, "contribution": 33.48 },
+      { "activityTypeId": null, "group": 0, "contribution": 11.61 },
+      { "activityTypeId": null, "group": 8, "contribution": 7.18 }
+    ]
+  }
+}

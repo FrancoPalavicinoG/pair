@@ -1,0 +1,27 @@
+{
+  "userProfilePk": 10000001,
+  "hrvSummary": {
+    "calendarDate": "2026-08-27",
+    "weeklyAvg": 43,
+    "lastNightAvg": 37,
+    "lastNight5MinHigh": 70,
+    "baseline": {
+      "lowUpper": 40,
+      "balancedLow": 44,
+      "balancedUpper": 61,
+      "markerValue": 0.21170044
+    },
+    "status": "UNBALANCED",
+    "feedbackPhrase": "HRV_UNBALANCED_7",
+    "createTimeStamp": "2026-08-27T12:07:13.363"
+  },
+  "hrvReadings": [
+    { "hrvValue": 26, "readingTimeGMT": "2026-08-27T03:41:57.0", "readingTimeLocal": "2026-08-26T23:41:57.0" },
+    { "hrvValue": 30, "readingTimeGMT": "2026-08-27T03:46:57.0", "readingTimeLocal": "2026-08-26T23:46:57.0" },
+    { "hrvValue": 29, "readingTimeGMT": "2026-08-27T03:51:57.0", "readingTimeLocal": "2026-08-26T23:51:57.0" }
+  ],
+  "startTimestampGmt": "2026-08-27T03:39:00.0",
+  "endTimestampGmt": "2026-08-27T12:07:00.0",
+  "startTimestampLocal": "2026-08-26T23:39:00.0",
+  "endTimestampLocal": "2026-08-27T08:07:00.0"
+}

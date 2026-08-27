@@ -71,14 +71,19 @@ Recorrida manual de la cuenta real (vía la UI de Garmin Connect, no vía API) p
 - [x] Predisposición para entrenar (readiness) — `GET /metrics-service/metrics/trainingreadiness/{fecha}`
 - [x] VO2 max, puntuación de resistencia, hill score ("puntuación de pendiente") — `hillscore` + `endurancescore`
 - [x] Peso/IMC — `GET /weight-service/weight/dayview/{fecha}`
-- [x] Aclimatación calor/altitud — **sin cobertura en `garth`**, ni confirmado ni descartado, queda anotado
+- [x] Aclimatación calor/altitud — no encontrada en `garth` en esta pasada (luego apareció igual, anidada en el endpoint de estado de entreno — ver Batch 2b)
 - [ ] Umbral de lactato, salud general (semáforo), foco de carga, edad física — no encontrados en `garth` todavía, falta revisar más a fondo o `python-garminconnect`
 - [ ] Bloque "reportes históricos" (calorías, distancias, frecuencias cardíacas, FTP) — no investigado en esta pasada
 
-**Batch 2b — pendiente, necesita llamadas reales contra la cuenta (siguiente paso):**
-- [ ] Verificar cada endpoint de arriba contra la cuenta conectada, un dump por vez, en tandas — confirmar path real, valores exactos de los campos tipo enum (`status` de HRV, `trainingStatus` numérico, `level` de readiness), y guardar fixture anonimizada de cada uno
-- [ ] Storage + sync para lo que quede confirmado
+**Batch 2b — verificado contra la cuenta real, hecho (2026-08-27):** 8 llamadas reales (a través de `createSyncClient`, mismo rate limiter que usa la sync), todas contra `f@example.com`, fecha `2026-08-27`.
+- [x] HRV — confirmado, `status: "UNBALANCED"` real, fixture `docs/fixtures/hrv.anon.json`
+- [x] Sleep score + fases — confirmado, las dos rutas candidatas devuelven lo mismo, se queda con `sleep-service` (no necesita `displayName`); `sleepScores.overall.value: 75` = el número que muestra la web. Fixture `docs/fixtures/sleep-daily.anon.json`
+- [x] Estado de entreno + ACWR — confirmado, y **resultó ser un endpoint agregador**: en la misma respuesta vienen también aclimatación calor/altitud (que se había marcado "sin cobertura en garth" — sí existe, estaba anidada acá) y VO2 max por deporte y foco de carga. `trainingStatus: 8` + `trainingStatusFeedbackPhrase: "STRAINED_1"` = "Sobrecarga"; `dailyAcuteChronicWorkloadRatio: 1.1` coincide exacto con la web — **Garmin ya calcula el ACWR, no hace falta derivarlo nosotros**. Fixture `docs/fixtures/training-status-aggregate.anon.json`
+- [x] Predisposición para entrenar (readiness) — confirmado, `level: "MODERATE"`, `score: 50`, exacto a la web. Fixture `docs/fixtures/training-readiness.anon.json`
+- [x] VO2 max, resistencia, hill score — confirmado, `overallScore: 28` resuelve la tile sin nombre de la referencia (es hill score). La clasificación de resistencia (`classification: 3`) no viene con texto pero se puede derivar comparando `overallScore` contra los umbrales que el mismo payload trae. Fixture `docs/fixtures/hill-endurance-score.anon.json`
+- [x] Peso/IMC — endpoint confirmado (200, forma correcta), sin dato cargado para esta cuenta/fecha — no es error, es el "vacío" real de Garmin
+- [ ] Umbral de lactato, salud general, foco de carga (ya salió gratis arriba, dentro del agregador de estado de entreno), edad física, reportes históricos — quedan para una próxima tanda si hace falta
 
 ## Preguntas abiertas
 
-Cuáles de estos datos existen de verdad en la cuenta de prueba (varios dependen del modelo de reloj: HRV status, sleep score y VO2 max no están disponibles en todos los Garmin) — se responde investigando, no se asume acá.
+Ninguna sobre los endpoints ya confirmados. Quedan sin investigar: umbral de lactato, salud general (semáforo), edad física, reportes históricos — se retoman cuando `app-dashboard-widgets-v2` Fase B decida si hacen falta.
