@@ -1,8 +1,21 @@
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, asc, and, gte } from "drizzle-orm";
 import { db } from "../client";
 import { dailyMetrics } from "../schema/daily-metrics";
 
 export type DailyMetricsRow = typeof dailyMetrics.$inferInsert;
+
+/** Ultimos `days` dias de metricas de un usuario, ordenados de mas viejo a mas nuevo. */
+export async function findRecentDailyMetrics(
+  userId: string,
+  days: number,
+): Promise<DailyMetricsRow[]> {
+  const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  return await db
+    .select()
+    .from(dailyMetrics)
+    .where(and(eq(dailyMetrics.userId, userId), gte(dailyMetrics.date, cutoff)))
+    .orderBy(asc(dailyMetrics.date));
+}
 
 export async function findTodayMetrics(userId: string) {
   const today = new Date().toISOString().slice(0, 10); // mismo formato que ya usa la columna "date"
