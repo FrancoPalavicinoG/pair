@@ -14,6 +14,7 @@ Nota (2026-08-16): esta paleta es light-only por decisión deliberada. Dark mode
 --graphite: #5C6459  /* texto secundario, metadata, líneas neutras */
 --ember:    #FF4A17  /* el agente. nunca decorativo — ver regla abajo */
 --panel:    #14161A  /* superficie oscura: inputs, gráficos, tiles en hover/flagged */
+--panel-muted: #8B958A  /* texto secundario sobre --panel: label/sparkline de una tile en hover, comentarios de terminal */
 --rule:      rgba(22,26,22,.18)  /* bordes y divisores sobre superficie clara */
 --rule-soft: rgba(22,26,22,.10)  /* divisores muy sutiles, fondos de grid de 1px */
 ```
@@ -76,6 +77,19 @@ Sin signos de exclamación, sin emojis, sentence case siempre — incluidos boto
 
 Una grilla sutil de 1px (`repeating-linear-gradient` horizontal + vertical, `rgba(22,26,22,.03)`) cubre toda la superficie, fija respecto al viewport (`position: fixed`, `z-index` alto, `pointer-events: none`). Referencia al memory-in-pixel display del reloj — es parte de la identidad, no decoración de una sola página: se replica en cualquier superficie nueva del producto.
 
+## Layout de escritorio
+
+`apps/web` es una app que vive en el escritorio, no un sitio responsive pensado primero para el teléfono. Ninguna pantalla autenticada se resuelve como una columna angosta centrada en medio de un viewport ancho — eso es el layout por defecto de un formulario mobile, no el de una app nativa.
+
+**Shell** (`Dashboard`, `Connect Garmin`, `Widgets` y cualquier superficie autenticada nueva):
+
+- Sidebar izquierdo fijo, ancho ~248px, fondo `--lcd` con `border-right: 1px solid var(--rule-soft)`. De arriba a abajo: wordmark, nav vertical, logout al final (`margin-top: auto`).
+- Cada ítem de nav es texto body (no mono), con el marcador `›` a la izquierda igual que el patrón de "lista tipo menú" de Inputs; el ítem activo pasa el marcador a `--ember` — mismo lenguaje que ya usa el resto del sistema para "esto está seleccionado", no un tratamiento nuevo.
+- Contenido a la derecha: sin límite de ancho tipo tarjeta (nada de `max-width: 24rem` centrado). Usa el mismo `max-width` que el resto de la marca (1080–1200px) con padding lateral, dejando que la grilla respire en pantallas grandes en vez de forzar una columna.
+- Dentro del contenido, cualquier fila de datos relacionados (stat tiles, widgets del dashboard) va en grid real (`grid-template-columns`), no apilada en una sola columna con `space-y-*`. Una lista vertical de tarjetas de ancho completo es el layout por defecto a evitar.
+
+**Pantallas de auth** (`/login`, `/signup`, MFA): quedan como card centrada — es el patrón correcto para una ventana de login de app nativa (piénsese en el login de una app de Mac), no un error a corregir. Lleva wordmark arriba de la card y un ancho algo más generoso que una columna mobile (`~28rem`, no `24rem`).
+
 ## Componentes
 
 ### Inputs
@@ -103,6 +117,8 @@ Todo elemento clickeable define su propio `:focus-visible` explícito (`outline:
 ### Dashboard / stat tiles
 
 Anatomía: label (mono, mayúscula chica, graphite) → valor (Archivo `wght 800`, grande, `--ink`) → delta (mono chico, signo + comparación, graphite) → sparkline (línea de 2px + un marcador cuadrado al final, ver Gráficos).
+
+**Contenedor**: cualquier fila de stat tiles es un `display:grid` con `gap: 1px` sobre fondo `--rule-soft` — el gap de 1px hace de divisor entre tiles sin agregar un `border` por tile. Es el reemplazo estándar de una caja individual con `border` cuando hay más de una métrica relacionada en la misma vista; una sola caja suelta con borde propio es el patrón a evitar ahí.
 
 - Monocromas por defecto (línea graphite sobre fondo transparente que hereda el de la tile) — los hues vívidos del sistema de gráficos no se duplican acá. Extenderlos a las tiles fue una decisión que se probó y se revirtió por dos motivos: rompía la separación validada bajo daltonismo simulado (ver techo de hues en Gráficos), y diluía el significado de "un color por gráfico".
 - El delta de una tile solo pasa a `--ember` cuando esa métrica es la que pair está comentando activamente — como mucho una tile así por vista. Esa tile además pasa toda su superficie a `--panel` (label, valor y fondo incluidos) para que se lea como "la que tiene algo que decir".
