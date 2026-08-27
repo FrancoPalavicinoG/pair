@@ -60,3 +60,11 @@ pnpm-debug.log*
 # --- spike/: el script se commitea, la sesion de garth y los dumps crudos nunca ---
 spike/.garth-session/
 spike/.raw-dumps/
+
+# --- Imagenes sueltas de referencia (screenshots, inspiracion) dropeadas en el repo
+# para que Claude las lea: nunca se commitean. Si algun dia hace falta un asset real
+# (ej. apps/web/public/), agregar una excepcion puntual con "!ruta/al/asset.png".
+*.png
+*.jpg
+*.jpeg
+*.webp
