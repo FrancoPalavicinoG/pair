@@ -8,6 +8,7 @@
   --graphite: #5c6459;
   --ember: #ff4a17;
   --panel: #14161a;
+  --panel-muted: #8b958a;
   --rule: rgba(22, 26, 22, 0.18);
   --rule-soft: rgba(22, 26, 22, 0.1);
 }
@@ -20,6 +21,7 @@
   --color-graphite: var(--graphite);
   --color-ember: var(--ember);
   --color-panel: var(--panel);
+  --color-panel-muted: var(--panel-muted);
   --color-rule: var(--rule);
   --color-rule-soft: var(--rule-soft);
   --font-sans: var(--font-archivo);
@@ -36,11 +38,30 @@ body {
   z-index: 50;
   pointer-events: none;
   background-image:
-    repeating-linear-gradient(to right, rgba(22, 26, 22, 0.03) 0 1px, transparent 1px 100%),
-    repeating-linear-gradient(to bottom, rgba(22, 26, 22, 0.03) 0 1px, transparent 1px 100%);
+    repeating-linear-gradient(0deg, rgba(22, 26, 22, 0.03) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgba(22, 26, 22, 0.03) 0 1px, transparent 1px 3px);
 }
 
-/* Unica animacion en loop permitida por docs/style.md: cursor de input tipo comando. */
+/* Ejes wdth/wght del variable font (docs/style.md, Tipografia). */
+@utility font-display {
+  font-variation-settings: "wdth" 90, "wght" 800;
+}
+@utility font-body {
+  font-variation-settings: "wdth" 100, "wght" 400;
+}
+
+/* Dos puntos superpuestos del eyebrow (docs/style.md). */
+.eyebrow-dots::before {
+  content: "";
+  width: 14px;
+  height: 6px;
+  flex: none;
+  background:
+    radial-gradient(circle 3px at 3px 3px, var(--ink) 98%, transparent),
+    radial-gradient(circle 3px at 11px 3px, var(--ember) 98%, transparent);
+}
+
+/* Cursor de input tipo comando (unico loop permitido, docs/style.md). */
 @keyframes cmd-cursor-blink {
   0%,
   49% {
