@@ -204,6 +204,9 @@ export async function syncDailyMetrics(
       steps: (summary.totalSteps as number) ?? null,
       sleepSeconds: (summary.sleepingSeconds as number) ?? null,
       bodyBattery: (summary.bodyBatteryMostRecentValue as number) ?? null,
+      stressAverage: (summary.averageStressLevel as number) ?? null,
+      spo2Average: (summary.averageSpo2 as number) ?? null,
+      respirationAvg: (summary.avgWakingRespirationValue as number) ?? null,
       raw: summary,
     });
     count++;

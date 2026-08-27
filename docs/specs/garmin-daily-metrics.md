@@ -58,14 +58,19 @@ Recorrida manual de la cuenta real (vía la UI de Garmin Connect, no vía API) p
 
 ## Checklist de implementación
 
-- [ ] Revisar `raw` de filas reales existentes por campos del catálogo sin usar
-- [ ] Investigar y documentar (skill `/garmin-endpoint`, en tandas): HRV, body battery detallado, stress (ya marcados "por confirmar")
-- [ ] Investigar y documentar: sleep score + fases, estado de entreno, readiness
-- [ ] Investigar y documentar el resto del bloque "bienestar diario" (VO2 max, umbral de lactato, carga de entreno, salud general, foco de carga, resistencia, peso/IMC, aclimatación calor/altitud, edad física, puntuación de pendiente)
-- [ ] Investigar y documentar el bloque "reportes históricos" (calorías, distancias, frecuencias cardíacas, FTP)
-- [ ] Diseñar y migrar el storage para todo lo confirmado (`packages/db/src/schema/daily-metrics.ts` y/o tablas nuevas)
-- [ ] Extender `syncDailyMetrics` para persistir lo que corresponda a la sync diaria
-- [ ] Probado end-to-end: un `pnpm sync` contra la cuenta real trae y guarda todo lo confirmado, sin romper los 4 campos que ya funcionan
+**Batch 1 — hecho (2026-08-27):**
+- [x] Revisar `raw` de filas reales existentes por campos del catálogo sin usar — pagó: stress, body battery detallado, SpO2 y respiración ya venían en el resumen diario que ya sincronizamos, sin endpoint nuevo (`docs/garmin-api.md`, commit `1d54fc2`)
+- [x] Storage para lo confirmado gratis: 3 columnas nuevas (`stress_average`, `spo2_average`, `respiration_avg`) en `packages/db/src/schema/daily-metrics.ts` — conservador a propósito, un valor resumen por área, el detalle rico (eventos de body battery, stress por franja) se queda en `raw` hasta que un widget concreto lo pida
+- [x] `syncDailyMetrics` extendido con el mapeo de esos 3 campos
+- [x] Probado end-to-end: `pnpm sync --user f@example.com` contra la cuenta real, `stress_average: 29`, `spo2_average: 94`, `respiration_avg: 15` del día de hoy, sin romper los 4 campos que ya andaban
+
+**Batch 2 — pendiente, necesita investigación real (skill `/garmin-endpoint`, en tandas):**
+- [ ] HRV (no está en el resumen diario, endpoint separado sin confirmar)
+- [ ] Sleep score + fases de sueño
+- [ ] Estado de entreno, readiness
+- [ ] Resto del bloque "bienestar diario" (VO2 max, umbral de lactato, carga de entreno, salud general, foco de carga, resistencia, peso/IMC, aclimatación calor/altitud, edad física, puntuación de pendiente)
+- [ ] Bloque "reportes históricos" (calorías, distancias, frecuencias cardíacas, FTP)
+- [ ] Storage + sync para lo que ese batch confirme
 
 ## Preguntas abiertas
 

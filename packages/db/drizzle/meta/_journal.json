@@ -29,6 +29,13 @@
       "when": 1787692544071,
       "tag": "0003_mighty_shooting_star",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1787865867607,
+      "tag": "0004_strange_johnny_blaze",
+      "breakpoints": true
     }
   ]
 }
