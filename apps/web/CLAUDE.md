@@ -14,6 +14,12 @@ Todo componente y toda decisión visual sigue `docs/style.md` (paleta, tipograf�
 | `/connectors` | URL del MCP, instrucciones por cliente, estado de la conexión, revocar |
 | `/oauth/consent` | Pantalla de autorización cuando Claude pide acceso |
 
+## Estructura visual
+
+Toda superficie autenticada (grupo de rutas `(app)`) vive dentro del shell de escritorio: `(app)/_components/app-shell.tsx` (sidebar fijo + wordmark + nav) envuelve `children` desde `(app)/layout.tsx`. Ninguna página del grupo `(app)` vuelve a centrar su propio contenido en una columna angosta — eso es contrato del shell, no de cada página (ver `docs/style.md`, "Layout de escritorio"). Las pantallas de `(auth)` (login/signup) quedan fuera del shell, como card centrada.
+
+`src/components/` (fuera de `app/`) tiene los componentes de marca compartidos entre rutas (`wordmark.tsx`, `eyebrow.tsx`) — sin estado, transcripción directa de `docs/style.md`. Un componente específico de una sola ruta sigue viviendo en el `_components/` de esa ruta.
+
 ## Reglas
 
 - Server Components por defecto. `"use client"` solo donde hace falta interactividad real.
