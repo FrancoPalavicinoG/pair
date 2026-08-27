@@ -10,6 +10,7 @@ import {
 } from "./_components/widgets/registry";
 import { DashboardLayoutEditor, type WidgetItem } from "./_components/dashboard-layout-editor";
 import { Eyebrow } from "@/components/eyebrow";
+import { PairButton } from "@/components/pair-button";
 
 export default async function DashboardPage() {
   const session = await requireSession();
@@ -52,12 +53,9 @@ export default async function DashboardPage() {
       {syncStatus === "not_connected" && (
         <div className="flex items-center justify-between gap-4 border border-rule-soft px-5 py-4">
           <p className="text-sm text-graphite">Garmin isn&apos;t connected yet.</p>
-          <Link
-            href="/settings/garmin"
-            className="border border-ink px-4 py-2 text-sm text-ink transition-colors hover:bg-ink hover:text-bone"
-          >
+          <PairButton variant="outline" href="/settings/garmin">
             Connect Garmin
-          </Link>
+          </PairButton>
         </div>
       )}
 
@@ -73,12 +71,9 @@ export default async function DashboardPage() {
           <p className="text-sm text-ink">
             <span aria-hidden>× </span>Garmin disconnected
           </p>
-          <Link
-            href="/settings/garmin"
-            className="border border-ink px-4 py-2 text-sm text-ink transition-colors hover:bg-ink hover:text-bone"
-          >
+          <PairButton variant="outline" href="/settings/garmin">
             Reconnect Garmin
-          </Link>
+          </PairButton>
         </div>
       )}
 
@@ -89,12 +84,9 @@ export default async function DashboardPage() {
             {credentials.lastSyncedAt ? credentials.lastSyncedAt.toLocaleString() : "never"}
           </p>
           <form action={syncNowAction}>
-            <button
-              type="submit"
-              className="border border-ink px-4 py-2 text-sm text-ink transition-colors hover:bg-ink hover:text-bone"
-            >
+            <PairButton variant="outline" type="submit">
               Sync now
-            </button>
+            </PairButton>
           </form>
         </div>
       )}

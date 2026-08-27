@@ -7,6 +7,7 @@ import {
   type WidgetKey,
 } from "../_components/widgets/registry";
 import { Eyebrow } from "@/components/eyebrow";
+import { ListRow } from "@/components/list-row";
 
 export default async function DashboardWidgetsPage() {
   const session = await requireSession();
@@ -28,15 +29,12 @@ export default async function DashboardWidgetsPage() {
         {rows.map((row) => (
           <li key={row.key}>
             <form action={toggleWidgetVisibility.bind(null, row.key)}>
-              <button
-                type="submit"
-                className="flex w-full items-center justify-between gap-3 border border-rule-soft px-3 py-2 text-sm text-ink transition-colors hover:border-ink"
-              >
+              <ListRow type="submit">
                 <span>{row.label}</span>
                 <span className={`font-mono ${row.visible ? "text-ember" : "text-graphite"}`}>
                   {row.visible ? "[×]" : "[ ]"}
                 </span>
-              </button>
+              </ListRow>
             </form>
           </li>
         ))}

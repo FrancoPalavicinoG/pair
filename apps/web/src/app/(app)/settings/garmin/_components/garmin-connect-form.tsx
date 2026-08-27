@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { connectGarminAction } from "../actions";
+import { PairButton } from "@/components/pair-button";
 
 // Un solo formulario para los dos pasos (credenciales, y código MFA si Garmin
 // lo pide) — qué campos mostrar depende de state?.status.
@@ -74,13 +75,9 @@ export function GarminConnectForm() {
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="w-full bg-ember px-4 py-2.5 text-bone outline-none transition-opacity focus-visible:outline-2 focus-visible:outline-ember focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-      >
+      <PairButton type="submit" disabled={pending} className="w-full">
         {needsMfa ? "Verify" : "Connect"}
-      </button>
+      </PairButton>
     </form>
   );
 }

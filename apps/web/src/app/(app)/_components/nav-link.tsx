@@ -12,7 +12,7 @@ export function NavLink({ href, children }: { href: string; children: React.Reac
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className="flex items-center gap-2 px-6 py-2 text-sm text-ink outline-none transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-ember focus-visible:-outline-offset-2"
+      className="flex items-center gap-2 px-6 py-2 text-sm text-ink outline-none transition-colors hover:text-ink focus-visible:[--tw-outline-style:solid] focus-visible:outline-2 focus-visible:outline-ember focus-visible:-outline-offset-2"
     >
       <span aria-hidden className={active ? "text-ember" : "text-graphite"}>
         ›

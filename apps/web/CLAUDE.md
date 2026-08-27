@@ -18,7 +18,9 @@ Todo componente y toda decisión visual sigue `docs/style.md` (paleta, tipograf�
 
 Toda superficie autenticada (grupo de rutas `(app)`) vive dentro del shell de escritorio: `(app)/_components/app-shell.tsx` (sidebar fijo + wordmark + nav) envuelve `children` desde `(app)/layout.tsx`. Ninguna página del grupo `(app)` vuelve a centrar su propio contenido en una columna angosta — eso es contrato del shell, no de cada página (ver `docs/style.md`, "Layout de escritorio"). Las pantallas de `(auth)` (login/signup) quedan fuera del shell, como card centrada.
 
-`src/components/` (fuera de `app/`) tiene los componentes de marca compartidos entre rutas (`wordmark.tsx`, `eyebrow.tsx`) — sin estado, transcripción directa de `docs/style.md`. Un componente específico de una sola ruta sigue viviendo en el `_components/` de esa ruta.
+`src/components/` (fuera de `app/`) tiene los componentes de marca compartidos entre rutas (`wordmark.tsx`, `eyebrow.tsx`, `pair-button.tsx`, `list-row.tsx`) — sin estado, transcripción directa de `docs/style.md`. Un componente específico de una sola ruta sigue viviendo en el `_components/` de esa ruta.
+
+**Regla de reuso**: un patrón visual usado 2 veces o más (mismo botón, misma fila, misma tarjeta) se saca a un componente propio en vez de repetir la clase de Tailwind larga a mano en cada archivo — nunca copiar/pegar un `className` de 5+ utilidades entre componentes. Otro componente lo importa siempre, no lo redefine. Ver `PairButton`/`ListRow` como el patrón de referencia: variantes fijas (no props de estilo libre), wrapper delgado sin lógica de negocio, migración de los usos existentes en el mismo cambio que crea el componente.
 
 ## Reglas
 

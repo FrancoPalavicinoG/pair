@@ -1,7 +1,7 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 import { findRecentActivities } from "@pair/db";
 import { formatDistance, formatDuration } from "@/lib/format";
+import { ListRow } from "@/components/list-row";
 
 export async function renderRecentActivities(userId: string): Promise<ReactNode> {
   const activities = await findRecentActivities(userId, 20);
@@ -15,10 +15,7 @@ export async function renderRecentActivities(userId: string): Promise<ReactNode>
       <ul className="space-y-1">
         {activities.map((activity) => (
           <li key={activity.id}>
-            <Link
-              href={`/activities/${activity.garminActivityId}`}
-              className="flex items-center justify-between gap-3 border border-rule-soft px-3 py-2 text-sm text-ink transition-colors hover:border-ink"
-            >
+            <ListRow href={`/activities/${activity.garminActivityId}`}>
               <span className="truncate">{activity.name ?? activity.sportType ?? "Activity"}</span>
               <span className="shrink-0 text-graphite">
                 {activity.distanceMeters != null ? formatDistance(activity.distanceMeters) : ""}
@@ -26,7 +23,7 @@ export async function renderRecentActivities(userId: string): Promise<ReactNode>
                   ? ` · ${formatDuration(activity.durationSeconds)}`
                   : ""}
               </span>
-            </Link>
+            </ListRow>
           </li>
         ))}
       </ul>

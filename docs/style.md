@@ -100,10 +100,13 @@ Viven sobre `--panel` (superficie oscura), nunca directo sobre `--lcd`. Monoespa
 - **Código MFA**: 6 casillas cuadradas separadas, mono, centradas, mismo tratamiento de foco (borde ember) que el resto.
 - **Select**: mismo fondo oscuro, sin flecha nativa del navegador — chevron propio en mono (`›` rotado 90°), borde a ember en foco.
 - **Lista tipo menú** (ej. selector de conector): opciones con un marcador `›` a la izquierda; en la opción activa el marcador pasa a ember, y el fondo de esa fila puede pasar a `--panel` para reforzar la selección: evaluar caso a caso, no es obligatorio en cada lista.
+- **Fila simple** (ej. una actividad reciente, un toggle de widget): borde `--rule-soft`, hover a borde `--ink`. Implementación de referencia: `apps/web/src/components/list-row.tsx` (`ListRow`).
 - **Toggle**: checkbox real oculto + label con `[ ]` / `[×]` en mono; el bracket pasa a ember cuando está marcado.
 - **Autocompletado fantasma**: texto ya escrito en `--ink`, sugerencia en `--graphite` a ~55% opacidad, con un hint `tab` en una cápsula chica de borde sutil.
 
 ### Botones
+
+Implementación de referencia: `apps/web/src/components/pair-button.tsx` (`PairButton`, variantes `primary`/`outline`/`confirm`). Ningún botón de `apps/web` define su estilo a mano — usa `PairButton`.
 
 - **Outline** (acción secundaria, ej. "Edit"): borde 1px `--ink` o `--rule`, fondo transparente, texto `--ink` o `--graphite`.
 - **Primary**: relleno ember, texto `--bone`. Es la acción principal de la vista (login, signup, conectar Garmin, submit de un form) y se habilita apenas la acción es válida de tomar.
@@ -167,3 +170,4 @@ Cosas que costó descubrir al construir estos componentes — no repetirlas:
 
 - **`preserveAspectRatio="none"` deforma las marcas.** Un `<svg>` con ese atributo estira su contenido de forma no uniforme para llenar el contenedor (necesario para que una línea de tendencia ocupe el ancho completo de una tarjeta responsive). Un `<circle>` o `<rect>` cuadrado dibujado *adentro* de ese `viewBox` se deforma en óvalo o rectángulo según el ancho real de la tarjeta en pantalla. Solución: la línea se queda en el SVG (estirarse no le hace nada), pero cualquier marcador puntual (punto de sparkline, de línea de tendencia) va como elemento HTML posicionado por `%` **encima** del SVG, con tamaño fijo en px — nunca como shape dentro del viewBox estirado.
 - **Un `<button>` sin `outline` propio hereda el foco nativo del navegador.** En macOS/Safari ese foco puede tomar el color de acento del sistema del usuario — si está en naranja, se confunde con ember al hacer click aunque el CSS nunca haya pedido ember. Definir siempre `:focus-visible` explícito (ver Foco / interacción arriba) en vez de confiar en el default del navegador.
+- **`outline-none` + `focus-visible:outline-2` en Tailwind v4 no pinta nada.** `outline-2`/`outline-{color}` fijan ancho y color pero delegan el estilo a la variable compartida `--tw-outline-style`; `outline-none` fija esa misma variable a `none` **de forma permanente en el elemento**, así que un `focus-visible:outline-2` posterior sigue leyendo `none` y el anillo nunca se ve (se probó con foco real por teclado + estilos computados, no a ojo — un `getComputedStyle` apurado sin forzar reflow después de un `Tab` sintético también puede devolver el valor viejo y hacer parecer que el bug sigue). Fix: `focus-visible:[--tw-outline-style:solid]` en vez de (o además de) `focus-visible:outline`, para sobreescribir la variable específicamente en el estado con foco.
