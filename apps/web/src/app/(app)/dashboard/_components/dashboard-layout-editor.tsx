@@ -61,7 +61,7 @@ export function DashboardLayoutEditor({
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
       <SortableContext items={items.map((item) => item.key)} strategy={verticalListSortingStrategy}>
-        <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
           {items.map((item) => (
             <SortableWidgetTile key={item.key} item={item} onHide={handleHide} />
           ))}

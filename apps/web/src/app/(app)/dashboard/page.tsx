@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireSession } from "@/lib/session";
-import { findUserById, findCredentialsByUserId } from "@pair/db";
-import { logout, syncNowAction } from "./actions";
+import { findCredentialsByUserId } from "@pair/db";
+import { syncNowAction } from "./actions";
 import { SyncStatusPoller } from "./_components/sync-status-poller";
 import {
   getEffectiveLayout,
@@ -9,14 +9,10 @@ import {
   type WidgetKey,
 } from "./_components/widgets/registry";
 import { DashboardLayoutEditor, type WidgetItem } from "./_components/dashboard-layout-editor";
+import { Eyebrow } from "@/components/eyebrow";
 
 export default async function DashboardPage() {
   const session = await requireSession();
-  const user = await findUserById(session.userId);
-  if (!user) {
-    await logout();
-    return;
-  }
 
   const credentials = await findCredentialsByUserId(session.userId);
   let syncStatus: string;
@@ -50,75 +46,71 @@ export default async function DashboardPage() {
   }
 
   return (
-    <main className="flex min-h-full flex-1 flex-col items-center justify-center px-4 py-16">
-      <div className="w-full max-w-sm space-y-8 text-center">
-        <p className="font-mono text-sm text-ink">{user.email}</p>
+    <div className="space-y-10">
+      <Eyebrow>Dashboard</Eyebrow>
 
-        {syncStatus === "not_connected" && (
+      {syncStatus === "not_connected" && (
+        <div className="flex items-center justify-between gap-4 border border-rule-soft px-5 py-4">
+          <p className="text-sm text-graphite">Garmin isn&apos;t connected yet.</p>
           <Link
             href="/settings/garmin"
-            className="block w-full border border-ink px-4 py-2.5 text-center text-ink transition-colors hover:bg-ink hover:text-bone"
+            className="border border-ink px-4 py-2 text-sm text-ink transition-colors hover:bg-ink hover:text-bone"
           >
             Connect Garmin
           </Link>
-        )}
+        </div>
+      )}
 
-        {syncStatus === "syncing" && (
-          <>
-            <p className="text-sm text-graphite">Syncing…</p>
-            <SyncStatusPoller syncInProgress />
-          </>
-        )}
+      {syncStatus === "syncing" && (
+        <div className="flex items-center justify-between gap-4 border border-rule-soft px-5 py-4">
+          <p className="text-sm text-graphite">Syncing…</p>
+          <SyncStatusPoller syncInProgress />
+        </div>
+      )}
 
-        {syncStatus === "needs_reconnect" && (
-          <>
-            <p className="text-sm text-ink">
-              <span aria-hidden>× </span>Garmin disconnected
-            </p>
-            <Link
-              href="/settings/garmin"
-              className="block w-full border border-ink px-4 py-2.5 text-center text-ink transition-colors hover:bg-ink hover:text-bone"
-            >
-              Reconnect Garmin
-            </Link>
-          </>
-        )}
-
-        {syncStatus === "synced" && credentials && (
-          <>
-            <p className="text-sm text-graphite">
-              Last synced:{" "}
-              {credentials.lastSyncedAt ? credentials.lastSyncedAt.toLocaleString() : "never"}
-            </p>
-            <form action={syncNowAction}>
-              <button
-                type="submit"
-                className="w-full border border-ink px-4 py-2.5 text-ink transition-colors hover:bg-ink hover:text-bone"
-              >
-                Sync now
-              </button>
-            </form>
-          </>
-        )}
-
-        <DashboardLayoutEditor initialWidgets={visibleWidgets} hiddenKeys={hiddenKeys} />
-
-        <Link
-          href="/dashboard/widgets"
-          className="block text-center font-mono text-xs uppercase tracking-[0.1em] text-graphite transition-colors hover:text-ink"
-        >
-          Edit widgets
-        </Link>
-
-        <form action={logout}>
-          <button
-            type="submit"
-            className="w-full border border-ink px-4 py-2.5 text-ink transition-colors hover:bg-ink hover:text-bone"
+      {syncStatus === "needs_reconnect" && (
+        <div className="flex items-center justify-between gap-4 border border-rule-soft px-5 py-4">
+          <p className="text-sm text-ink">
+            <span aria-hidden>× </span>Garmin disconnected
+          </p>
+          <Link
+            href="/settings/garmin"
+            className="border border-ink px-4 py-2 text-sm text-ink transition-colors hover:bg-ink hover:text-bone"
           >
-            Log out
-          </button>
-        </form>
+            Reconnect Garmin
+          </Link>
+        </div>
+      )}
+
+      {syncStatus === "synced" && credentials && (
+        <div className="flex items-center justify-between gap-4 border border-rule-soft px-5 py-4">
+          <p className="text-sm text-graphite">
+            Last synced:{" "}
+            {credentials.lastSyncedAt ? credentials.lastSyncedAt.toLocaleString() : "never"}
+          </p>
+          <form action={syncNowAction}>
+            <button
+              type="submit"
+              className="border border-ink px-4 py-2 text-sm text-ink transition-colors hover:bg-ink hover:text-bone"
+            >
+              Sync now
+            </button>
+          </form>
+        </div>
+      )}
+
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <p className="font-mono text-xs uppercase tracking-[0.1em] text-graphite">Widgets</p>
+          <Link
+            href="/dashboard/widgets"
+            className="font-mono text-xs uppercase tracking-[0.1em] text-graphite transition-colors hover:text-ink"
+          >
+            Edit widgets
+          </Link>
+        </div>
+        <DashboardLayoutEditor initialWidgets={visibleWidgets} hiddenKeys={hiddenKeys} />
       </div>
-    </main>
+    </div>
   );
 }
