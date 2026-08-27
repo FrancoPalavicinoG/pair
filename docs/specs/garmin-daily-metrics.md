@@ -1,7 +1,7 @@
 # Spec: Catálogo de datos diarios de Garmin (bienestar, entreno, reportes históricos)
 
 Roadmap: P4 (Dashboard personalizable), nuevo ítem ("Catálogo de datos diarios de Garmin")
-Estado: draft
+Estado: hecho
 
 ## Objetivo
 
@@ -82,7 +82,13 @@ Recorrida manual de la cuenta real (vía la UI de Garmin Connect, no vía API) p
 - [x] Predisposición para entrenar (readiness) — confirmado, `level: "MODERATE"`, `score: 50`, exacto a la web. Fixture `docs/fixtures/training-readiness.anon.json`
 - [x] VO2 max, resistencia, hill score — confirmado, `overallScore: 28` resuelve la tile sin nombre de la referencia (es hill score). La clasificación de resistencia (`classification: 3`) no viene con texto pero se puede derivar comparando `overallScore` contra los umbrales que el mismo payload trae. Fixture `docs/fixtures/hill-endurance-score.anon.json`
 - [x] Peso/IMC — endpoint confirmado (200, forma correcta), sin dato cargado para esta cuenta/fecha — no es error, es el "vacío" real de Garmin
-- [ ] Umbral de lactato, salud general, foco de carga (ya salió gratis arriba, dentro del agregador de estado de entreno), edad física, reportes históricos — quedan para una próxima tanda si hace falta
+
+**Batch 3 — storage, hecho (2026-08-27):**
+- [x] 24 columnas nuevas en `packages/db/src/schema/daily-metrics.ts`, migraciones `0005_burly_hitman` + `0006_zippy_black_queen` (la 0006 corrige un nombre: `weight_kg` → `weight`, porque la unidad real no está confirmada — no se asume "Kg" sin un dato real que lo confirme)
+- [x] `syncDailyMetrics` extendido: 8 llamadas por día (antes 1), cada una con `tryFetch` propio para que un endpoint sin dato ese día no tire abajo el resto. `raw` pasa de "el payload del resumen diario" a un objeto con namespace por fuente (`usersummary`, `hrv`, `sleep`, `trainingStatus`, `readiness`, `hillScore`, `enduranceScore`, `weight`) — las filas viejas (Batch 1 y anteriores) tienen `raw` con la forma vieja (el resumen diario directo, sin namespace), quien lea `raw` de una fila histórica tiene que saberlo
+- [x] Probado end-to-end contra la cuenta real: las 24 columnas quedan pobladas con los mismos valores ya confirmados en Batch 2b (`hrv_status: UNBALANCED`, `sleep_score: 75`, `training_status: 8`, `acwr: 1.1`, `readiness_score: 50`, `hill_score: 28`, `endurance_score: 5996`, peso/IMC en `null` como se esperaba), sin romper ninguno de los 7 campos que ya andaban
+
+**Deliberadamente sin investigar** (quedan fuera del cierre de este spec, no es una omisión): umbral de lactato, estado de salud general (semáforo), edad física, reportes históricos (calorías/distancias/FC/FTP en serie larga). Se retoman si `app-dashboard-widgets-v2` Fase B decide que hacen falta — no antes.
 
 ## Preguntas abiertas
 

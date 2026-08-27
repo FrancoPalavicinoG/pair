@@ -36,6 +36,20 @@
       "when": 1787865867607,
       "tag": "0004_strange_johnny_blaze",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1787866882982,
+      "tag": "0005_burly_hitman",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1787867075879,
+      "tag": "0006_zippy_black_queen",
+      "breakpoints": true
     }
   ]
 }

@@ -177,6 +177,26 @@ export async function syncActivities(
   return inserted;
 }
 
+// Devuelve `value` como objeto indexable si lo es, si no `undefined` — para
+// encadenar acceso a campos anidados sin `any` (CLAUDE.md raiz: any prohibido).
+function obj(value: unknown): Record<string, unknown> | undefined {
+  return value && typeof value === "object" ? (value as Record<string, unknown>) : undefined;
+}
+
+// Igual que `client.connectapi`, pero no tira: un dia sin dato para este
+// endpoint (reloj no compatible, cuenta sin ese dato ese dia) no debe cortar
+// el resto de los campos de `syncDailyMetrics`.
+async function tryFetch<T>(
+  client: ReturnType<typeof createGarminClient>,
+  path: string,
+): Promise<T | null> {
+  try {
+    return await client.connectapi<T>(path);
+  } catch {
+    return null;
+  }
+}
+
 export async function syncDailyMetrics(
   userId: string,
   displayName: string,
@@ -197,6 +217,65 @@ export async function syncDailyMetrics(
     const summary = await client.connectapi<Record<string, unknown>>(
       `/usersummary-service/usersummary/daily/${displayName}?calendarDate=${dateStr}`,
     );
+
+    const hrv = await tryFetch<Record<string, unknown>>(client, `/hrv-service/hrv/${dateStr}`);
+    const hrvSummary = obj(hrv?.hrvSummary);
+
+    const sleep = await tryFetch<Record<string, unknown>>(
+      client,
+      `/sleep-service/sleep/dailySleepData?date=${dateStr}`,
+    );
+    const sleepDto = obj(sleep?.dailySleepDTO);
+    const sleepOverall = obj(obj(sleepDto?.sleepScores)?.overall);
+
+    // Agregador: trae estado de entreno + ACWR + aclimatacion + VO2max + foco
+    // de carga en una sola llamada (docs/garmin-api.md).
+    const trainingStatusAggregate = await tryFetch<Record<string, unknown>>(
+      client,
+      `/mobile-gateway/usersummary/trainingstatus/latest/${dateStr}`,
+    );
+    const trainingStatusData = obj(
+      obj(obj(trainingStatusAggregate?.mostRecentTrainingStatus)?.payload)?.latestTrainingStatusData,
+    );
+    const firstDeviceTrainingStatus = trainingStatusData
+      ? obj(Object.values(trainingStatusData)[0])
+      : undefined;
+    const acuteTrainingLoad = obj(firstDeviceTrainingStatus?.acuteTrainingLoadDTO);
+    const acclimation = obj(
+      obj(trainingStatusAggregate?.mostRecentHeatAltitudeAcclimation)?.payload,
+    );
+    const vo2MaxPayload = obj(obj(trainingStatusAggregate?.mostRecentVO2Max)?.payload);
+    const vo2Generic = obj(vo2MaxPayload?.generic);
+    const vo2Cycling = obj(vo2MaxPayload?.cycling);
+    const loadBalanceMap = obj(
+      obj(obj(trainingStatusAggregate?.mostRecentTrainingLoadBalance)?.payload)
+        ?.metricsTrainingLoadBalanceDTOMap,
+    );
+    const firstDeviceLoadBalance = loadBalanceMap ? obj(Object.values(loadBalanceMap)[0]) : undefined;
+
+    const readinessList = await tryFetch<Record<string, unknown>[]>(
+      client,
+      `/metrics-service/metrics/trainingreadiness/${dateStr}`,
+    );
+    const morningReadiness = readinessList?.find(
+      (entry) => entry.inputContext === "AFTER_WAKEUP_RESET",
+    );
+
+    const hillScoreData = await tryFetch<Record<string, unknown>>(
+      client,
+      `/metrics-service/metrics/hillscore?calendarDate=${dateStr}`,
+    );
+    const enduranceScoreData = await tryFetch<Record<string, unknown>>(
+      client,
+      `/metrics-service/metrics/endurancescore?calendarDate=${dateStr}`,
+    );
+
+    const weightData = await tryFetch<Record<string, unknown>>(
+      client,
+      `/weight-service/weight/dayview/${dateStr}`,
+    );
+    const weightTotalAverage = obj(weightData?.totalAverage);
+
     await upsertDailyMetrics({
       userId,
       date: dateStr,
@@ -207,7 +286,40 @@ export async function syncDailyMetrics(
       stressAverage: (summary.averageStressLevel as number) ?? null,
       spo2Average: (summary.averageSpo2 as number) ?? null,
       respirationAvg: (summary.avgWakingRespirationValue as number) ?? null,
-      raw: summary,
+      hrvStatus: (hrvSummary?.status as string) ?? null,
+      hrvWeeklyAvg: (hrvSummary?.weeklyAvg as number) ?? null,
+      hrvLastNightAvg: (hrvSummary?.lastNightAvg as number) ?? null,
+      sleepScore: (sleepOverall?.value as number) ?? null,
+      deepSleepSeconds: (sleepDto?.deepSleepSeconds as number) ?? null,
+      lightSleepSeconds: (sleepDto?.lightSleepSeconds as number) ?? null,
+      remSleepSeconds: (sleepDto?.remSleepSeconds as number) ?? null,
+      awakeSleepSeconds: (sleepDto?.awakeSleepSeconds as number) ?? null,
+      trainingStatus: (firstDeviceTrainingStatus?.trainingStatus as number) ?? null,
+      trainingStatusPhrase: (firstDeviceTrainingStatus?.trainingStatusFeedbackPhrase as string) ?? null,
+      acuteLoad: (acuteTrainingLoad?.dailyTrainingLoadAcute as number) ?? null,
+      chronicLoad: (acuteTrainingLoad?.dailyTrainingLoadChronic as number) ?? null,
+      acwr: (acuteTrainingLoad?.dailyAcuteChronicWorkloadRatio as number) ?? null,
+      heatAcclimationPercent: (acclimation?.heatAcclimationPercentage as number) ?? null,
+      altitudeAcclimationMeters: (acclimation?.altitudeAcclimation as number) ?? null,
+      vo2MaxRunning: (vo2Generic?.vo2MaxValue as number) ?? null,
+      vo2MaxCycling: (vo2Cycling?.vo2MaxValue as number) ?? null,
+      loadBalanceFeedback: (firstDeviceLoadBalance?.trainingBalanceFeedbackPhrase as string) ?? null,
+      readinessScore: (morningReadiness?.score as number) ?? null,
+      readinessLevel: (morningReadiness?.level as string) ?? null,
+      hillScore: (hillScoreData?.overallScore as number) ?? null,
+      enduranceScore: (enduranceScoreData?.overallScore as number) ?? null,
+      weight: (weightTotalAverage?.weight as number) ?? null,
+      bmi: (weightTotalAverage?.bmi as number) ?? null,
+      raw: {
+        usersummary: summary,
+        hrv,
+        sleep,
+        trainingStatus: trainingStatusAggregate,
+        readiness: readinessList,
+        hillScore: hillScoreData,
+        enduranceScore: enduranceScoreData,
+        weight: weightData,
+      },
     });
     count++;
   }

@@ -1,0 +1,24 @@
+ALTER TABLE "daily_metrics" ADD COLUMN "hrv_status" text;--> statement-breakpoint
+ALTER TABLE "daily_metrics" ADD COLUMN "hrv_weekly_avg" integer;--> statement-breakpoint
+ALTER TABLE "daily_metrics" ADD COLUMN "hrv_last_night_avg" integer;--> statement-breakpoint
+ALTER TABLE "daily_metrics" ADD COLUMN "sleep_score" integer;--> statement-breakpoint
+ALTER TABLE "daily_metrics" ADD COLUMN "deep_sleep_seconds" integer;--> statement-breakpoint
+ALTER TABLE "daily_metrics" ADD COLUMN "light_sleep_seconds" integer;--> statement-breakpoint
+ALTER TABLE "daily_metrics" ADD COLUMN "rem_sleep_seconds" integer;--> statement-breakpoint
+ALTER TABLE "daily_metrics" ADD COLUMN "awake_sleep_seconds" integer;--> statement-breakpoint
+ALTER TABLE "daily_metrics" ADD COLUMN "training_status" integer;--> statement-breakpoint
+ALTER TABLE "daily_metrics" ADD COLUMN "training_status_phrase" text;--> statement-breakpoint
+ALTER TABLE "daily_metrics" ADD COLUMN "acute_load" integer;--> statement-breakpoint
+ALTER TABLE "daily_metrics" ADD COLUMN "chronic_load" integer;--> statement-breakpoint
+ALTER TABLE "daily_metrics" ADD COLUMN "acwr" real;--> statement-breakpoint
+ALTER TABLE "daily_metrics" ADD COLUMN "heat_acclimation_percent" integer;--> statement-breakpoint
+ALTER TABLE "daily_metrics" ADD COLUMN "altitude_acclimation_meters" integer;--> statement-breakpoint
+ALTER TABLE "daily_metrics" ADD COLUMN "vo2_max_running" integer;--> statement-breakpoint
+ALTER TABLE "daily_metrics" ADD COLUMN "vo2_max_cycling" integer;--> statement-breakpoint
+ALTER TABLE "daily_metrics" ADD COLUMN "load_balance_feedback" text;--> statement-breakpoint
+ALTER TABLE "daily_metrics" ADD COLUMN "readiness_score" integer;--> statement-breakpoint
+ALTER TABLE "daily_metrics" ADD COLUMN "readiness_level" text;--> statement-breakpoint
+ALTER TABLE "daily_metrics" ADD COLUMN "hill_score" integer;--> statement-breakpoint
+ALTER TABLE "daily_metrics" ADD COLUMN "endurance_score" integer;--> statement-breakpoint
+ALTER TABLE "daily_metrics" ADD COLUMN "weight_kg" real;--> statement-breakpoint
+ALTER TABLE "daily_metrics" ADD COLUMN "bmi" real;
