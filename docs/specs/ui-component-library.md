@@ -1,7 +1,7 @@
 # Spec: Librería de componentes de UI propios
 
 Roadmap: P4 (Dashboard personalizable), nuevo ítem ("Librería de componentes de UI")
-Estado: draft
+Estado: hecho
 
 ## Objetivo
 
@@ -11,7 +11,9 @@ Salida observable: `PairButton` reemplaza los tres bloques de botón hoy duplica
 
 ## Alcance
 
-**Entra**: `PairButton` (variantes `primary` / `outline` / `confirm`, estado disabled/inert), y `ListRow` (el patrón "fila con `border-rule-soft`, hover a `border-ink`" que hoy se repite en `recent-activities.tsx`, `dashboard/widgets/page.tsx` y el wrapper de `dashboard-layout-editor.tsx`).
+**Entra**: `PairButton` (variantes `primary` / `outline` / `confirm`, estado disabled/inert), y `ListRow` (el patrón "fila con `border-rule-soft`, hover a `border-ink`" que hoy se repite en `recent-activities.tsx` y `dashboard/widgets/page.tsx`).
+
+**Ajustado al implementar**: el wrapper `SortableWidgetTile` de `dashboard-layout-editor.tsx` (tercer candidato original de `ListRow`) quedó afuera — no es una fila simple, es un contenedor con `ref` de drag-and-drop, handle y botón de cierre superpuestos, contenido vertical arbitrario. Forzarlo a `ListRow` hubiera roto la idea de "wrapper delgado". Se deja como está.
 
 **No entra** (diferido, no es una omisión):
 - Componentes de input (`$` prefix, MFA boxes, select propio): hoy solo existen en `auth-form.tsx` y `garmin-connect-form.tsx`, casi idénticos pero no vale la pena forzar la abstracción con un solo caso de uso real de cada variante — se revisa cuando aparezca un tercer formulario.
@@ -28,9 +30,13 @@ Salida observable: `PairButton` reemplaza los tres bloques de botón hoy duplica
 
 ## Checklist de implementación
 
-- [ ] `PairButton` (`apps/web/src/components/pair-button.tsx`): variantes primary/outline/confirm, estado disabled
-- [ ] `ListRow` (`apps/web/src/components/list-row.tsx`)
-- [ ] Migrar los 5 usos de botón identificados a `PairButton`
-- [ ] Migrar los 3 usos de fila identificados a `ListRow`
-- [ ] `docs/style.md`: nota en la sección Botones apuntando a `PairButton` como la implementación de referencia
-- [ ] `pnpm typecheck` / `pnpm lint` verdes, revisión visual de las 5 pantallas tocadas sin diferencia perceptible contra el estado actual (es un refactor, no un rediseño)
+- [x] `PairButton` (`apps/web/src/components/pair-button.tsx`): variantes primary/outline/confirm, estado disabled
+- [x] `ListRow` (`apps/web/src/components/list-row.tsx`)
+- [x] Migrar los 5 usos de botón identificados a `PairButton`
+- [x] Migrar los 2 usos de fila identificados a `ListRow` (ver "Ajustado al implementar" arriba sobre el tercero)
+- [x] `docs/style.md`: nota en la sección Botones apuntando a `PairButton`, y en Inputs apuntando a `ListRow`
+- [x] `pnpm typecheck` / `pnpm lint` verdes, revisión visual de las pantallas tocadas confirmada sin diferencia perceptible (capturas antes/después)
+
+## Bug encontrado y corregido durante la implementación
+
+`outline-none` + `focus-visible:outline-2 focus-visible:outline-ember` nunca pintaba el anillo de foco, en ningún botón/fila del proyecto (bug preexistente, no introducido en este spec). Causa: Tailwind v4 delega `outline-style` a una variable compartida `--tw-outline-style`, que `outline-none` deja en `none` de forma permanente en el elemento — un `focus-visible:outline-2` posterior nunca la vuelve a poner en `solid`. Fix: `focus-visible:[--tw-outline-style:solid]`. Verificado con foco real de teclado + `getComputedStyle` (con reflow forzado — una primera lectura apurada sin reflow devuelve el valor viejo y hace parecer que el bug sigue). Documentado en `docs/style.md`, Gotchas técnicos, y aplicado también a `NavLink` (mismo bug, de la sesión anterior).

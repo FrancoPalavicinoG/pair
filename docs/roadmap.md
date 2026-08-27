@@ -71,7 +71,7 @@ Objetivo: el gateway funcionando de punta a punta con la infraestructura mínima
 ## P4 — Dashboard personalizable ⬅ fase actual
 
 - [x] Widgets configurables y layout persistente. Spec: `docs/specs/app-dashboard-widgets.md`.
-- [ ] Librería de componentes de UI propios. Spec: `docs/specs/ui-component-library.md`.
+- [x] Librería de componentes de UI propios. Spec: `docs/specs/ui-component-library.md`.
 - [ ] Catálogo de datos diarios de Garmin (bienestar, entreno, reportes históricos). Spec: `docs/specs/garmin-daily-metrics.md`.
 - [ ] Sistema de visualización v2 (gauges, fases de sueño, zonas de potencia). Spec: `docs/specs/dashboard-visualization-system.md`.
 - [ ] Dashboard widgets v2 (Activities al sidebar, tiles individuales, grilla cuadrada). Spec: `docs/specs/app-dashboard-widgets-v2.md`.
