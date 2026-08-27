@@ -64,13 +64,20 @@ Recorrida manual de la cuenta real (vía la UI de Garmin Connect, no vía API) p
 - [x] `syncDailyMetrics` extendido con el mapeo de esos 3 campos
 - [x] Probado end-to-end: `pnpm sync --user f@example.com` contra la cuenta real, `stress_average: 29`, `spo2_average: 94`, `respiration_avg: 15` del día de hoy, sin romper los 4 campos que ya andaban
 
-**Batch 2 — pendiente, necesita investigación real (skill `/garmin-endpoint`, en tandas):**
-- [ ] HRV (no está en el resumen diario, endpoint separado sin confirmar)
-- [ ] Sleep score + fases de sueño
-- [ ] Estado de entreno, readiness
-- [ ] Resto del bloque "bienestar diario" (VO2 max, umbral de lactato, carga de entreno, salud general, foco de carga, resistencia, peso/IMC, aclimatación calor/altitud, edad física, puntuación de pendiente)
-- [ ] Bloque "reportes históricos" (calorías, distancias, frecuencias cardíacas, FTP)
-- [ ] Storage + sync para lo que ese batch confirme
+**Batch 2a — forma derivada de código fuente, hecho (2026-08-27):** `garth` está instalado en `services/garmin-auth/.venv` y tiene módulos tipados para casi todo el catálogo — se leyó el código fuente (no se llamó a Garmin) y se documentó en `docs/garmin-api.md` como "por confirmar (derivado de código)":
+- [x] HRV — `GET /hrv-service/hrv/{fecha}`
+- [x] Sleep score + fases — dos candidatos (`sleep-service` y `wellness-service`), documentados ambos
+- [x] Estado de entreno + ACWR — `GET /mobile-gateway/usersummary/trainingstatus/latest/{fecha}` (posible solape con "métricas derivadas propias" del roadmap, anotado)
+- [x] Predisposición para entrenar (readiness) — `GET /metrics-service/metrics/trainingreadiness/{fecha}`
+- [x] VO2 max, puntuación de resistencia, hill score ("puntuación de pendiente") — `hillscore` + `endurancescore`
+- [x] Peso/IMC — `GET /weight-service/weight/dayview/{fecha}`
+- [x] Aclimatación calor/altitud — **sin cobertura en `garth`**, ni confirmado ni descartado, queda anotado
+- [ ] Umbral de lactato, salud general (semáforo), foco de carga, edad física — no encontrados en `garth` todavía, falta revisar más a fondo o `python-garminconnect`
+- [ ] Bloque "reportes históricos" (calorías, distancias, frecuencias cardíacas, FTP) — no investigado en esta pasada
+
+**Batch 2b — pendiente, necesita llamadas reales contra la cuenta (siguiente paso):**
+- [ ] Verificar cada endpoint de arriba contra la cuenta conectada, un dump por vez, en tandas — confirmar path real, valores exactos de los campos tipo enum (`status` de HRV, `trainingStatus` numérico, `level` de readiness), y guardar fixture anonimizada de cada uno
+- [ ] Storage + sync para lo que quede confirmado
 
 ## Preguntas abiertas
 
