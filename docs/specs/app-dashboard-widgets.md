@@ -1,7 +1,7 @@
 # Spec: Dashboard configurable — widgets, layout persistente, drag-and-drop
 
 Roadmap: P4 (Dashboard personalizable), primer ítem ("Widgets configurables y layout persistente")
-Estado: draft
+Estado: hecho
 
 ## Objetivo
 
@@ -40,13 +40,17 @@ Salida observable: en `/dashboard`, tres secciones (actividades recientes, métr
 - [x] Schema + migración: `dashboard_layouts` (`userId` único, `widgets: jsonb`)
 - [x] `packages/db/src/repositories/dashboard-layouts.ts`: get/upsert
 - [x] `findWeeklySummary(userId)` en `packages/db/src/repositories/activities.ts`
-- [ ] Tres archivos de widget (`_components/widgets/`): `recent-activities.tsx`, `today-metrics.tsx` (extraídos), `weekly-summary.tsx` (nuevo)
-- [ ] `WIDGET_REGISTRY` + lógica de la página: leer layout, renderizar visibles en orden
-- [ ] Client Component de drag-and-drop (`dnd-kit`) que recibe los widgets ya renderizados como `children`
-- [ ] Server Actions `updateDashboardLayout` y `toggleWidgetVisibility`
-- [ ] Vista `/dashboard/widgets` para volver a mostrar un widget oculto
-- [ ] Estética: tarjetas de widget + handle de arrastre según `docs/style.md`
-- [ ] Probado en vivo: reordenar persiste después de recargar, ocultar/mostrar funciona, un usuario sin `dashboard_layouts` todavía (primera vez) ve los tres widgets en un orden por defecto razonable
+- [x] Tres archivos de widget (`_components/widgets/`): `recent-activities.tsx`, `today-metrics.tsx` (extraídos), `weekly-summary.tsx` (nuevo)
+- [x] `WIDGET_REGISTRY` + lógica de la página: leer layout, renderizar visibles en orden
+- [x] Client Component de drag-and-drop (`dnd-kit`) que recibe los widgets ya renderizados como `children`
+- [x] Server Actions `updateDashboardLayout` y `toggleWidgetVisibility`
+- [x] Vista `/dashboard/widgets` para volver a mostrar un widget oculto
+- [x] Estética: tarjetas de widget + handle de arrastre según `docs/style.md`
+- [x] Probado en vivo: reordenar persiste después de recargar, ocultar/mostrar funciona, un usuario sin `dashboard_layouts` todavía (primera vez) ve los tres widgets en un orden por defecto razonable
+
+## Pendiente
+
+- [x] Widget vacío cuando `render()` devuelve `null`: `page.tsx` ahora chequea `if (node)` antes de empujar a `visibleWidgets`, así que un widget sin datos no deja la tarjeta vacía dibujada.
 
 ## Preguntas abiertas
 

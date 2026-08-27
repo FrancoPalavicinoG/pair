@@ -6,7 +6,7 @@ Regla: no se empieza una fase sin cumplir el criterio de salida de la anterior. 
 
 ---
 
-## P0 — Spike de autenticación ⬅ fase actual
+## P0 — Spike de autenticación
 
 Objetivo: demostrar que podemos autenticar, leer y **escribir** en Garmin. Si esto falla, el proyecto cambia de forma.
 
@@ -68,9 +68,9 @@ Objetivo: el gateway funcionando de punta a punta con la infraestructura mínima
 
 ---
 
-## P4 — Dashboard personalizable
+## P4 — Dashboard personalizable ⬅ fase actual
 
-- [ ] Widgets configurables y layout persistente.
+- [x] Widgets configurables y layout persistente. Spec: `docs/specs/app-dashboard-widgets.md`.
 - [ ] Métricas derivadas propias (carga, ratio agudo/crónico, adherencia al plan).
 - [ ] Comparación plan vs. ejecutado, que es lo que Garmin Connect hace mal.
 
