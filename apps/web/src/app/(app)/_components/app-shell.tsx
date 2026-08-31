@@ -82,7 +82,13 @@ function GarminStatusBlock({ status }: { status: GarminStatus }) {
   if (status.state === "syncing") {
     return (
       <div className="border-t border-rule-soft pt-4">
-        <p className="font-mono text-xs text-graphite">Syncing…</p>
+        <button
+          type="button"
+          disabled
+          className="inline-flex w-full items-center justify-center bg-panel px-4 py-2.5 text-sm text-bone disabled:cursor-not-allowed"
+        >
+          Syncing…
+        </button>
         <SyncStatusPoller syncInProgress />
       </div>
     );
