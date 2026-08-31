@@ -8,6 +8,7 @@ export function StatTile({
   delta,
   flagged = false,
   sparkline,
+  square = false,
 }: {
   label: string;
   value: string;
@@ -15,12 +16,13 @@ export function StatTile({
   delta?: string;
   flagged?: boolean;
   sparkline?: Sparkline | null;
+  square?: boolean;
 }) {
   return (
     <div
       className={`group relative px-5 pt-5 pb-0 transition-colors duration-[250ms] ${
-        flagged ? "bg-panel" : "bg-lcd hover:bg-panel"
-      }`}
+        square ? "aspect-square" : ""
+      } ${flagged ? "bg-panel" : "bg-lcd hover:bg-panel"}`}
     >
       <p
         className={`mb-2.5 font-mono text-[10.5px] uppercase tracking-[0.1em] transition-colors duration-[250ms] ${

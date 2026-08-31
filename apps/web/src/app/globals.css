@@ -11,6 +11,30 @@
   --panel-muted: #8b958a;
   --rule: rgba(22, 26, 22, 0.18);
   --rule-soft: rgba(22, 26, 22, 0.1);
+
+  /* Rampa "effort" — ordinal, tambien el sistema de color de zonas de HR (docs/style.md, Graficos). */
+  --z1: #f2c79a;
+  --z2: #eca25e;
+  --z3: #e67e3a;
+  --z4: #d45a28;
+  --z5: #b33a1c;
+  /* Hues de identidad de grafico, uno por grafico visible a la vez. */
+  --chart-a: #1fa79c;
+  --chart-b: #9b5de5;
+  /* Estado, paleta fija y reservada. */
+  --status-ready: #3f9a5c;
+  --status-attn: #3e6fd1;
+  /* Zonas de potencia (ciclismo) — ordinal, hue propio, validada con scripts/validate_palette.js. */
+  --pw1: #f5a9d0;
+  --pw2: #ed7cb3;
+  --pw3: #e54e93;
+  --pw4: #cc2e72;
+  --pw5: #992050;
+  /* Fases de sueno — misma familia de hue que --chart-a a proposito (docs/style.md, Graficos). */
+  --sleep1: #a8e6e0;
+  --sleep2: #5fc9be;
+  --sleep3: var(--chart-a);
+  --sleep4: #0d6e66;
 }
 
 @theme inline {
@@ -24,6 +48,24 @@
   --color-panel-muted: var(--panel-muted);
   --color-rule: var(--rule);
   --color-rule-soft: var(--rule-soft);
+  --color-z1: var(--z1);
+  --color-z2: var(--z2);
+  --color-z3: var(--z3);
+  --color-z4: var(--z4);
+  --color-z5: var(--z5);
+  --color-chart-a: var(--chart-a);
+  --color-chart-b: var(--chart-b);
+  --color-status-ready: var(--status-ready);
+  --color-status-attn: var(--status-attn);
+  --color-pw1: var(--pw1);
+  --color-pw2: var(--pw2);
+  --color-pw3: var(--pw3);
+  --color-pw4: var(--pw4);
+  --color-pw5: var(--pw5);
+  --color-sleep1: var(--sleep1);
+  --color-sleep2: var(--sleep2);
+  --color-sleep3: var(--sleep3);
+  --color-sleep4: var(--sleep4);
   --font-sans: var(--font-archivo);
   --font-mono: var(--font-jetbrains-mono);
 }
