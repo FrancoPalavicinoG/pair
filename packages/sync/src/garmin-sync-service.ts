@@ -281,7 +281,7 @@ export async function syncDailyMetrics(
       date: dateStr,
       restingHeartRate: (summary.restingHeartRate as number) ?? null,
       steps: (summary.totalSteps as number) ?? null,
-      sleepSeconds: (summary.sleepingSeconds as number) ?? null,
+      sleepSeconds: (sleepDto?.sleepTimeSeconds as number) ?? null,
       bodyBattery: (summary.bodyBatteryMostRecentValue as number) ?? null,
       stressAverage: (summary.averageStressLevel as number) ?? null,
       spo2Average: (summary.averageSpo2 as number) ?? null,
