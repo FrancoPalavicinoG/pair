@@ -75,8 +75,9 @@ Objetivo: el gateway funcionando de punta a punta con la infraestructura mínima
 - [x] Catálogo de datos diarios de Garmin (bienestar, entreno, reportes históricos). Spec: `docs/specs/garmin-daily-metrics.md`.
 - [x] Sistema de visualización v2 (gauges, fases de sueño, zonas de potencia). Spec: `docs/specs/dashboard-visualization-system.md`.
 - [x] Dashboard widgets v2 (Activities al sidebar, tiles individuales, grilla cuadrada). Spec: `docs/specs/app-dashboard-widgets-v2.md`.
-- [ ] Métricas derivadas propias (carga, ratio agudo/crónico, adherencia al plan).
 - [ ] Comparación plan vs. ejecutado, que es lo que Garmin Connect hace mal.
+
+**Sacado del roadmap (2026-08-31)**: "Métricas derivadas propias (carga, ratio agudo/crónico)" — Garmin ya calcula y expone ese número (`garmin-daily-metrics.md`, ACWR confirmado real), así que no hace falta derivarlo nosotros. Se resuelve trayendo el dato como widget más en `app-dashboard-widgets-v2` Fase B, no como ítem de roadmap aparte.
 
 **Salida**: el dashboard responde una pregunta que la app de Garmin no responde.
 

@@ -1,4 +1,35 @@
+import type { ReactNode } from "react";
 import type { Sparkline } from "@/lib/sparkline";
+
+// Marco compartido de una tile cuadrada: fondo, hover, label arriba. `StatTile` lo usa
+// por dentro para su anatomía fija (label/valor/delta/sparkline); widgets con contenido
+// propio (sleep phases, training load) lo usan directo con children.
+export function TileShell({
+  label,
+  flagged = false,
+  children,
+}: {
+  label: string;
+  flagged?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className={`group relative flex aspect-square flex-col overflow-hidden p-5 transition-colors duration-[250ms] ${
+        flagged ? "bg-panel" : "bg-lcd hover:bg-panel"
+      }`}
+    >
+      <p
+        className={`mb-2.5 font-mono text-[10.5px] uppercase tracking-[0.1em] transition-colors duration-[250ms] ${
+          flagged ? "text-panel-muted" : "text-graphite group-hover:text-panel-muted"
+        }`}
+      >
+        {label}
+      </p>
+      {children}
+    </div>
+  );
+}
 
 // `flagged`: la unica tile por vista en la que pair esta comentando algo; ahi el delta pasa a ember.
 export function StatTile({
@@ -18,20 +49,8 @@ export function StatTile({
   sparkline?: Sparkline | null;
   square?: boolean;
 }) {
-  return (
-    <div
-      className={`group relative transition-colors duration-[250ms] ${
-        square ? "flex aspect-square flex-col overflow-hidden p-5" : "px-5 pt-5 pb-0"
-      } ${flagged ? "bg-panel" : "bg-lcd hover:bg-panel"}`}
-    >
-      <p
-        className={`mb-2.5 font-mono text-[10.5px] uppercase tracking-[0.1em] transition-colors duration-[250ms] ${
-          flagged ? "text-panel-muted" : "text-graphite group-hover:text-panel-muted"
-        }`}
-      >
-        {label}
-      </p>
-
+  const content = (
+    <>
       <p
         className={`font-display mb-1.5 text-[32px] leading-none tracking-[-0.03em] transition-colors duration-[250ms] ${
           flagged ? "text-bone" : "text-ink group-hover:text-bone"
@@ -75,6 +94,31 @@ export function StatTile({
           />
         </div>
       )}
+    </>
+  );
+
+  if (square) {
+    return (
+      <TileShell label={label} flagged={flagged}>
+        {content}
+      </TileShell>
+    );
+  }
+
+  return (
+    <div
+      className={`group relative px-5 pt-5 pb-0 transition-colors duration-[250ms] ${
+        flagged ? "bg-panel" : "bg-lcd hover:bg-panel"
+      }`}
+    >
+      <p
+        className={`mb-2.5 font-mono text-[10.5px] uppercase tracking-[0.1em] transition-colors duration-[250ms] ${
+          flagged ? "text-panel-muted" : "text-graphite group-hover:text-panel-muted"
+        }`}
+      >
+        {label}
+      </p>
+      {content}
     </div>
   );
 }

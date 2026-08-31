@@ -18,8 +18,11 @@ export function formatPace(meters: number, seconds: number): string {
     return `${min}:${sec.toString().padStart(2, "0")} min/km`;
 }
 
-export function formatSportType(sportType: string): string {
-    return sportType.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+// Prettifica texto tipo enum de Garmin ("STRAINED_1", "running") a algo mostrable
+// ("Strained 1", "Running") sin traducir a mano — no tenemos la lista completa de
+// valores que Garmin puede devolver para ningún campo de este tipo.
+export function formatLabel(value: string): string {
+    return value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 export function formatDuration(seconds: number): string {

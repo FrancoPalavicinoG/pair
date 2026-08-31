@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { findRecentActivities } from "@pair/db";
-import { formatDistance, formatDuration, formatSportType } from "@/lib/format";
+import { formatDistance, formatDuration, formatLabel } from "@/lib/format";
 import { StatTile } from "./stat-tile";
 
 export async function renderRecentActivity(userId: string): Promise<ReactNode> {
@@ -15,7 +15,7 @@ export async function renderRecentActivity(userId: string): Promise<ReactNode> {
   return (
     <StatTile
       square
-      label={activity.sportType ? formatSportType(activity.sportType) : "Activity"}
+      label={activity.sportType ? formatLabel(activity.sportType) : "Activity"}
       value={value}
       delta={activity.startTimeLocal.toLocaleDateString()}
     />
