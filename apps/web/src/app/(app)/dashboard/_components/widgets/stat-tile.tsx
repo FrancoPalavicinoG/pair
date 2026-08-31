@@ -20,8 +20,8 @@ export function StatTile({
 }) {
   return (
     <div
-      className={`group relative px-5 pt-5 pb-0 transition-colors duration-[250ms] ${
-        square ? "aspect-square" : ""
+      className={`group relative transition-colors duration-[250ms] ${
+        square ? "flex aspect-square flex-col overflow-hidden p-5" : "px-5 pt-5 pb-0"
       } ${flagged ? "bg-panel" : "bg-lcd hover:bg-panel"}`}
     >
       <p
@@ -46,7 +46,7 @@ export function StatTile({
       </p>
 
       {sparkline && (
-        <div className="relative h-7 pt-1.5">
+        <div className={`relative h-7 ${square ? "mt-auto" : "mt-1.5"}`}>
           <svg
             viewBox="0 0 100 28"
             preserveAspectRatio="none"
@@ -55,18 +55,21 @@ export function StatTile({
             <path
               d={sparkline.path}
               fill="none"
-              strokeWidth="2"
+              strokeWidth="1.5"
+              vectorEffect="non-scaling-stroke"
               strokeLinecap="round"
               strokeLinejoin="round"
               className={
-                flagged ? "stroke-panel-muted" : "stroke-graphite transition-colors duration-[250ms] group-hover:stroke-panel-muted"
+                flagged
+                  ? "stroke-panel-muted"
+                  : "stroke-graphite opacity-70 transition-colors duration-[250ms] group-hover:stroke-panel-muted"
               }
             />
           </svg>
           <span
             aria-hidden
-            className={`absolute -translate-x-1/2 -translate-y-1/2 ${
-              flagged ? "h-2.5 w-2.5 bg-ember" : "h-2 w-2 bg-graphite group-hover:bg-panel-muted"
+            className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full ${
+              flagged ? "h-2 w-2 bg-ember" : "h-1.5 w-1.5 bg-graphite group-hover:bg-panel-muted"
             }`}
             style={{ left: `${sparkline.lastPoint.xPercent}%`, top: `${sparkline.lastPoint.yPercent}%` }}
           />
