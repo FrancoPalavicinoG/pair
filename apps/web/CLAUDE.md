@@ -9,7 +9,8 @@ Todo componente y toda decisión visual sigue `docs/style.md` (paleta, tipograf�
 | Ruta | Qué es |
 |---|---|
 | `/onboarding` | Alta y conexión de Garmin (email, password, MFA) |
-| `/dashboard` | Métricas y actividades. Widgets configurables (P4) |
+| `/dashboard` | Widgets configurables (P4), uno por métrica, grilla cuadrada de 3 columnas |
+| `/activities` | Lista completa de actividades sincronizadas |
 | `/workouts` | Entrenamientos creados y agendados, con su origen (manual o vía Claude) |
 | `/connectors` | URL del MCP, instrucciones por cliente, estado de la conexión, revocar |
 | `/oauth/consent` | Pantalla de autorización cuando Claude pide acceso |
@@ -35,7 +36,9 @@ Toda superficie autenticada (grupo de rutas `(app)`) vive dentro del shell de es
 
 ## Dashboard configurable (P4)
 
-El layout y las métricas custom viven en DB, no en `localStorage`. Un widget es: fuente de datos + transformación + visualización. Antes de añadir el segundo tipo de widget, definir esa abstracción; antes no.
+El layout y las métricas custom viven en DB, no en `localStorage`. Un widget es: fuente de datos + transformación + visualización.
+
+`dashboard/_components/widgets/registry.ts` tiene dos partes: un `Record` estático (`FIXED_WIDGET_REGISTRY`) para los widgets de key fija, y `getWidgetEntries(userId)` que le suma widgets calculados en tiempo de render a partir del dato real del usuario (hoy: uno por deporte que aparece en su semana, key compuesta `weekly_distance:<sport>`) — no una lista fija de deportes hardcodeada. `getEffectiveLayout(userId)` mezcla el layout guardado con el set actual de `getWidgetEntries`: una key guardada que ya no existe en el registry se ignora, y cualquier widget que el usuario no tiene guardado (layout nuevo, o widget agregado después de su último guardado) aparece visible por default. Ver `docs/specs/app-dashboard-widgets-v2.md`.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

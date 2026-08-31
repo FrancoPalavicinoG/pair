@@ -1,24 +1,22 @@
 import Link from "next/link";
 import { requireSession } from "@/lib/session";
 import { toggleWidgetVisibility } from "../actions";
-import {
-  getEffectiveLayout,
-  WIDGET_REGISTRY,
-  type WidgetKey,
-} from "../_components/widgets/registry";
+import { getEffectiveLayout, getWidgetEntries, type WidgetKey } from "../_components/widgets/registry";
 import { Eyebrow } from "@/components/eyebrow";
 import { ListRow } from "@/components/list-row";
 
 export default async function DashboardWidgetsPage() {
   const session = await requireSession();
-  const layout = await getEffectiveLayout(session.userId);
+  const [entries, layout] = await Promise.all([
+    getWidgetEntries(session.userId),
+    getEffectiveLayout(session.userId),
+  ]);
 
   const rows: { key: WidgetKey; label: string; visible: boolean }[] = [];
-  for (const key of Object.keys(WIDGET_REGISTRY) as WidgetKey[]) {
-    const registryEntry = WIDGET_REGISTRY[key];
-    const layoutEntry = layout.find((w) => w.key === key);
+  for (const entry of entries) {
+    const layoutEntry = layout.find((w) => w.key === entry.key);
     const visible = layoutEntry ? layoutEntry.visible : true;
-    rows.push({ key, label: registryEntry.label, visible });
+    rows.push({ key: entry.key, label: entry.label, visible });
   }
 
   return (

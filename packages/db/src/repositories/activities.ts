@@ -38,9 +38,11 @@ export async function insertActivity(activity: NewActivity): Promise<void> {
     .onConflictDoNothing({ target: [activities.userId, activities.garminActivityId] });
 }
 
+export type WeeklySportBucket = { distanceMeters: number; activityCount: number };
+
 export type WeeklySummary = {
-  thisWeek: { distanceMeters: number; activityCount: number };
-  lastWeek: { distanceMeters: number; activityCount: number };
+  totalDurationSeconds: { thisWeek: number; lastWeek: number };
+  bySport: Record<string, { thisWeek: WeeklySportBucket; lastWeek: WeeklySportBucket }>;
 };
 
 // Zona horaria para calcular el corte de semana. Único lugar a tocar si esto deja de ser Chile.
@@ -96,6 +98,8 @@ export async function findWeeklySummary(userId: string): Promise<WeeklySummary> 
     .select({
       startTimeUtc: activities.startTimeUtc,
       distanceMeters: activities.distanceMeters,
+      durationSeconds: activities.durationSeconds,
+      sportType: activities.sportType,
     })
     .from(activities)
     .where(
@@ -108,17 +112,27 @@ export async function findWeeklySummary(userId: string): Promise<WeeklySummary> 
     );
 
   const summary: WeeklySummary = {
-    thisWeek: { distanceMeters: 0, activityCount: 0 },
-    lastWeek: { distanceMeters: 0, activityCount: 0 },
+    totalDurationSeconds: { thisWeek: 0, lastWeek: 0 },
+    bySport: {},
   };
 
   for (const row of rows) {
+    const sport = row.sportType ?? "other";
+    summary.bySport[sport] ??= {
+      thisWeek: { distanceMeters: 0, activityCount: 0 },
+      lastWeek: { distanceMeters: 0, activityCount: 0 },
+    };
+
     if (row.startTimeUtc >= bounds.thisWeekStart) {
-      summary.thisWeek.distanceMeters += row.distanceMeters ?? 0;
-      summary.thisWeek.activityCount += 1;
-    } else if (row.startTimeUtc <= bounds.lastWeekEnd) {
-      summary.lastWeek.distanceMeters += row.distanceMeters ?? 0;
-      summary.lastWeek.activityCount += 1;
+      summary.bySport[sport].thisWeek.distanceMeters += row.distanceMeters ?? 0;
+      summary.bySport[sport].thisWeek.activityCount += 1;
+      summary.totalDurationSeconds.thisWeek += row.durationSeconds ?? 0;
+    } else {
+      // El WHERE ya acota las filas a [lastWeekStart, thisWeekEnd]: cualquier fila que
+      // no sea "esta semana" cae necesariamente en la semana pasada completa (lunes-domingo).
+      summary.bySport[sport].lastWeek.distanceMeters += row.distanceMeters ?? 0;
+      summary.bySport[sport].lastWeek.activityCount += 1;
+      summary.totalDurationSeconds.lastWeek += row.durationSeconds ?? 0;
     }
   }
 

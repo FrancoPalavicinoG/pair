@@ -1,7 +1,7 @@
 # Spec: Dashboard widgets v2 — Activities al sidebar, tiles individuales, grilla cuadrada
 
 Roadmap: P4 (Dashboard personalizable), nuevo ítem ("Dashboard widgets v2")
-Estado: draft
+Estado: Fase A hecha, Fase B pendiente (sesión de decisión aparte)
 
 ## Objetivo
 
@@ -39,13 +39,13 @@ Salida observable: el sidebar tiene un ítem "Activities" con la lista completa;
 ## Checklist de implementación
 
 **Fase A**
-- [ ] `/activities` (sidebar + página, lista completa)
-- [ ] Separar `today_metrics` en 4 widgets independientes
-- [ ] Separar `weekly_summary` en `weekly_hours` + widgets de distancia por deporte (dinámico)
-- [ ] Widget `recent_activity`
-- [ ] Grilla de 3 columnas, tiles cuadradas
-- [ ] `/dashboard/metrics/[key]` con vista mínima por widget
-- [ ] Probado en vivo: reordenar/ocultar cada tile por separado persiste; un usuario con `dashboard_layouts` viejo (keys de v1) no rompe, ve el layout nuevo por defecto
+- [x] `/activities` (sidebar + página, lista completa)
+- [x] Separar `today_metrics` en 4 widgets independientes
+- [x] Separar `weekly_summary` en `weekly_hours` + widgets de distancia por deporte (dinámico)
+- [x] Widget `recent_activity`
+- [x] Grilla de 3 columnas, tiles cuadradas
+- [x] `/dashboard/metrics/[key]` con vista mínima por widget
+- [x] Probado en vivo: reordenar/ocultar cada tile por separado persiste; un usuario con `dashboard_layouts` viejo (keys de v1) no rompe, ve el layout nuevo por defecto
 
 **Fase B** (bloqueada hasta que `garmin-daily-metrics` confirme datos)
 - [ ] Revisar el catálogo confirmado por `garmin-daily-metrics` y decidir, dato por dato, cuáles entran como widget en esta pasada
@@ -53,4 +53,10 @@ Salida observable: el sidebar tiene un ítem "Activities" con la lista completa;
 
 ## Preguntas abiertas
 
-Formato exacto de la key compuesta para widgets por deporte (`weekly_distance:running` vs. una key separada tipo `weekly_distance_running`) y de su segmento de URL en `/dashboard/metrics/[key]` — se resuelve en el plan de implementación, no cambia el diseño de fondo.
+Resuelto en el plan de implementación: la key compuesta es `weekly_distance:<sport>` (dos puntos), válida sin escapar como segmento de URL (`:` es un carácter válido en un `pchar` de la RFC 3986); el link a `/dashboard/metrics/[key]` igual la pasa por `encodeURIComponent` por prolijidad.
+
+## Notas de cierre (Fase A)
+
+- **Bug preexistente encontrado y arreglado** (no introducido por este cambio, pero se volvió mucho más visible con los widgets nuevos): `findWeeklySummary` calculaba `lastWeekEnd` como `now - 7 días` (un instante puntual) en vez del fin de la semana calendario pasada, así que cualquier actividad de la semana pasada fuera de esa franja angosta (la mayoría, cualquier día que no sea el mismo día-y-hora de hace una semana) no caía ni en "esta semana" ni en "semana pasada" — se perdía en silencio. Se arregló en el mismo archivo que ya tocaba este spec (`packages/db/src/repositories/activities.ts`): como el `WHERE` ya acota las filas a `[lastWeekStart, thisWeekEnd]`, cualquier fila que no sea "esta semana" es necesariamente "semana pasada completa", sin necesitar un segundo límite.
+- **`getEffectiveLayout` se generalizó** más allá de lo descrito en el plan original: no solo devuelve el default cuando no hay fila guardada, sino que siempre mezcla lo guardado con el set actual de `getWidgetEntries` — cualquier key guardada que ya no exista se ignora, y cualquier widget que el usuario no tiene guardado (layout viejo con solo keys v1, o un widget agregado después de su último guardado) aparece visible por default. Encontrado probando en vivo el caso "usuario con layout v1": con el diseño original del plan, un layout que solo tenía keys viejas quedaba con la grilla completamente vacía en vez de mostrar el default nuevo.
+- **Hallazgo no arreglado, fuera de alcance**: un warning de hidratación de React en `aria-describedby="DndDescribedBy-N"` de `dnd-kit` (`useSortable`), visible como el badge "1 Issue" del overlay de Next dev — el contador de IDs que genera esa librería difiere entre el render de servidor y el de cliente. Es preexistente (el drag-and-drop ya existía en v1, antes de esta sesión), no afecta la función (reordenar/ocultar/persistir probado en vivo, funciona), y arreglarlo es trabajo aparte sobre `dnd-kit`, no de este spec.
