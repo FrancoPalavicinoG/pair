@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { requireSession } from "@/lib/session";
 import { toggleWidgetVisibility } from "../actions";
-import { getEffectiveLayout, getWidgetEntries, type WidgetKey } from "../_components/widgets/registry";
+import {
+  getEffectiveLayout,
+  getWidgetEntries,
+  MAX_VISIBLE_WIDGETS,
+  type WidgetKey,
+} from "../_components/widgets/registry";
 import { Eyebrow } from "@/components/eyebrow";
 import { ListRow } from "@/components/list-row";
 
@@ -19,9 +24,19 @@ export default async function DashboardWidgetsPage() {
     rows.push({ key: entry.key, label: entry.label, visible });
   }
 
+  const visibleCount = rows.filter((row) => row.visible).length;
+  const atLimit = visibleCount >= MAX_VISIBLE_WIDGETS;
+
   return (
     <div className="max-w-md space-y-8">
       <Eyebrow>Dashboard widgets</Eyebrow>
+
+      <div className="border border-rule-soft px-5 py-4">
+        <p className={`text-sm ${atLimit ? "text-ink" : "text-graphite"}`}>
+          {visibleCount}/{MAX_VISIBLE_WIDGETS} widgets visible on the dashboard.
+          {atLimit && " Hide one to enable another."}
+        </p>
+      </div>
 
       <ul className="space-y-2">
         {rows.map((row) => (

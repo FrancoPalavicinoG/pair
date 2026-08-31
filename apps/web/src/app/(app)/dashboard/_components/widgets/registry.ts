@@ -56,6 +56,12 @@ export type FixedWidgetKey =
 // Key compuesta para el widget de distancia por deporte: "weekly_distance:running".
 export type WidgetKey = FixedWidgetKey | `weekly_distance:${string}`;
 
+// Tope temporal mientras no existe paginación (docs/specs/app-dashboard-widgets-v2.md):
+// evita que la grilla del dashboard necesite scroll interno. `getEffectiveLayout` lo
+// aplica en la lectura (no reescribe lo guardado), `toggleWidgetVisibility` lo respeta
+// al togglear, y `/dashboard/widgets` lo muestra como aviso.
+export const MAX_VISIBLE_WIDGETS = 15;
+
 export type WidgetEntry = {
   key: WidgetKey;
   label: string;
@@ -115,6 +121,11 @@ export async function getWidgetEntries(userId: string): Promise<WidgetEntry[]> {
 // ya no existe (ej. las keys v1 "today_metrics"/"weekly_summary"/"recent_activities") se
 // ignora, y cualquier widget que el usuario todavía no tiene guardado (porque nunca tuvo
 // layout, o porque es nuevo desde su último guardado) se agrega al final como visible.
+//
+// Después de mezclar, aplica el tope de MAX_VISIBLE_WIDGETS: entre los marcados visible,
+// los primeros según el orden del array se quedan así, el resto se corrige a no-visible
+// en lo que se devuelve (no se reescribe lo guardado en DB) — corrige también cuentas
+// viejas que ya tenían más de 15 antes de que existiera este tope.
 export async function getEffectiveLayout(userId: string): Promise<DashboardWidgetConfig[]> {
   const [entries, row] = await Promise.all([getWidgetEntries(userId), findDashboardLayout(userId)]);
   const stored = row?.widgets ?? [];
@@ -127,5 +138,12 @@ export async function getEffectiveLayout(userId: string): Promise<DashboardWidge
     .filter((entry) => !storedKeys.has(entry.key))
     .map((entry) => ({ key: entry.key, visible: true }));
 
-  return [...storedKnown, ...missing];
+  const merged = [...storedKnown, ...missing];
+
+  let visibleCount = 0;
+  return merged.map((w) => {
+    if (!w.visible) return w;
+    visibleCount += 1;
+    return visibleCount > MAX_VISIBLE_WIDGETS ? { ...w, visible: false } : w;
+  });
 }
