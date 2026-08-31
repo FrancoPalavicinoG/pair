@@ -1,7 +1,7 @@
 # Spec: Sistema de visualización v2 (gauges, fases de sueño, zonas de potencia)
 
 Roadmap: P4 (Dashboard personalizable), nuevo ítem ("Sistema de visualización v2")
-Estado: draft
+Estado: hecho
 
 ## Objetivo
 
@@ -29,14 +29,20 @@ Salida observable: `docs/style.md` (sección Gráficos) documenta los tipos nuev
 
 ## Checklist de implementación
 
-- [ ] `docs/style.md`: documentar la relación rampa de esfuerzo ↔ HR zones explícitamente
-- [ ] Validar y documentar la rampa de zonas de potencia (`scripts/validate_palette.js --ordinal`)
-- [ ] `docs/style.md`: tipo de marca "gauge circular"
-- [ ] `docs/style.md`: tipo de marca "barra de fases de sueño" + su sistema de color (explorar 1 hue con intensidad variable antes que 4 hues)
-- [ ] `docs/style.md`: tipo de marca "mini-barras diarias" y regla de cuándo usar sparkline vs. mini-barras
-- [ ] `docs/style.md`: "tile cuadrada" como estándar de forma, con la excepción de widgets de lista
-- [ ] Componentes base reutilizables para gauge y barra de fases (`apps/web/src/components/` o junto a `StatTile`, se decide con `ui-component-library` ya en pie)
+- [x] `docs/style.md`: documentar la relación rampa de esfuerzo ↔ HR zones explícitamente
+- [x] Validar y documentar la rampa de zonas de potencia (`scripts/validate_palette.js --ordinal`)
+- [x] `docs/style.md`: tipo de marca "gauge circular"
+- [x] `docs/style.md`: tipo de marca "barra de fases de sueño" + su sistema de color (se confirmó 1 hue con intensidad variable, reusando la familia de `--chart-a`)
+- [x] `docs/style.md`: tipo de marca "mini-barras diarias" y regla de cuándo usar sparkline vs. mini-barras
+- [x] `docs/style.md`: "tile cuadrada" como estándar de forma, con la excepción de widgets de lista
+- [x] Componentes base reutilizables para gauge y barra de fases (`apps/web/src/components/gauge-chart.tsx`, `sleep-phase-bar.tsx`)
 
 ## Preguntas abiertas
 
 Color exacto del gauge cuando la métrica no tiene una escala de zonas propia (¿hue de identidad fijo, o el mismo ember reservado para "esto es lo que pair señala"?) — se responde con el primer caso de uso real (`app-dashboard-widgets-v2` Fase B), no en abstracto.
+
+## Notas de cierre
+
+- `scripts/validate_palette.js` no existía en el repo pese a que `docs/style.md` ya lo citaba como comando real — se vendorizó desde el skill `dataviz` en este cambio. También faltaban en `globals.css` varios tokens de color que `docs/style.md` ya documentaba (`--z1`…`--z5`, `--chart-a`, `--chart-b`, `--status-ready`, `--status-attn`): estaban en la doc pero nunca se habían escrito en CSS. Se agregaron.
+- Corriendo el validador contra la paleta ya shippeada salió un hallazgo preexistente no pedido por este spec: `--status-ready` (verde) y `--chart-a` (teal) fallan la separación bajo daltonismo simulado entre sí (ΔE 8.5, piso 15). Documentado en `docs/style.md` como nota, no se corrige acá.
+- `StatTile` quedó con la prop `square` (opcional, default `false`) sin ningún consumidor activándola: se intentó activarla tanto en la grilla de 4 columnas de "Today" como en el widget suelto "This week" durante la verificación visual, y ambas rompieron el layout real (celdas de ~107px insuficientes para el contenido; el widget suelto se infló a un cuadrado de ~430px y estiró toda la fila del dashboard). Confirma en la práctica que wirear "cuadrada" de verdad necesita las celdas de tamaño fijo que trae `app-dashboard-widgets-v2` — quedó documentado en `docs/style.md`, sección "Forma".
