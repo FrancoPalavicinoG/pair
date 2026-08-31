@@ -54,6 +54,16 @@ export function DashboardLayoutEditor({
   hiddenKeys: WidgetKey[];
 }) {
   const [items, setItems] = useState<WidgetItem[]>(initialWidgets);
+  // `initialWidgets` es una prop, no cambia sola — pero cada revalidación del server
+  // (poll de sync, o el propio router.refresh tras hide/drag) manda un array nuevo con
+  // datos frescos, y `useState` solo lee su valor inicial una vez. Sin este ajuste, un
+  // sync que termina mientras el usuario está en /dashboard nunca se refleja hasta un
+  // reload manual — el prop cambia, pero `items` se queda con los valores del mount.
+  const [prevInitialWidgets, setPrevInitialWidgets] = useState(initialWidgets);
+  if (initialWidgets !== prevInitialWidgets) {
+    setPrevInitialWidgets(initialWidgets);
+    setItems(initialWidgets);
+  }
   const sensors = useSensors(useSensor(PointerSensor));
   const containerRef = useRef<HTMLDivElement>(null);
   // Alto disponible calculado directo desde el viewport (window.innerHeight - la posición
