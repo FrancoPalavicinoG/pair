@@ -2,8 +2,6 @@ import Link from "next/link";
 import { requireSession } from "@/lib/session";
 import { findCredentialsByUserId } from "@pair/db";
 import { deriveGarminStatus } from "@/lib/garmin-status";
-import { syncNowAction } from "../actions";
-import { SyncStatusPoller } from "../_components/sync-status-poller";
 import {
   getEffectiveLayout,
   getWidgetEntries,
@@ -11,7 +9,6 @@ import {
 } from "./_components/widgets/registry";
 import { DashboardLayoutEditor, type WidgetItem } from "./_components/dashboard-layout-editor";
 import { Eyebrow } from "@/components/eyebrow";
-import { PairButton } from "@/components/pair-button";
 
 export default async function DashboardPage() {
   const session = await requireSession();
@@ -43,31 +40,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Eyebrow>Dashboard</Eyebrow>
-
-        {garminStatus.state === "syncing" && (
-          <div className="flex items-center gap-4">
-            <p className="text-sm text-graphite">Syncing…</p>
-            <SyncStatusPoller syncInProgress />
-          </div>
-        )}
-
-        {garminStatus.state === "synced" && (
-          <div className="flex items-center gap-4">
-            <p className="text-sm text-graphite">
-              {garminStatus.lastSyncedAt
-                ? `Synced ${garminStatus.lastSyncedAt.toLocaleString()}`
-                : "Never synced"}
-            </p>
-            <form action={syncNowAction}>
-              <PairButton variant="outline" type="submit">
-                Sync now
-              </PairButton>
-            </form>
-          </div>
-        )}
-      </div>
+      <Eyebrow>Dashboard</Eyebrow>
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
@@ -79,6 +52,16 @@ export default async function DashboardPage() {
             Edit widgets
           </Link>
         </div>
+
+        {garminStatus.state === "syncing" && <p className="text-sm text-graphite">Syncing…</p>}
+        {garminStatus.state === "synced" && (
+          <p className="text-sm text-graphite">
+            {garminStatus.lastSyncedAt
+              ? `Synced ${garminStatus.lastSyncedAt.toLocaleString()}`
+              : "Never synced"}
+          </p>
+        )}
+
         <DashboardLayoutEditor initialWidgets={visibleWidgets} hiddenKeys={hiddenKeys} />
       </div>
     </div>

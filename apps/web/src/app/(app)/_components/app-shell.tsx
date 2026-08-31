@@ -1,7 +1,7 @@
 import { Wordmark } from "@/components/wordmark";
 import { PairButton } from "@/components/pair-button";
 import type { GarminStatus } from "@/lib/garmin-status";
-import { logout } from "../actions";
+import { logout, syncNowAction } from "../actions";
 import { NavLink } from "./nav-link";
 import { SyncStatusPoller } from "./sync-status-poller";
 
@@ -61,9 +61,10 @@ export function AppShell({
   );
 }
 
-// Estado de conexión de Garmin: visible desde cualquier ruta, no solo /dashboard — es la
-// única acción realmente urgente (conectar/reconectar). "Synced [hora]" + "Sync now" (ya
-// conectado) viven junto al título de /dashboard en vez de acá — ver dashboard/page.tsx.
+// Estado de conexión de Garmin: visible desde cualquier ruta, no solo /dashboard. Connect/
+// Reconnect y Sync now son botones ember de ancho completo (proporcionales al sidebar, no
+// shrink-wrapped) — es la acción accionable de este bloque. "Synced [hora]" (texto, sin
+// botón) vive debajo del título "Widgets" en /dashboard en vez de acá — ver dashboard/page.tsx.
 function GarminStatusBlock({ status }: { status: GarminStatus }) {
   if (status.state === "not_connected" || status.state === "needs_reconnect") {
     return (
@@ -71,7 +72,7 @@ function GarminStatusBlock({ status }: { status: GarminStatus }) {
         <p className="font-mono text-xs uppercase tracking-[0.1em] text-ember">
           {status.state === "not_connected" ? "Garmin not connected" : "Garmin disconnected"}
         </p>
-        <PairButton variant="outline" href="/settings/garmin">
+        <PairButton variant="primary" href="/settings/garmin" className="w-full">
           {status.state === "not_connected" ? "Connect Garmin" : "Reconnect Garmin"}
         </PairButton>
       </div>
@@ -87,5 +88,13 @@ function GarminStatusBlock({ status }: { status: GarminStatus }) {
     );
   }
 
-  return null;
+  return (
+    <div className="border-t border-rule-soft pt-4">
+      <form action={syncNowAction}>
+        <PairButton variant="primary" type="submit" className="w-full">
+          Sync now
+        </PairButton>
+      </form>
+    </div>
+  );
 }
