@@ -68,8 +68,8 @@ export function StatTile({
           </svg>
           <span
             aria-hidden
-            className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full ${
-              flagged ? "h-2 w-2 bg-ember" : "h-1.5 w-1.5 bg-graphite group-hover:bg-panel-muted"
+            className={`absolute -translate-x-1/2 -translate-y-1/2 ${
+              flagged ? "h-2.5 w-2.5 bg-ember" : "h-2 w-2 bg-graphite group-hover:bg-panel-muted"
             }`}
             style={{ left: `${sparkline.lastPoint.xPercent}%`, top: `${sparkline.lastPoint.yPercent}%` }}
           />

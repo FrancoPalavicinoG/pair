@@ -119,7 +119,7 @@ Todo elemento clickeable define su propio `:focus-visible` explícito (`outline:
 
 ### Dashboard / stat tiles
 
-Anatomía: label (mono, mayúscula chica, graphite) → valor (Archivo `wght 800`, grande, `--ink`) → delta (mono chico, signo + comparación, graphite) → sparkline (línea fina de 1.5px al 70% de opacidad + un marcador **redondo** al final — excepción puntual a "marcador cuadrado", ver Gráficos).
+Anatomía: label (mono, mayúscula chica, graphite) → valor (Archivo `wght 800`, grande, `--ink`) → delta (mono chico, signo + comparación, graphite) → sparkline (línea fina de 1.5px al 70% de opacidad + un marcador cuadrado al final, ver Gráficos).
 
 **Contenedor**: cualquier fila de stat tiles es un `display:grid` con `gap: 1px` sobre fondo `--rule-soft` — el gap de 1px hace de divisor entre tiles sin agregar un `border` por tile. Es el reemplazo estándar de una caja individual con `border` cuando hay más de una métrica relacionada en la misma vista; una sola caja suelta con borde propio es el patrón a evitar ahí.
 
@@ -165,7 +165,7 @@ node scripts/validate_palette.js "<hex,hex,…>" --mode dark --surface "#14161A"
 
 Para una rampa ordinal, agregar `--ordinal`. El script falla si la separación bajo daltonismo simulado no alcanza, si el contraste contra la superficie es insuficiente, o si la luminosidad no es monótona — corregir el color hasta que pase, no forzar el commit con un fallo.
 
-**Marcas**: siempre píxel cuadrado, nunca círculo u óvalo — referencia directa a la textura de pantalla LCD. Línea de 2px, marcador ≥8px de lado. Ver gotcha técnico abajo sobre cómo posicionar el marcador sin deformarlo. **Excepción puntual, solo el sparkline de stat tile**: línea de 1.5px al 70% de opacidad, marcador redondo de 6px — vive comprimido dentro de una tile chica, no en una vista de gráfico completa, y ahí un punto redondo lee mejor que uno cuadrado. No es un cambio a la regla: línea de tendencia, heatmap y cualquier gráfico de vista completa se quedan con marcador cuadrado.
+**Marcas**: siempre píxel cuadrado, nunca círculo u óvalo — referencia directa a la textura de pantalla LCD. Línea de 2px (1.5px en el sparkline de stat tile, comprimido dentro de una tile chica — mismo criterio, grosor ajustado al tamaño), marcador ≥8px de lado. Ver gotcha técnico abajo sobre cómo posicionar el marcador sin deformarlo.
 
 ## Motion
 
