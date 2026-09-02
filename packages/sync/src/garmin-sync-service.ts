@@ -19,6 +19,7 @@ import {
   NotFoundError,
   activityDetailSchema,
   localDateString,
+  addDaysToDateString,
 } from "@pair/core";
 
 const GARMIN_AUTH_URL = process.env.GARMIN_AUTH_URL ?? "http://localhost:8000";
@@ -132,10 +133,13 @@ export function createSyncClient(
   });
 }
 
-function addDays(date: Date, days: number): Date {
-  const copy = new Date(date);
-  copy.setDate(copy.getDate() + days);
-  return copy;
+// "YYYY-MM-DD HH:MM:SS" sin zona (formato de Garmin) -> Date.UTC de los componentes.
+// `new Date(string)` la interpretaria con la zona del proceso que corre el sync.
+function parseGarminTimestamp(raw: string): Date {
+  const [datePart, timePart] = raw.split(" ");
+  const [year, month, day] = (datePart ?? "").split("-").map(Number);
+  const [hour, minute, second] = (timePart ?? "").split(":").map(Number);
+  return new Date(Date.UTC(year ?? 1970, (month ?? 1) - 1, day ?? 1, hour ?? 0, minute ?? 0, second ?? 0));
 }
 
 export async function syncActivities(
@@ -165,8 +169,8 @@ export async function syncActivities(
         garminActivityId,
         name: (raw.activityName as string) ?? null,
         sportType: ((raw.activityType as Record<string, unknown>)?.typeKey as string) ?? null,
-        startTimeUtc: new Date(raw.startTimeGMT as string),
-        startTimeLocal: new Date((raw.startTimeLocal as string).replace(" ", "T")),
+        startTimeUtc: parseGarminTimestamp(raw.startTimeGMT as string),
+        startTimeLocal: parseGarminTimestamp(raw.startTimeLocal as string),
         durationSeconds: (raw.duration as number) ?? null,
         distanceMeters: (raw.distance as number) ?? null,
         averageSpeedMps: (raw.averageSpeed as number) ?? null,
@@ -207,18 +211,17 @@ export async function syncDailyMetrics(
 ): Promise<number> {
   const timezone = await findUserTimezone(userId);
   const mostRecentDate = await findMostRecentMetricsDate(userId);
-  const today = new Date();
-  // El dia de hoy se re-sincroniza siempre (sus datos siguen cambiando
-  // hasta la noche), aunque ya tenga una fila guardada.
-  const afterMostRecent = mostRecentDate
-    ? addDays(new Date(mostRecentDate), 1)
-    : addDays(today, -FIRST_SYNC_DAILY_METRICS_DAYS);
-  const start = afterMostRecent > today ? today : afterMostRecent;
+  const todayLocalDate = localDateString(new Date(), timezone);
+
+  // Camina fechas-calendario en string, nunca un instante UTC paso a paso — un paso "de
+  // 24h en UTC" no siempre cruza un dia de calendario local, podia saltarse "hoy" entero.
+  const startLocalDate = mostRecentDate
+    ? addDaysToDateString(mostRecentDate, 1)
+    : addDaysToDateString(todayLocalDate, -FIRST_SYNC_DAILY_METRICS_DAYS);
+  const effectiveStart = startLocalDate > todayLocalDate ? todayLocalDate : startLocalDate;
 
   let count = 0;
-  for (let d = start; d <= today; d = addDays(d, 1)) {
-    // calendarDate de Garmin es por dia local, no UTC (docs/garmin-api.md).
-    const dateStr = localDateString(d, timezone);
+  for (let dateStr = effectiveStart; dateStr <= todayLocalDate; dateStr = addDaysToDateString(dateStr, 1)) {
     const summary = await client.connectapi<Record<string, unknown>>(
       `/usersummary-service/usersummary/daily/${displayName}?calendarDate=${dateStr}`,
     );
