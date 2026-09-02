@@ -1,4 +1,5 @@
 import { pgTable, timestamp, uuid, integer, real, text, jsonb, date, unique } from "drizzle-orm/pg-core";
+import type { SleepStageSegment } from "@pair/core";
 import { users } from "./users";
 
 // Una fila por usuario y día; el resto de las métricas vive en raw.
@@ -27,6 +28,9 @@ export const dailyMetrics = pgTable(
     lightSleepSeconds: integer("light_sleep_seconds"),
     remSleepSeconds: integer("rem_sleep_seconds"),
     awakeSleepSeconds: integer("awake_sleep_seconds"),
+    // Bloque a bloque real de la noche, derivado de sleepLevels (docs/garmin-api.md).
+    // Ya en hora local (SleepStageSegment.startLocal/endLocal), orden cronológico.
+    sleepStages: jsonb("sleep_stages").$type<SleepStageSegment[]>(),
     // Estado de entreno, ACWR, aclimatación, VO2max, foco de carga
     // (todo del mismo agregador mobile-gateway/usersummary/trainingstatus/latest/{fecha})
     trainingStatus: integer("training_status"),

@@ -20,6 +20,8 @@ import {
   activityDetailSchema,
   localDateString,
   addDaysToDateString,
+  parseGarminUtcTimestamp,
+  parseSleepStages,
 } from "@pair/core";
 
 const GARMIN_AUTH_URL = process.env.GARMIN_AUTH_URL ?? "http://localhost:8000";
@@ -133,15 +135,6 @@ export function createSyncClient(
   });
 }
 
-// "YYYY-MM-DD HH:MM:SS" sin zona (formato de Garmin) -> Date.UTC de los componentes.
-// `new Date(string)` la interpretaria con la zona del proceso que corre el sync.
-function parseGarminTimestamp(raw: string): Date {
-  const [datePart, timePart] = raw.split(" ");
-  const [year, month, day] = (datePart ?? "").split("-").map(Number);
-  const [hour, minute, second] = (timePart ?? "").split(":").map(Number);
-  return new Date(Date.UTC(year ?? 1970, (month ?? 1) - 1, day ?? 1, hour ?? 0, minute ?? 0, second ?? 0));
-}
-
 export async function syncActivities(
   userId: string,
   client: ReturnType<typeof createGarminClient>,
@@ -169,8 +162,8 @@ export async function syncActivities(
         garminActivityId,
         name: (raw.activityName as string) ?? null,
         sportType: ((raw.activityType as Record<string, unknown>)?.typeKey as string) ?? null,
-        startTimeUtc: parseGarminTimestamp(raw.startTimeGMT as string),
-        startTimeLocal: parseGarminTimestamp(raw.startTimeLocal as string),
+        startTimeUtc: parseGarminUtcTimestamp(raw.startTimeGMT as string),
+        startTimeLocal: parseGarminUtcTimestamp(raw.startTimeLocal as string),
         durationSeconds: (raw.duration as number) ?? null,
         distanceMeters: (raw.distance as number) ?? null,
         averageSpeedMps: (raw.averageSpeed as number) ?? null,
@@ -307,6 +300,7 @@ export async function syncDailyMetrics(
       lightSleepSeconds: (sleepDto?.lightSleepSeconds as number) ?? null,
       remSleepSeconds: (sleepDto?.remSleepSeconds as number) ?? null,
       awakeSleepSeconds: (sleepDto?.awakeSleepSeconds as number) ?? null,
+      sleepStages: parseSleepStages(sleep),
       trainingStatus: (firstDeviceTrainingStatus?.trainingStatus as number) ?? null,
       trainingStatusPhrase: (firstDeviceTrainingStatus?.trainingStatusFeedbackPhrase as string) ?? null,
       acuteLoad: (acuteTrainingLoad?.dailyTrainingLoadAcute as number) ?? null,

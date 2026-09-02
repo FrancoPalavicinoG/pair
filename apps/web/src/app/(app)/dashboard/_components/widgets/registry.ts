@@ -22,7 +22,6 @@ import { renderRecentActivity } from "./recent-activity";
 import { renderHrv } from "./hrv";
 import { renderTrainingStatus } from "./training-status";
 import { renderTrainingLoad } from "./training-load";
-import { renderSleepScore } from "./sleep-score";
 import { renderSleepPhases } from "./sleep-phases";
 import { renderReadiness } from "./readiness";
 import { renderStress } from "./stress";
@@ -47,7 +46,6 @@ export type FixedWidgetKey =
   | "hrv"
   | "training_status"
   | "training_load"
-  | "sleep_score"
   | "sleep_phases"
   | "readiness"
   | "stress"
@@ -87,7 +85,6 @@ const FIXED_WIDGET_REGISTRY: Record<FixedWidgetKey, Omit<WidgetEntry, "key">> = 
   hrv: { label: "HRV", render: renderHrv },
   training_status: { label: "Training status", render: renderTrainingStatus },
   training_load: { label: "Training load", render: renderTrainingLoad },
-  sleep_score: { label: "Sleep score", render: renderSleepScore },
   sleep_phases: { label: "Sleep phases", render: renderSleepPhases },
   readiness: { label: "Readiness", render: renderReadiness },
   stress: { label: "Stress", render: renderStress },

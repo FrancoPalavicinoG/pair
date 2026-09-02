@@ -27,6 +27,18 @@ export function formatLabel(value: string): string {
     return value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+// Hora de reloj ("11:29 PM") a partir de un ISO cuyo instante ya representa la hora local
+// empaquetada como UTC (SleepStageSegment.startLocal/endLocal, @pair/core) — por eso usa
+// los getters UTC del Date y no los locales, que la corrarían de nuevo con la zona del navegador.
+export function formatClockTime(iso: string): string {
+    const date = new Date(iso);
+    const hours24 = date.getUTCHours();
+    const minutes = date.getUTCMinutes();
+    const period = hours24 < 12 ? "AM" : "PM";
+    const hours12 = hours24 % 12 === 0 ? 12 : hours24 % 12;
+    return `${hours12}:${minutes.toString().padStart(2, "0")} ${period}`;
+}
+
 export function formatDuration(seconds: number): string {
     if (seconds < 60) {
         return `${seconds.toFixed(0)} s`;

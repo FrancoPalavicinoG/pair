@@ -15,3 +15,26 @@ export const activityDetailSchema = z
       .passthrough(),
   })
   .passthrough();
+
+// Campos confirmados contra una cuenta real (docs/fixtures/sleep-daily.anon.json).
+// `sleepLevels` no está documentado por Garmin — el bloque a bloque real de cada fase de
+// sueño, no solo movimiento (docs/garmin-api.md).
+export const sleepDailyDataSchema = z
+  .object({
+    dailySleepDTO: z
+      .object({
+        sleepStartTimestampGMT: z.number(),
+        sleepStartTimestampLocal: z.number(),
+      })
+      .passthrough(),
+    sleepLevels: z
+      .array(
+        z.object({
+          startGMT: z.string(),
+          endGMT: z.string(),
+          activityLevel: z.number(),
+        }),
+      )
+      .optional(),
+  })
+  .passthrough();

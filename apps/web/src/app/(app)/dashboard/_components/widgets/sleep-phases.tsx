@@ -1,31 +1,28 @@
 import type { ReactNode } from "react";
 import { findTodayMetrics } from "@pair/db";
+import { formatDuration } from "@/lib/format";
 import { TileShell } from "./stat-tile";
 import { SleepPhaseBar } from "@/components/sleep-phase-bar";
 
-// Fondo claro por defecto, como cualquier otra tile — invierte a oscuro en hover
-// (`SleepPhaseBar` y `TileShell` ya lo manejan solos, nada especial acá).
+// Unifica lo que antes eran dos widgets (sleep score + sleep phases): horas dormidas +
+// score como texto chico (un gauge circular no entra junto al timeline en el tile de
+// 180px), más el timeline cronológico real de la noche.
 export async function renderSleepPhases(userId: string): Promise<ReactNode> {
   const today = await findTodayMetrics(userId);
-  if (
-    today?.deepSleepSeconds == null ||
-    today?.lightSleepSeconds == null ||
-    today?.remSleepSeconds == null ||
-    today?.awakeSleepSeconds == null
-  ) {
-    return null;
-  }
+  const segments = today?.sleepStages;
+  if (!segments?.length) return null;
 
   return (
-    <TileShell label="Sleep phases">
-      <SleepPhaseBar
-        phases={{
-          deep: today.deepSleepSeconds,
-          light: today.lightSleepSeconds,
-          rem: today.remSleepSeconds,
-          awake: today.awakeSleepSeconds,
-        }}
-      />
+    <TileShell label="Sleep">
+      <div className="mb-2.5 flex items-baseline justify-between">
+        <p className="font-display text-[22px] leading-none tracking-[-0.03em] text-ink transition-colors duration-[250ms] group-hover:text-bone">
+          {today?.sleepSeconds != null ? formatDuration(today.sleepSeconds) : "—"}
+        </p>
+        {today?.sleepScore != null && (
+          <p className="font-mono text-xs text-graphite">Score {today.sleepScore}</p>
+        )}
+      </div>
+      <SleepPhaseBar segments={segments} />
     </TileShell>
   );
 }
