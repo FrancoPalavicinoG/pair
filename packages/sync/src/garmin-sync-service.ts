@@ -9,6 +9,7 @@ import {
   seal,
   open,
   updateSyncStatus,
+  findUserTimezone,
   type GarminCredentialStatus,
 } from "@pair/db";
 import {
@@ -17,6 +18,7 @@ import {
   GarminApiError,
   NotFoundError,
   activityDetailSchema,
+  localDateString,
 } from "@pair/core";
 
 const GARMIN_AUTH_URL = process.env.GARMIN_AUTH_URL ?? "http://localhost:8000";
@@ -202,6 +204,7 @@ export async function syncDailyMetrics(
   displayName: string,
   client: ReturnType<typeof createGarminClient>,
 ): Promise<number> {
+  const timezone = await findUserTimezone(userId);
   const mostRecentDate = await findMostRecentMetricsDate(userId);
   const today = new Date();
   // El dia de hoy se re-sincroniza siempre (sus datos siguen cambiando
@@ -213,7 +216,8 @@ export async function syncDailyMetrics(
 
   let count = 0;
   for (let d = start; d <= today; d = addDays(d, 1)) {
-    const dateStr = d.toISOString().slice(0, 10);
+    // calendarDate de Garmin es por dia local, no UTC (docs/garmin-api.md).
+    const dateStr = localDateString(d, timezone);
     const summary = await client.connectapi<Record<string, unknown>>(
       `/usersummary-service/usersummary/daily/${displayName}?calendarDate=${dateStr}`,
     );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { PairButton } from "@/components/pair-button";
 
 export type AuthFormState = { error?: string } | undefined;
@@ -15,9 +15,19 @@ type AuthFormProps = {
 // el caller solo cambia el Server Action y el texto del botón.
 export function AuthForm({ action, submitLabel, passwordAutoComplete }: AuthFormProps) {
   const [state, formAction, pending] = useActionState(action, undefined);
+  const timezoneRef = useRef<HTMLInputElement>(null);
+
+  // Input no controlado: setearlo directo en el DOM evita un mismatch de hidratación SSR/CSR.
+  useEffect(() => {
+    if (timezoneRef.current) {
+      timezoneRef.current.value = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    }
+  }, []);
 
   return (
     <form action={formAction} className="space-y-4">
+      <input type="hidden" name="timezone" ref={timezoneRef} />
+
       <label className="block space-y-1.5">
         <span className="font-mono text-xs uppercase tracking-[0.1em] text-graphite">Email</span>
         <span className="flex items-center gap-2 border border-bone/20 bg-panel px-3 py-2.5 font-mono text-bone transition-colors focus-within:border-ember">

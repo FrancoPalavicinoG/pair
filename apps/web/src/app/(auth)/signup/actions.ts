@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { signUp } from "@/services/auth-service";
 import { createSession } from "@/lib/session";
+import { captureTimezone } from "@/lib/timezone";
 import type { AuthFormState } from "../_components/auth-form";
 import { AuthError } from "@pair/core";
 
@@ -27,5 +28,6 @@ export async function signupAction(
   }
 
   await createSession(user.id);
+  await captureTimezone(user.id, formData.get("timezone"));
   redirect("/dashboard");
 }

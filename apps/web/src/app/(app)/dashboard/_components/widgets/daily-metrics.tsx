@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { findRecentDailyMetrics, type DailyMetricsRow } from "@pair/db";
+import { findRecentDailyMetrics, findTodayMetrics, type DailyMetricsRow } from "@pair/db";
 import { formatDuration } from "@/lib/format";
 import { buildSparkline } from "@/lib/sparkline";
 import { StatTile } from "./stat-tile";
@@ -38,13 +38,16 @@ const METRICS: Record<MetricKey, { label: string; unit?: string; format: (v: num
 };
 
 async function renderMetric(userId: string, key: MetricKey): Promise<ReactNode> {
-  const series = await findRecentDailyMetrics(userId, HISTORY_DAYS);
-  const today = series[series.length - 1];
+  const today = await findTodayMetrics(userId);
   if (!today) return null;
 
   const value = today[key];
   if (value == null) return null;
 
+  // Descarta filas con fecha posterior a "hoy" (residuo de un bug de sync ya corregido).
+  const series = (await findRecentDailyMetrics(userId, HISTORY_DAYS)).filter(
+    (row) => row.date <= today.date,
+  );
   const yesterday: DailyMetricsRow | undefined = series[series.length - 2];
   const previous = yesterday?.[key];
   const { label, unit, format } = METRICS[key];

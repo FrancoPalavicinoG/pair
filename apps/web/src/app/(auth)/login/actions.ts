@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { logIn } from "@/services/auth-service";
 import { createSession } from "@/lib/session";
+import { captureTimezone } from "@/lib/timezone";
 import type { AuthFormState } from "../_components/auth-form";
 import { AuthError } from "@pair/core";
 
@@ -28,5 +29,8 @@ export async function loginAction(
   }
 
   await createSession(user.id);
+  // Se recaptura en cada login (no solo signup): autocorrige viaje/DST sola, sin
+  // lógica extra. Best-effort — un valor ausente o inválido no bloquea el login.
+  await captureTimezone(user.id, formData.get("timezone"));
   redirect("/dashboard");
 }

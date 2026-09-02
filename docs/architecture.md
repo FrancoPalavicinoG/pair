@@ -83,7 +83,7 @@ Detalle en `apps/mcp/CLAUDE.md`.
 
 Postgres. Tablas principales:
 
-- `users`, `sessions` — auth propia de PAIR.
+- `users`, `sessions` — auth propia de PAIR. `users.timezone` (IANA, ej. `America/Santiago`) se captura del browser en cada login/signup y es la zona que usa todo cálculo de "hoy" (sync diario, widgets, límites de semana) — Garmin reporta por día-calendario-local, no UTC (`docs/garmin-api.md`).
 - `garmin_credentials` — tokens cifrados, `user_id`, estado, `last_refreshed_at`.
 - `activities` — normalizadas + `raw jsonb` con la respuesta original de Garmin.
 - `daily_metrics` — resumen diario (pasos, sueño, HRV, body battery…), una fila por usuario y día.

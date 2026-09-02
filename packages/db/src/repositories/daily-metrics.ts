@@ -1,6 +1,8 @@
 import { eq, desc, asc, and, gte } from "drizzle-orm";
+import { localDateString } from "@pair/core";
 import { db } from "../client";
 import { dailyMetrics } from "../schema/daily-metrics";
+import { findUserTimezone } from "./users";
 
 export type DailyMetricsRow = typeof dailyMetrics.$inferInsert;
 
@@ -9,7 +11,8 @@ export async function findRecentDailyMetrics(
   userId: string,
   days: number,
 ): Promise<DailyMetricsRow[]> {
-  const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const timezone = await findUserTimezone(userId);
+  const cutoff = localDateString(new Date(Date.now() - days * 24 * 60 * 60 * 1000), timezone);
   return await db
     .select()
     .from(dailyMetrics)
@@ -18,7 +21,8 @@ export async function findRecentDailyMetrics(
 }
 
 export async function findTodayMetrics(userId: string) {
-  const today = new Date().toISOString().slice(0, 10); // mismo formato que ya usa la columna "date"
+  const timezone = await findUserTimezone(userId);
+  const today = localDateString(new Date(), timezone); // mismo formato que ya usa la columna "date"
   const [row] = await db
     .select()
     .from(dailyMetrics)

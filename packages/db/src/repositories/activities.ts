@@ -1,6 +1,7 @@
 import { eq, desc, and, gte, lte, isNull } from "drizzle-orm";
 import { db } from "../client";
 import { activities } from "../schema/activities";
+import { findUserTimezone } from "./users";
 
 export type NewActivity = typeof activities.$inferInsert;
 
@@ -45,9 +46,6 @@ export type WeeklySummary = {
   bySport: Record<string, { thisWeek: WeeklySportBucket; lastWeek: WeeklySportBucket }>;
 };
 
-// Zona horaria para calcular el corte de semana. Único lugar a tocar si esto deja de ser Chile.
-const WEEK_BOUNDS_TIMEZONE = "America/Santiago";
-
 // Offset UTC real (en minutos) de `timeZone` en el instante `date`. Usa el offset que ICU calcula
 // para esa fecha puntual, así que no hay que saber a mano si aplica horario de verano o invierno.
 function getUtcOffsetMinutes(date: Date, timeZone: string): number {
@@ -58,16 +56,18 @@ function getUtcOffsetMinutes(date: Date, timeZone: string): number {
   return hours * 60;
 }
 
-export function getWeekBounds(now: Date): {
+export function getWeekBounds(
+  now: Date,
+  timeZone: string,
+): {
   thisWeekStart: Date;
   thisWeekEnd: Date;
   lastWeekStart: Date;
   lastWeekEnd: Date;
 } {
-  const offsetMinutes = getUtcOffsetMinutes(now, WEEK_BOUNDS_TIMEZONE);
+  const offsetMinutes = getUtcOffsetMinutes(now, timeZone);
 
-  // Corremos "now" por el offset: sus getters UTC quedan leyendo la hora local de Chile,
-  // así podemos hacer la aritmética del lunes con Date.UTC en vez de manejar zonas a mano.
+  // Corremos "now" por el offset: sus getters UTC quedan leyendo la hora local del usuario.
   const shifted = new Date(now.getTime() + offsetMinutes * 60_000);
 
   // getUTCDay() da domingo=0..sábado=6; lo convertimos a lunes=0..domingo=6.
@@ -93,7 +93,8 @@ export function getWeekBounds(now: Date): {
 }
 
 export async function findWeeklySummary(userId: string): Promise<WeeklySummary> {
-  const bounds = getWeekBounds(new Date());
+  const timezone = await findUserTimezone(userId);
+  const bounds = getWeekBounds(new Date(), timezone);
   const rows = await db
     .select({
       startTimeUtc: activities.startTimeUtc,

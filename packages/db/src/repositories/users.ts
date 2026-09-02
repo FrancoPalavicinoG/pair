@@ -18,3 +18,13 @@ export async function createUser(email: string, passwordHash: string) {
   if (!created) throw new DatabaseError("Failed to create user");
   return created;
 }
+
+// Trae solo la columna timezone, sin el resto de la fila.
+export async function findUserTimezone(userId: string): Promise<string> {
+  const [row] = await db.select({ timezone: users.timezone }).from(users).where(eq(users.id, userId));
+  return row?.timezone ?? "America/Santiago";
+}
+
+export async function updateUserTimezone(userId: string, timezone: string): Promise<void> {
+  await db.update(users).set({ timezone }).where(eq(users.id, userId));
+}
