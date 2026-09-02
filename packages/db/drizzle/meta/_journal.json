@@ -57,6 +57,13 @@
       "when": 1788312900977,
       "tag": "0007_glamorous_wolfpack",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1788371880671,
+      "tag": "0008_boring_mimic",
+      "breakpoints": true
     }
   ]
 }

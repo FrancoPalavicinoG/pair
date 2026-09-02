@@ -1,8 +1,8 @@
 import Link from "next/link";
 import type { Activity } from "@pair/db";
-import { formatDistance, formatDuration, formatPace, formatLabel } from "@/lib/format";
+import { formatDistance, formatDuration, formatLabel } from "@/lib/format";
 import { formatActivityTime } from "@/lib/activity-date";
-import { getActivityCategory, ACTIVITY_CATEGORY_LABEL } from "@/lib/activity-category";
+import { getActivityCategory, getSpeedDisplay, ACTIVITY_CATEGORY_LABEL } from "@/lib/activity-category";
 import { ACTIVITY_ICON } from "@/components/icons/activity-icons";
 import { ROW_CHROME } from "@/components/list-row";
 
@@ -39,11 +39,7 @@ export function ActivityRow({ activity }: { activity: Activity }) {
       <span className="text-right text-graphite">
         {activity.durationSeconds != null ? formatDuration(activity.durationSeconds) : "–"}
       </span>
-      <span className="text-right text-graphite">
-        {activity.distanceMeters != null && activity.durationSeconds != null
-          ? formatPace(activity.distanceMeters, activity.durationSeconds)
-          : "–"}
-      </span>
+      <span className="text-right text-graphite">{getSpeedDisplay(category, activity.averageSpeedMps)}</span>
     </Link>
   );
 }

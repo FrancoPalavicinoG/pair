@@ -3,8 +3,9 @@ import { requireSession } from "@/lib/session";
 import { findActivityByGarminId, findUserTimezone } from "@pair/db";
 import { fetchActivityDetail } from "@pair/sync";
 import { GarminApiError, localDateString } from "@pair/core";
-import { formatDistance, formatDuration, formatPace } from "@/lib/format";
+import { formatDistance, formatDuration } from "@/lib/format";
 import { dayLabel, localDateFromTimestamp } from "@/lib/activity-date";
+import { getActivityCategory, getSpeedDisplay } from "@/lib/activity-category";
 import { Eyebrow } from "@/components/eyebrow";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -48,6 +49,8 @@ export default async function ActivityDetailPage({
   const today = localDateString(now, timezone);
   const yesterday = localDateString(new Date(now.getTime() - DAY_MS), timezone);
 
+  const speedDisplay = getSpeedDisplay(getActivityCategory(activity.sportType), activity.averageSpeedMps);
+
   return (
     <div className="max-w-2xl space-y-8">
       <div className="space-y-1">
@@ -67,9 +70,7 @@ export default async function ActivityDetailPage({
         {activity.durationSeconds != null && (
           <p className="bg-lcd p-4 text-sm text-ink">{formatDuration(activity.durationSeconds)}</p>
         )}
-        {detail.distance != null && detail.duration != null && (
-          <p className="bg-lcd p-4 text-sm text-ink">{formatPace(detail.distance, detail.duration)}</p>
-        )}
+        {speedDisplay !== "–" && <p className="bg-lcd p-4 text-sm text-ink">{speedDisplay}</p>}
         {detail.averageHR != null && (
           <p className="bg-lcd p-4 text-sm text-ink">{detail.averageHR} bpm avg</p>
         )}

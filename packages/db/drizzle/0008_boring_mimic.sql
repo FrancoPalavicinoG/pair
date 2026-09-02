@@ -1,0 +1,1 @@
+ALTER TABLE "activities" ADD COLUMN "average_speed_mps" real;

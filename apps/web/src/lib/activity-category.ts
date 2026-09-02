@@ -1,3 +1,5 @@
+import { formatPace, formatSpeed } from "@/lib/format";
+
 export const ACTIVITY_CATEGORIES = [
   "running",
   "cycling",
@@ -195,4 +197,15 @@ export function getSportTypesForCategory(category: ActivityCategory): string[] {
   return Object.entries(SPORT_TYPE_TO_CATEGORY)
     .filter(([, cat]) => cat === category)
     .map(([sportType]) => sportType);
+}
+
+// Pace (min/km) solo tiene sentido corriendo o en un gym-activity con movimiento real (una
+// gym-activity estática — strength/yoga/pilates — nunca trae averageSpeed, así que llegar
+// acá con un valor ya implica que hubo movimiento). Ciclismo usa km/h. El resto de
+// categorías no pide nada de esto todavía — "–" en vez de inventar una unidad.
+export function getSpeedDisplay(category: ActivityCategory, averageSpeedMps: number | null): string {
+  if (averageSpeedMps == null || averageSpeedMps <= 0) return "–";
+  if (category === "running" || category === "gym") return formatPace(averageSpeedMps);
+  if (category === "cycling") return formatSpeed(averageSpeedMps);
+  return "–";
 }

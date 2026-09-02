@@ -5,17 +5,19 @@ export function formatDistance(meters: number): string {
     return `${(meters / 1000).toFixed(1)} km`;
 }
 
-export function formatPace(meters: number, seconds: number): string {
-    if (seconds === 0) {
+export function formatPace(speedMps: number): string {
+    if (speedMps <= 0) {
         return "-";
-    } else if (meters === 0) {
-        return "-"; 
     }
-    const paceSecondsPerKm = seconds / (meters / 1000);
+    const paceSecondsPerKm = 1000 / speedMps;
     const totalSeconds = Math.round(paceSecondsPerKm);
     const min  = Math.floor(totalSeconds / 60);
     const sec = totalSeconds % 60;
     return `${min}:${sec.toString().padStart(2, "0")} min/km`;
+}
+
+export function formatSpeed(speedMps: number): string {
+    return `${(speedMps * 3.6).toFixed(1)} km/h`;
 }
 
 // Prettifica texto tipo enum de Garmin ("STRAINED_1", "running") a algo mostrable

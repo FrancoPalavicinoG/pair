@@ -17,6 +17,7 @@ export const activities = pgTable(
     startTimeLocal: timestamp("start_time_local", { withTimezone: false }).notNull(),
     durationSeconds: real("duration_seconds"),
     distanceMeters: real("distance_meters"),
+    averageSpeedMps: real("average_speed_mps"),
     calories: real("calories"),
     // Payload crudo de Garmin.
     raw: jsonb("raw").notNull(),

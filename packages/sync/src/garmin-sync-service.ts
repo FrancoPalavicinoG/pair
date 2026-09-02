@@ -169,6 +169,7 @@ export async function syncActivities(
         startTimeLocal: new Date((raw.startTimeLocal as string).replace(" ", "T")),
         durationSeconds: (raw.duration as number) ?? null,
         distanceMeters: (raw.distance as number) ?? null,
+        averageSpeedMps: (raw.averageSpeed as number) ?? null,
         calories: (raw.calories as number) ?? null,
         raw,
       });
