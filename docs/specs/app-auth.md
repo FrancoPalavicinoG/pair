@@ -39,9 +39,9 @@ Decisiones discutidas y elegidas juntos, con la alternativa descartada:
 
 Orden sugerido (de adentro hacia afuera: primero lo que no depende de nada, al final lo que junta todo). Se detalla archivo por archivo en plan mode antes de empezar a escribir.
 
-- [ ] `AuthError` en `packages/core/src/errors.ts`
-- [ ] `findUserById` en `packages/db/src/repositories/users.ts` (falta para resolver el email desde la sesión)
-- [ ] `apps/web/src/lib/session.ts` (cookie + `getSession`/`requireSession`)
-- [ ] `apps/web/src/services/auth-service.ts` (`signUp`/`logIn`)
-- [ ] Rutas `(auth)/login`, `(auth)/signup`, `(app)/dashboard`, gate en `/`
-- [ ] Probado end-to-end contra Postgres real: signup, login (ok e incorrecto), email repetido, password corta, logout, los tres gates de sesión
+- [x] `AuthError` en `packages/core/src/errors.ts`
+- [x] `findUserById` en `packages/db/src/repositories/users.ts` (falta para resolver el email desde la sesión)
+- [x] `apps/web/src/lib/session.ts` (cookie + `getSession`/`requireSession`)
+- [x] `apps/web/src/services/auth-service.ts` (`signUp`/`logIn`)
+- [x] Rutas `(auth)/login`, `(auth)/signup`, `(app)/dashboard`, gate en `/`
+- [x] Probado end-to-end contra Postgres real: signup, login (ok e incorrecto), email repetido, password corta, logout, los tres gates de sesión

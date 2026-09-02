@@ -4,6 +4,8 @@ Regla: no se empieza una fase sin cumplir el criterio de salida de la anterior. 
 
 **Reordenamiento (2026-08-24)**: P4 pasa antes que P3. Con P2 cerrado, el dashboard solo refleja lo que Garmin Connect ya muestra — no hay ningún aporte propio todavía. Se prioriza construir eso (P4: widgets, métricas derivadas, comparación plan vs. ejecutado) antes de invertir en MCP/conectores (P3), que no le suma nada a la app si el dashboard de abajo no tiene valor propio. `docs/specs/mcp-oauth-server.md` queda escrito (investigación real ya hecha) pero pausado, no descartado.
 
+**Reordenamiento (2026-09-02)**: P3 se retoma y pasa a ser la fase activa — `docs/specs/mcp-oauth-server.md` deja de estar pausado. La visión del proyecto se precisó en esta sesión (ver `CLAUDE.md`): sin P3 no existe el harness Garmin↔Claude, que es la razón de ser central del proyecto. En paralelo, P5 se adelanta: el "dog factor" y el historial de ejercicio no dependen de que el MCP exista (son storage + UI propia) y además son la data que las tools de P3 van a exponer, así que conviene construirlos a la vez, no en secuencia. Se agregan P6 (vista de plan) y P7 (ajuste automático diario) como fases nuevas, explícitamente **fuera de esta iteración** — quedan documentadas para no perder las decisiones ya tomadas (sobre todo la de P7: cron server-side, ver más abajo) sin comprometernos a construirlas ahora. El último ítem de P4 (comparación plan vs. ejecutado) pasa a depender de P3: sin un plan real no hay contra qué comparar lo ejecutado.
+
 ---
 
 ## P0 — Spike de autenticación
@@ -53,14 +55,15 @@ Objetivo: el gateway funcionando de punta a punta con la infraestructura mínima
 
 ---
 
-## P3 — MCP y conectores
+## P3 — MCP y conectores ⬅ fase actual
 
+- [ ] Gate de conexión Garmin + hub "Connections": sacar `Connect Garmin` del nav fijo del sidebar. La conexión con Garmin pasa a ser un gate, no una vista navegable — mismo patrón que `requireSession()` → `/login`: si no hay credenciales o el token expiró, se redirige directo a la vista de login de Garmin antes de renderizar cualquier ruta de `(app)`; conectado, no se vuelve a ver. El tab `Connections` del sidebar queda para el conector MCP (placeholder hasta que exista). No depende del resto de este ítem, se construye primero.
 - [ ] Authorization Server OAuth 2.1 con DCR + PKCE (vía librería, ver ADR 0003).
 - [ ] `apps/mcp` sobre Streamable HTTP, sesión → usuario.
-- [ ] Tools de lectura.
+- [ ] Tools de lectura: actividades y métricas diarias, más tools de "insight" que traducen los datos crudos (carga, HRV, readiness, dog factor de P5) en algo que Claude pueda razonar — no un dump plano de columnas.
 - [ ] DSL `PairWorkout` + traductor + tests.
-- [ ] Tools de escritura con preview → confirm.
-- [ ] Vista `/settings/connectors`: URL de conexión, instrucciones por cliente, sesiones activas, revocación.
+- [ ] Tools de escritura con preview → confirm: crear/agendar workouts, y registrar sets de ejercicio (peso, reps) a partir de lo que Claude interpreta de una foto de rutina — el parseo de la imagen lo hace Claude (visión), PAIR solo persiste contra el perfil de ejercicio de P5.
+- [ ] Vista `/settings/connectors` (dentro de `Connections`): URL de conexión, instrucciones por cliente, sesiones activas, revocación.
 - [ ] Pantalla de consentimiento con scopes legibles.
 - [ ] `audit_log` de toda escritura.
 
@@ -68,14 +71,14 @@ Objetivo: el gateway funcionando de punta a punta con la infraestructura mínima
 
 ---
 
-## P4 — Dashboard personalizable ⬅ fase actual
+## P4 — Dashboard personalizable
 
 - [x] Widgets configurables y layout persistente. Spec: `docs/specs/app-dashboard-widgets.md`.
 - [x] Librería de componentes de UI propios. Spec: `docs/specs/ui-component-library.md`.
 - [x] Catálogo de datos diarios de Garmin (bienestar, entreno, reportes históricos). Spec: `docs/specs/garmin-daily-metrics.md`.
 - [x] Sistema de visualización v2 (gauges, fases de sueño, zonas de potencia). Spec: `docs/specs/dashboard-visualization-system.md`.
 - [x] Dashboard widgets v2 (Activities al sidebar, tiles individuales, grilla cuadrada). Spec: `docs/specs/app-dashboard-widgets-v2.md`.
-- [ ] Comparación plan vs. ejecutado, que es lo que Garmin Connect hace mal.
+- [ ] Comparación plan vs. ejecutado, que es lo que Garmin Connect hace mal. Depende de que exista un plan real (DSL de P3): sin eso no hay contra qué comparar lo ejecutado.
 
 **Sacado del roadmap (2026-08-31)**: "Métricas derivadas propias (carga, ratio agudo/crónico)" — Garmin ya calcula y expone ese número (`garmin-daily-metrics.md`, ACWR confirmado real), así que no hace falta derivarlo nosotros. Se resuelve trayendo el dato como widget más en `app-dashboard-widgets-v2` Fase B, no como ítem de roadmap aparte.
 
@@ -83,13 +86,43 @@ Objetivo: el gateway funcionando de punta a punta con la infraestructura mínima
 
 ---
 
-## P5 — Perfil de usuario
+## P5 — Perfil de usuario y señales diarias
+
+Corre en paralelo a P3: es storage + UI propia, no depende de que el MCP exista, y las tools de "insight" de P3 leen de acá.
 
 - [ ] Datos físicos básicos (altura, peso): sync desde Garmin cuando esté disponible, edición manual como fallback.
 - [ ] Zonas de esfuerzo por deporte: ritmo de carrera, FTP de ciclismo — sync desde Garmin cuando esté disponible, manual si no.
-- [ ] 1RM por ejercicio de fuerza, carga manual (números sueltos, no depende del catálogo de ejercicios de Garmin — eso sigue fuera de alcance).
+- [ ] Historial de ejercicio de fuerza: un registro por fecha y ejercicio (peso, reps), no un número suelto. No depende del catálogo de ejercicios de Garmin — eso sigue fuera de alcance. El máximo vigente se deriva del historial con su fecha; un máximo de hace 6+ meses no cuenta como vigente (umbral exacto a definir en el spec).
+- [ ] "Dog factor": input diario manual (escala 1-10) que el usuario reporta en PAIR. Actúa como override en las decisiones de ajuste de plan (P7): un dog factor alto sostiene la carga aunque las métricas de Garmin digan lo contrario; uno bajo la baja aunque las métricas estén bien. Seguimiento de qué lo explica (journaling) queda para una iteración futura.
 
-**Salida**: el traductor DSL de P3 puede resolver targets relativos ("85% de tu máximo", "zona 3 de ritmo") a valores absolutos sin pedirle el número al usuario en cada workout.
+**Salida**: el traductor DSL de P3 puede resolver targets relativos ("85% de tu máximo", "zona 3 de ritmo") a valores absolutos sin pedirle el número al usuario en cada workout, y las tools de insight de P3 tienen el dog factor disponible como señal.
+
+---
+
+## P6 — Vista de plan de entrenamiento
+
+No entra en esta iteración — elegido explícitamente afuera para priorizar el harness (P3) y las señales (P5) primero. Queda documentado para no perder de vista la segunda razón de ser del proyecto (ver `CLAUDE.md`).
+
+Objetivo: el plan que arma Claude vía el DSL de P3 se ve y se edita en PAIR, no solo en el chat. Depende de que P3 tenga el DSL y las tools de escritura funcionando — sin eso no hay plan que mostrar.
+
+- [ ] Modelo de datos del plan (agenda de sesiones, no solo el workout suelto que P3 ya agenda en Garmin)
+- [ ] Vista de plan en la web: calendario/lista de sesiones, detalle por sesión
+- [ ] Edición manual desde la web, reflejada de vuelta en Garmin (mismo patrón preview → confirm que las escrituras vía MCP)
+
+**Salida**: el plan que Claude arma se puede ver y ajustar sin volver al chat.
+
+---
+
+## P7 — Ajuste automático diario
+
+No entra en esta iteración. Depende de P3 (tools + DSL), P5 (dog factor, historial de ejercicio) y P6 (que exista un plan real que ajustar). Queda documentada la decisión de mecanismo, tomada en esta sesión, para no tener que redescutirla cuando llegue el turno.
+
+Objetivo: todas las mañanas, PAIR ajusta el plan del usuario según sus métricas de Garmin, su historial reciente de actividades y su dog factor, sin que el usuario tenga que pedirlo en el chat. Ejemplo: el plan tiene series de running programadas, pero ayer hubo CrossFit que cargó piernas — Claude decide bajar la carga o cambiar la sesión, no PAIR con una regla fija.
+
+- [ ] Decisión de arquitectura: cron server-side en PAIR que llama directo a la API de Claude (no espera a que el usuario abra Claude Desktop/Code), con las tools de P3 disponibles en proceso. Esto es un componente nuevo: PAIR pasa a operar un agente, no solo a exponer un MCP para clientes externos — se documenta en `docs/architecture.md` cuando este ítem se especifique.
+- [ ] Spec pendiente: cómo se acota el gasto de API por usuario/día, qué pasa si el ajuste falla o no hay nada que ajustar, cómo se notifica al usuario del cambio.
+
+**Salida**: el plan se ajusta solo cada mañana según métricas + dog factor, sin que el usuario tenga que pedirlo.
 
 ---
 

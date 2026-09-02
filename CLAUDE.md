@@ -1,6 +1,11 @@
 # PAIR — Contexto del proyecto
 
-PAIR conecta Garmin Connect con Claude. Tres piezas:
+PAIR conecta Garmin Connect con Claude. Dos razones de ser:
+
+1. **Harness entre Garmin y Claude vía MCP.** Claude es el cerebro: arma planes de entrenamiento, lee carga/HRV/sueño/readiness y ajusta según eso. PAIR traduce eso a lo que Garmin necesita (y viceversa) y aporta contexto propio que Garmin no tiene (ver "dog factor" en `docs/roadmap.md` P5).
+2. **Visualización de lo que Claude produce.** El plan que arma Claude se ve y se edita en PAIR, no solo en el chat — editable desde los dos lados, mismo dato.
+
+Tres piezas:
 
 1. **Gateway Garmin** — capa que autentica contra Garmin Connect (API no oficial) y normaliza datos y acciones.
 2. **MCP Server remoto** — expone el gateway a Claude Desktop / Claude Code vía OAuth, con una URL única.
@@ -14,7 +19,7 @@ Caso de uso guía: el entrenador manda una foto del entrenamiento → Claude la 
 
 ## Estado
 
-Fase actual: **P1 (gateway y datos), MVP**. Ver `docs/roadmap.md`.
+Fase actual: **P4 (dashboard personalizable)**. Ver `docs/roadmap.md`.
 Nada de lo que está fuera de la fase actual debe implementarse sin discutirlo primero.
 
 ---

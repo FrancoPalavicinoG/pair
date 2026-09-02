@@ -31,10 +31,10 @@ Salida observable: formulario de credenciales de Garmin; si Garmin pide MFA, un 
 
 ## Checklist de implementación
 
-- [ ] `(app)/settings/garmin/actions.ts`: Server Action que valida sesión, llama `performLogin`/`performMfa` según el paso, y `saveCredentials` al tener tokens
-- [ ] Componente de formulario de dos pasos (nuevo, `(app)/settings/garmin/_components/`)
-- [ ] `(app)/settings/garmin/page.tsx`
-- [ ] Link desde `/dashboard` a `/settings/garmin`
+- [x] `(app)/settings/garmin/actions.ts`: Server Action que valida sesión, llama `performLogin`/`performMfa` según el paso, y `saveCredentials` al tener tokens
+- [x] Componente de formulario de dos pasos (nuevo, `(app)/settings/garmin/_components/`)
+- [x] `(app)/settings/garmin/page.tsx`
+- [x] Link desde `/dashboard` a `/settings/garmin`
 - [x] Conexión sin MFA contra una cuenta real, confirmada (2026-08-23): fila cifrada visible en `garmin_credentials` vía `pnpm db:studio`, `status: "active"`
 - [x] Password de Garmin incorrecta muestra el mensaje de error (confirmado 2026-08-23: "garmin-auth /login failed: INVALID_CREDENTIALS")
 - [x] Camino de MFA implementado y revisado, sigue pendiente de prueba real hasta tener una cuenta con MFA activo (limitación conocida, no bloqueante)
