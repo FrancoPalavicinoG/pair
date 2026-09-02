@@ -1,8 +1,13 @@
 import Link from "next/link";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
-const CLASSES =
-  "flex w-full items-center justify-between gap-3 border border-rule-soft px-3 py-2 text-sm text-ink outline-none transition-colors hover:border-ink focus-visible:[--tw-outline-style:solid] focus-visible:outline-2 focus-visible:outline-ember focus-visible:outline-offset-2";
+// Chrome compartido de una fila (borde, hover, foco) sin la parte de layout: `ListRow` le
+// suma flex+justify-between, otros consumidores (ej. la fila de /activities, con más
+// columnas) suman su propio grid en vez de copiar este string entero.
+export const ROW_CHROME =
+  "w-full border border-rule-soft px-3 py-2 text-sm text-ink outline-none transition-colors hover:border-ink focus-visible:[--tw-outline-style:solid] focus-visible:outline-2 focus-visible:outline-ember focus-visible:outline-offset-2";
+
+const CLASSES = `flex items-center justify-between gap-3 ${ROW_CHROME}`;
 
 type CommonProps = { className?: string; children: ReactNode };
 

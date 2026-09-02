@@ -37,7 +37,7 @@ Ember es el acento de lo interactivo y accionable: botón primario, ítem activo
 
 Lo que sigue sin tocar: ember no es color de dato ni de estado del sistema. La rampa ordinal, los hues de identidad de gráfico y la paleta de status (`--status-ready`, `--status-attn`) siguen siendo las únicas fuentes de color ahí: mezclar ember rompe la separación bajo daltonismo simulado ya validada (ver Gráficos). Dentro de un gráfico o una stat tile, una marca en ember sigue significando específicamente "esto es lo que pair señala": ya no es la única razón por la que ember aparece en pantalla, pero sigue siendo la única razón por la que aparece ahí.
 
-Sin la regla de exclusividad, el límite pasa a ser de cantidad, no de contexto: ember en cada acción primaria y cada estado activo está bien; ember como fondo de superficie completo, ícono decorativo o color de texto de cuerpo no. Sigue siendo acento, no color base.
+Sin la regla de exclusividad, el límite pasa a ser de cantidad, no de contexto: ember en cada acción primaria y cada estado activo está bien; ember como fondo de superficie completo o color de texto de cuerpo no. Sigue siendo acento, no color base. Excepción explícita: los íconos de identidad de categoría (ver Iconos) son ember fijo — no son decoración, son la marca de "qué es esto" de esa fila.
 
 ## Tipografía
 
@@ -104,6 +104,10 @@ Viven sobre `--panel` (superficie oscura), nunca directo sobre `--lcd`. Monoespa
 - **Toggle**: checkbox real oculto + label con `[ ]` / `[×]` en mono; el bracket pasa a ember cuando está marcado.
 - **Autocompletado fantasma**: texto ya escrito en `--ink`, sugerencia en `--graphite` a ~55% opacidad, con un hint `tab` en una cápsula chica de borde sutil.
 
+### Chips de filtro
+
+A diferencia de los inputs de arriba, viven sobre superficie clara (`--lcd`), no `--panel` — para filtrar una lista que ya está en la página, no para capturar texto. Texto mono chico, uppercase, borde 1px `--rule-soft`. El chip activo (la opción seleccionada) pasa a ember — borde y texto —, mismo criterio que "ítem activo o seleccionado" de la sección Ember de arriba. Son `<Link>` reales que arman la URL de filtro (`?category=...`), no botones con estado de cliente.
+
 ### Botones
 
 Implementación de referencia: `apps/web/src/components/pair-button.tsx` (`PairButton`, variantes `primary`/`outline`/`confirm`). Ningún botón de `apps/web` define su estilo a mano — usa `PairButton`.
@@ -116,6 +120,10 @@ Implementación de referencia: `apps/web/src/components/pair-button.tsx` (`PairB
 ### Foco / interacción — nunca el color nativo del sistema
 
 Todo elemento clickeable define su propio `:focus-visible` explícito (`outline: 2px solid var(--ember)`) y resetea el outline nativo del navegador (`outline: none` en el estado base). Nunca dejar el foco nativo sin resetear: en macOS/Safari hereda el color de acento del sistema del usuario, y si ese acento no es ember el foco se ve inconsistente con el resto del sistema de interacción.
+
+### Iconos
+
+SVG a mano, mismo criterio geométrico que `Wordmark` (`apps/web/src/components/wordmark.tsx`): trazo fino (`stroke`, sin `fill`), formas simples, `viewBox` propio por ícono. Tamaño ~18-20px. `--ember` fijo — es marca de identidad (qué categoría es esta fila), no decoración ni color de dato; no cambia en hover ni se apaga.
 
 ### Dashboard / stat tiles
 

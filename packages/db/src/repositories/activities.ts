@@ -1,9 +1,10 @@
-import { eq, desc, and, gte, lte, isNull } from "drizzle-orm";
+import { eq, desc, and, gte, lte, isNull, inArray } from "drizzle-orm";
 import { db } from "../client";
 import { activities } from "../schema/activities";
 import { findUserTimezone } from "./users";
 
 export type NewActivity = typeof activities.$inferInsert;
+export type Activity = typeof activities.$inferSelect;
 
 export async function findRecentActivities(userId: string, limit: number) {
   return await db
@@ -138,4 +139,42 @@ export async function findWeeklySummary(userId: string): Promise<WeeklySummary> 
   }
 
   return summary;
+}
+
+// Mismo criterio de shift/trunca/deshift que getWeekBounds, pero al 1ro del mes.
+function getMonthStart(now: Date, timeZone: string): Date {
+  const offsetMinutes = getUtcOffsetMinutes(now, timeZone);
+  const shifted = new Date(now.getTime() + offsetMinutes * 60_000);
+  const shiftedMonthStart = new Date(Date.UTC(shifted.getUTCFullYear(), shifted.getUTCMonth(), 1));
+  return new Date(shiftedMonthStart.getTime() - offsetMinutes * 60_000);
+}
+
+export type ActivityRange = "this_week" | "this_month" | "all";
+
+// Para /activities: filtra por categoría (ya resuelta a sportTypes en apps/web,
+// packages/db no conoce ActivityCategory) y por rango de fecha, en un solo WHERE.
+export async function findActivities(
+  userId: string,
+  { limit, sportTypes, range }: { limit: number; sportTypes?: string[]; range?: ActivityRange },
+) {
+  const conditions = [eq(activities.userId, userId), isNull(activities.deletedAt)];
+
+  if (sportTypes && sportTypes.length > 0) {
+    conditions.push(inArray(activities.sportType, sportTypes));
+  }
+
+  if (range === "this_week" || range === "this_month") {
+    const timezone = await findUserTimezone(userId);
+    const now = new Date();
+    const cutoff =
+      range === "this_week" ? getWeekBounds(now, timezone).thisWeekStart : getMonthStart(now, timezone);
+    conditions.push(gte(activities.startTimeUtc, cutoff));
+  }
+
+  return await db
+    .select()
+    .from(activities)
+    .where(and(...conditions))
+    .orderBy(desc(activities.startTimeUtc))
+    .limit(limit);
 }

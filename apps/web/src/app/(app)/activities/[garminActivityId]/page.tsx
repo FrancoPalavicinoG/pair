@@ -1,10 +1,13 @@
 import { notFound } from "next/navigation";
 import { requireSession } from "@/lib/session";
-import { findActivityByGarminId } from "@pair/db";
+import { findActivityByGarminId, findUserTimezone } from "@pair/db";
 import { fetchActivityDetail } from "@pair/sync";
-import { GarminApiError } from "@pair/core";
+import { GarminApiError, localDateString } from "@pair/core";
 import { formatDistance, formatDuration, formatPace } from "@/lib/format";
+import { dayLabel, localDateFromTimestamp } from "@/lib/activity-date";
 import { Eyebrow } from "@/components/eyebrow";
+
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 export default async function ActivityDetailPage({
   params,
@@ -40,6 +43,11 @@ export default async function ActivityDetailPage({
     throw err;
   }
 
+  const timezone = await findUserTimezone(session.userId);
+  const now = new Date();
+  const today = localDateString(now, timezone);
+  const yesterday = localDateString(new Date(now.getTime() - DAY_MS), timezone);
+
   return (
     <div className="max-w-2xl space-y-8">
       <div className="space-y-1">
@@ -47,7 +55,9 @@ export default async function ActivityDetailPage({
         <h1 className="font-display text-3xl text-ink">
           {activity.name ?? activity.sportType ?? "Activity"}
         </h1>
-        <p className="text-sm text-graphite">{activity.startTimeLocal.toLocaleDateString()}</p>
+        <p className="text-sm text-graphite">
+          {dayLabel(localDateFromTimestamp(activity.startTimeLocal), today, yesterday)}
+        </p>
       </div>
 
       <div className="grid grid-cols-3 gap-px bg-rule-soft">
