@@ -261,8 +261,13 @@ export async function syncDailyMetrics(
       client,
       `/metrics-service/metrics/trainingreadiness/${dateStr}`,
     );
-    const morningReadiness = readinessList?.find(
-      (entry) => entry.inputContext === "AFTER_WAKEUP_RESET",
+    // Garmin recalcula el readiness varias veces al dia (despertar, post-ejercicio, etc.) —
+    // se usa el mas reciente por timestampLocal, no un inputContext fijo, para que coincida
+    // con lo que la app de Garmin muestra como valor actual.
+    const latestReadiness = readinessList?.reduce<Record<string, unknown> | undefined>(
+      (latest, entry) =>
+        !latest || (entry.timestampLocal as string) > (latest.timestampLocal as string) ? entry : latest,
+      undefined,
     );
 
     const hillScoreData = await tryFetch<Record<string, unknown>>(
@@ -308,8 +313,8 @@ export async function syncDailyMetrics(
       vo2MaxRunning: (vo2Generic?.vo2MaxValue as number) ?? null,
       vo2MaxCycling: (vo2Cycling?.vo2MaxValue as number) ?? null,
       loadBalanceFeedback: (firstDeviceLoadBalance?.trainingBalanceFeedbackPhrase as string) ?? null,
-      readinessScore: (morningReadiness?.score as number) ?? null,
-      readinessLevel: (morningReadiness?.level as string) ?? null,
+      readinessScore: (latestReadiness?.score as number) ?? null,
+      readinessLevel: (latestReadiness?.level as string) ?? null,
       hillScore: (hillScoreData?.overallScore as number) ?? null,
       enduranceScore: (enduranceScoreData?.overallScore as number) ?? null,
       weight: (weightTotalAverage?.weight as number) ?? null,
