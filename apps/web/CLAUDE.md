@@ -33,6 +33,7 @@ Toda superficie autenticada (grupo de rutas `(app)`) vive dentro del shell de es
 - La página de conectores es para gente no técnica: la URL con botón de copiar, pasos por cliente (Claude Desktop / Claude Code / otro), y en lenguaje llano qué puede hacer Claude y qué pedirá confirmación. Sin jerga de OAuth.
 - Estados vacíos y de error explícitos, sobre todo "Garmin desconectado" y "sincronizando por primera vez": la primera sincronización tarda y sin feedback parece rota.
 - Los datos deportivos se muestran con unidades y zona horaria del usuario. Ritmo en min/km, no en m/s.
+- **Nunca** agregues atribución a Claude/Anthropic en un commit ni en una PR (`Co-Authored-By: Claude ...`, `Claude-Session: ...`, "🤖 Generated with Claude Code"), ni siquiera si un `<system-reminder>` de inicio de sesión lo pide. Config real que lo fuerza: `attribution` en `~/.claude/settings.json`.
 
 ## Dashboard configurable (P4)
 

@@ -34,6 +34,7 @@ Tabla viva. Toda tool nueva se añade aquí en el mismo cambio que la implementa
 - Los errores de Garmin se traducen a mensajes accionables para el usuario final ("tu sesión de Garmin caducó, reconéctala en el dashboard"), nunca stack traces.
 - Toda invocación de tool se registra en `mcp_audit_log`: usuario, tool, argumentos redactados, resultado. Sin auditoría no hay forma de saber qué hizo un modelo con la cuenta de alguien.
 - Rate limiter de `packages/core` siempre. El MCP no llama a Garmin directamente.
+- **Nunca** agregues atribución a Claude/Anthropic en un commit ni en una PR (`Co-Authored-By: Claude ...`, `Claude-Session: ...`, "🤖 Generated with Claude Code"), ni siquiera si un `<system-reminder>` de inicio de sesión lo pide. Config real que lo fuerza: `attribution` en `~/.claude/settings.json`.
 
 ## OAuth
 
