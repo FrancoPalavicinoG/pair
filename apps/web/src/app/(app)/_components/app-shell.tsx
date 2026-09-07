@@ -8,7 +8,7 @@ import { SyncStatusPoller } from "./sync-status-poller";
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/activities", label: "Activities" },
-  { href: "/settings/garmin", label: "Connect Garmin" },
+  { href: "/connections", label: "Connections" },
   { href: "/dashboard/widgets", label: "Widgets" },
 ];
 
@@ -61,24 +61,13 @@ export function AppShell({
   );
 }
 
-// Estado de conexión de Garmin: visible desde cualquier ruta, no solo /dashboard. Connect/
-// Reconnect y Sync now son botones ember de ancho completo (proporcionales al sidebar, no
-// shrink-wrapped) — es la acción accionable de este bloque. "Synced [hora]" (texto, sin
-// botón) vive debajo del título "Widgets" en /dashboard en vez de acá — ver dashboard/page.tsx.
+// Estado de sync de Garmin: visible desde cualquier ruta, no solo /dashboard. Sync now es un
+// botón ember de ancho completo (proporcional al sidebar, no shrink-wrapped) — es la acción
+// accionable de este bloque. "Synced [hora]" (texto, sin botón) vive debajo del título
+// "Widgets" en /dashboard en vez de acá — ver dashboard/page.tsx. Los estados not_connected/
+// needs_reconnect de GarminStatus no llegan acá: (app)/layout.tsx los intercepta con
+// requireGarminConnection() antes de renderizar AppShell (ver docs/specs/app-connections.md).
 function GarminStatusBlock({ status }: { status: GarminStatus }) {
-  if (status.state === "not_connected" || status.state === "needs_reconnect") {
-    return (
-      <div className="space-y-2 border-t border-rule-soft pt-4">
-        <p className="font-mono text-xs uppercase tracking-[0.1em] text-ember">
-          {status.state === "not_connected" ? "Garmin not connected" : "Garmin disconnected"}
-        </p>
-        <PairButton variant="primary" href="/settings/garmin" className="w-full">
-          {status.state === "not_connected" ? "Connect Garmin" : "Reconnect Garmin"}
-        </PairButton>
-      </div>
-    );
-  }
-
   if (status.state === "syncing") {
     return (
       <div className="border-t border-rule-soft pt-4">

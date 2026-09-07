@@ -1,6 +1,6 @@
 import { requireSession } from "@/lib/session";
-import { findUserById, findCredentialsByUserId } from "@pair/db";
-import { deriveGarminStatus } from "@/lib/garmin-status";
+import { findUserById } from "@pair/db";
+import { requireGarminConnection } from "@/lib/garmin-status";
 import { logout } from "./actions";
 import { AppShell } from "./_components/app-shell";
 
@@ -12,8 +12,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     return;
   }
 
-  const credentials = await findCredentialsByUserId(session.userId);
-  const garminStatus = deriveGarminStatus(credentials);
+  const garminStatus = await requireGarminConnection();
 
   return (
     <AppShell email={user.email} garminStatus={garminStatus}>
