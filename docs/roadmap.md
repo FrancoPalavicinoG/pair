@@ -57,7 +57,7 @@ Objetivo: el gateway funcionando de punta a punta con la infraestructura mínima
 
 ## P3 — MCP y conectores ⬅ fase actual
 
-- [ ] Gate de conexión Garmin + hub "Connections": sacar `Connect Garmin` del nav fijo del sidebar. La conexión con Garmin pasa a ser un gate, no una vista navegable — mismo patrón que `requireSession()` → `/login`: si no hay credenciales o el token expiró, se redirige directo a la vista de login de Garmin antes de renderizar cualquier ruta de `(app)`; conectado, no se vuelve a ver. El tab `Connections` del sidebar queda para el conector MCP (placeholder hasta que exista). No depende del resto de este ítem, se construye primero.
+- [x] Gate de conexión Garmin + hub "Connections": sacar `Connect Garmin` del nav fijo del sidebar. La conexión con Garmin pasa a ser un gate, no una vista navegable — mismo patrón que `requireSession()` → `/login`: si no hay credenciales o el token expiró, se redirige directo a la vista de login de Garmin antes de renderizar cualquier ruta de `(app)`; conectado, no se vuelve a ver. El tab `Connections` del sidebar queda para el conector MCP (placeholder hasta que exista). Spec: `docs/specs/app-connections.md`.
 - [ ] Authorization Server OAuth 2.1 con DCR + PKCE (vía librería, ver ADR 0003).
 - [ ] `apps/mcp` sobre Streamable HTTP, sesión → usuario.
 - [ ] Tools de lectura: actividades y métricas diarias, más tools de "insight" que traducen los datos crudos (carga, HRV, readiness, dog factor de P5) en algo que Claude pueda razonar — no un dump plano de columnas.

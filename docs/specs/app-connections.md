@@ -1,7 +1,7 @@
 # Spec: Gate de conexión Garmin + hub "Connections"
 
 Roadmap: P3 (MCP y conectores), primer ítem ("Gate de conexión Garmin + hub 'Connections'")
-Estado: draft
+Estado: hecho
 
 ## Objetivo
 
@@ -26,15 +26,14 @@ Salida observable: un usuario nuevo que nunca conectó Garmin, al entrar a `/das
 
 ## Checklist de implementación
 
-- [ ] Mover `(app)/settings/garmin/` a su propio grupo de rutas fuera de `(app)` (ej. `(garmin-connect)/settings/garmin/`), conservando `requireSession()` adentro
-- [ ] `requireGarminConnection()` (o nombre equivalente) en `apps/web/src/lib/garmin-status.ts`: redirige a `/settings/garmin` si el estado es `not_connected` o `needs_reconnect`
-- [ ] Llamar ese helper desde `(app)/layout.tsx`, junto a `requireSession()`
-- [ ] `app-shell.tsx`: `NAV_ITEMS` pierde `Connect Garmin`, gana `Connections` → `/connections`
-- [ ] `(app)/connections/page.tsx`: placeholder
-- [ ] Simplificar `GarminStatusBlock` a los estados `syncing`/`connected` únicamente
-- [ ] Probado en vivo: cuenta nueva sin credenciales termina en `/settings/garmin` al entrar a `/dashboard`; conectado, navegar no muestra esa vista; forzar `needs_reconnect` (credenciales inválidas a mano en DB) dispara el redirect de nuevo; `/settings/garmin` no loopea
+- [x] Mover `(app)/settings/garmin/` a su propio grupo de rutas fuera de `(app)` (`(garmin-connect)/settings/garmin/`), conservando `requireSession()` adentro
+- [x] `requireGarminConnection()` en `apps/web/src/lib/garmin-status.ts`: redirige a `/settings/garmin` si el estado es `not_connected` o `needs_reconnect`
+- [x] Llamar ese helper desde `(app)/layout.tsx`, junto a `requireSession()`
+- [x] `app-shell.tsx`: `NAV_ITEMS` pierde `Connect Garmin`, gana `Connections` → `/connections`
+- [x] `(app)/connections/page.tsx`: placeholder
+- [x] Simplificar `GarminStatusBlock` a los estados `syncing`/`connected` únicamente
+- [x] Probado en vivo (2026-09-07): cuenta nueva sin credenciales termina en `/settings/garmin` al entrar a `/dashboard`; conectado, navegar no muestra esa vista; forzar `needs_reconnect` (credenciales inválidas a mano en DB) dispara el redirect de nuevo; `/settings/garmin` no loopea
 
 ## Preguntas abiertas
 
-- Nombre final del grupo de rutas nuevo para `/settings/garmin` (cosmético, se resuelve al escribir el código).
-- Si el placeholder de `/connections` necesita algo más que texto estático para esta pasada, o alcanza con "coming soon".
+Ninguna — resueltas al escribir el código: el grupo de rutas nuevo se llama `(garmin-connect)`, y el placeholder de `/connections` es solo texto ("coming soon"), confirmado.
