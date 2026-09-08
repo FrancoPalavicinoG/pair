@@ -43,3 +43,23 @@ export class GarminApiError extends PairError {
     this.status = options?.status;
   }
 }
+
+// Fallo del Authorization Server propio (apps/mcp): client inválido, code o
+// refresh token inválido/vencido, PKCE que no matchea, etc. `oauthErrorCode`
+// es el código de error de OAuth 2.1 (RFC 6749 §5.2: invalid_grant,
+// invalid_client, unsupported_grant_type...) que la ruta HTTP devuelve tal cual.
+export class OAuthError extends PairError {
+  readonly code = "OAUTH_ERROR";
+  readonly oauthErrorCode: string;
+  readonly status: number;
+
+  constructor(
+    oauthErrorCode: string,
+    message: string,
+    options?: { cause?: unknown; status?: number },
+  ) {
+    super(message, options);
+    this.oauthErrorCode = oauthErrorCode;
+    this.status = options?.status ?? 400;
+  }
+}

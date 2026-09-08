@@ -1,4 +1,4 @@
-import { createCipheriv, createDecipheriv, createHmac, randomBytes } from "node:crypto";
+import { createCipheriv, createDecipheriv, createHash, createHmac, randomBytes } from "node:crypto";
 import { ConfigError, DecryptionError } from "@pair/core";
 import type { EncryptedPayload } from "./schema/garmin-credentials";
 
@@ -60,4 +60,10 @@ export function open(payload: EncryptedPayload, userId: string): string {
       cause,
     });
   }
+}
+
+// Hash de un secreto que solo hace falta comparar, nunca leer de vuelta
+// (authorization codes, access/refresh tokens del AS propio). No reversible.
+export function hashToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
 }

@@ -4,3 +4,6 @@ export * from "./garmin-credentials";
 export * from "./activities";
 export * from "./daily-metrics";
 export * from "./dashboard-layouts";
+export * from "./oauth-clients";
+export * from "./oauth-grants";
+export * from "./oauth-tokens";
