@@ -80,11 +80,11 @@ Sin generador oficial; se monta a mano.
 
 ```bash
 mkdir -p apps/mcp && cd apps/mcp && pnpm init
-pnpm add @modelcontextprotocol/sdk hono zod @pair/core @pair/db
+pnpm add @hono/node-server hono zod @pair/core @pair/db
 pnpm add -D tsx tsup @pair/config
 ```
 
-Servidor HTTP con el transport Streamable HTTP del SDK, más las rutas del Authorization Server. La librería de OAuth (con Dynamic Client Registration y PKCE) se elige y se fija aquí antes de escribir la primera tool: es la decisión que más condiciona este paquete.
+El Authorization Server (metadatos RFC 8414, DCR RFC 7591, `/authorize`, `/token`) va a mano en `src/oauth/`, sin `@modelcontextprotocol/sdk`: los helpers de auth del SDK (`mcpAuthRouter`, `OAuthServerProvider`) quedaron congelados/deprecados en `@modelcontextprotocol/server-legacy/auth` (v1) y son Express, no Hono. Detalle en `docs/specs/mcp-oauth-server.md`. El SDK real (`@modelcontextprotocol/hono` + `@modelcontextprotocol/server`, confirmados contra `ts.sdk.modelcontextprotocol.io/v2`) se instala recién en el ítem de las tools, para el transport Streamable HTTP — no hace falta antes.
 
 ## 7. `services/garmin-auth`
 
@@ -104,7 +104,7 @@ Cada servicio valida las suyas al arrancar y falla ruidosamente si falta una. `.
 | Servicio | Variables |
 |---|---|
 | `apps/web` | `DATABASE_URL`, `REDIS_URL`, `ENCRYPTION_MASTER_KEY`, `GARMIN_AUTH_URL`, `GARMIN_AUTH_SHARED_SECRET`, `AUTH_SECRET` |
-| `apps/mcp` | `DATABASE_URL`, `REDIS_URL`, `ENCRYPTION_MASTER_KEY`, `OAUTH_ISSUER_URL`, `PUBLIC_MCP_URL` |
+| `apps/mcp` | `DATABASE_URL`, `OAUTH_ISSUER_URL`, `PAIR_WEB_URL`. Cuando lleguen las tools de Garmin: `REDIS_URL`, `ENCRYPTION_MASTER_KEY`, `PUBLIC_MCP_URL` |
 | `services/garmin-auth` | `SHARED_SECRET`, `LOG_LEVEL` |
 
 `ENCRYPTION_MASTER_KEY` se genera una vez y se guarda fuera del repo. Perderla significa que todos los usuarios reconectan Garmin desde cero.

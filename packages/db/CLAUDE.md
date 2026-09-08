@@ -26,5 +26,6 @@ pnpm db:studio
 
 Construidas en P1: `users`, `garmin_credentials` (cifrado), `activities`, `daily_metrics`.
 Construidas en P2: `sessions` (auth propia, revocable — el id de la fila es el token de la cookie).
+Construidas en P3: `oauth_clients`/`oauth_grants`/`oauth_tokens` (Authorization Server de `apps/mcp`, tokens hasheados con SHA-256, no cifrados — nunca hace falta leerlos de vuelta).
 
-El resto llega por fase, no antes: `workouts`/`workout_schedules` (P3), `oauth_clients`/`oauth_tokens`/`mcp_audit_log` (P3), `dashboard_layouts`/`custom_metrics` (P4). No crear estas tablas de antemano.
+El resto llega por fase, no antes: `workouts`/`workout_schedules` (P3), `mcp_audit_log` (P3), `dashboard_layouts`/`custom_metrics` (P4). No crear estas tablas de antemano.

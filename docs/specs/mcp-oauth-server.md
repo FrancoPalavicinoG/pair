@@ -45,16 +45,28 @@ Salida observable: Claude Desktop puede descubrir los metadatos OAuth de `apps/m
 - **Consentimiento mínimo**: `authorize()` redirige a una página de `apps/web` (ej. `/oauth/consent`) que muestra "¿autorizás a {client_name} a acceder a tu cuenta de PAIR?" con aprobar/denegar — sin lista de scopes legibles todavía (eso es su propio ítem). Requiere sesión de PAIR activa (reusa `requireSession`).
 - **`apps/mcp` se crea en este ítem** (scaffold mínimo: Hono + `@modelcontextprotocol/sdk`, según `docs/setup.md`), aunque las tools reales lleguen en el ítem siguiente — el AS necesita un servidor donde montarse.
 
+## Actualización (2026-09-08): el router del SDK está deprecado
+
+Investigado al arrancar la implementación (no estaba confirmado cuando se escribió este spec): `mcpAuthRouter`/`OAuthServerProvider` tal como se citan arriba son de la **v1** del SDK, y quedaron congelados en `@modelcontextprotocol/server-legacy/auth` — deprecados, con la recomendación oficial de "migrar el AS a un IdP dedicado". Además es Express, no Hono.
+
+Esto **refuerza, no contradice**, la decisión de más arriba de implementar `OAuthServerProvider` a mano: la alternativa "oficial" (usar el router del SDK) ya no es una opción mantenida. Se extendió la misma decisión al router HTTP: `apps/mcp/src/oauth/routes.ts` implementa a mano, en Hono, los cuatro endpoints (metadata RFC 8414, DCR RFC 7591, `/authorize`, `/token`), sin ninguna dependencia del SDK de MCP. `@modelcontextprotocol/sdk` no se instala en este ítem — se instala en el de las tools (transport Streamable HTTP), que es cuando hace falta.
+
+Los 5 métodos de `OAuthServerProvider` se colapsaron en 4 funciones en `apps/mcp/src/oauth/provider.ts`: `challengeForAuthorizationCode` no existe como función aparte porque, al no depender del SDK para la validación de PKCE, `exchangeAuthorizationCode` lee el `code_challenge` guardado y llama a `verifyPkce` en el mismo paso — no hace falta la coreografía separada de "buscar el challenge, verificar, después canjear" que el SDK exigía.
+
+Tokens y authorization codes se guardan **hasheados con SHA-256** (`hashToken` en `packages/db/src/crypto.ts`), no cifrados: nunca hace falta leerlos de vuelta, solo verificar que lo que presenta el cliente coincide.
+
 ## Checklist de implementación
 
-- [ ] Scaffold de `apps/mcp` (Hono, `@modelcontextprotocol/sdk`, `@pair/core`, `@pair/db`)
-- [ ] Schema + migración: `oauth_clients`, `oauth_grants`, `oauth_tokens`
-- [ ] `packages/db/src/repositories/oauth.ts`: repository nuevo
-- [ ] Implementación de `OAuthRegisteredClientsStore` (`getClient`, `registerClient`)
-- [ ] Implementación de `OAuthServerProvider` (los 5 métodos requeridos)
+- [x] Scaffold de `apps/mcp` (Hono, `@pair/core`, `@pair/db` — sin `@modelcontextprotocol/sdk`, ver nota arriba)
+- [x] Schema + migración: `oauth_clients`, `oauth_grants`, `oauth_tokens`
+- [x] `packages/db/src/repositories/oauth.ts`: repository nuevo
+- [x] `getClient`/`registerClient` (`apps/mcp/src/oauth/provider.ts`)
+- [x] Lógica de `OAuthServerProvider` a mano (`apps/mcp/src/oauth/provider.ts`): `buildConsentRedirect`, `exchangeAuthorizationCode`, `exchangeRefreshToken`, `verifyAccessToken`
 - [ ] `/oauth/consent` mínimo en `apps/web`
-- [ ] Montar `mcpAuthRouter` en `apps/mcp` con el provider
+- [x] Rutas HTTP del AS montadas en `apps/mcp` (`src/oauth/routes.ts`, sin `mcpAuthRouter` — ver nota arriba)
 - [ ] Probado end-to-end: un cliente OAuth de prueba (no Claude Desktop todavía, algo más simple/controlado) completa DCR + PKCE + consentimiento + intercambio de código, y `verifyAccessToken` resuelve el `userId` correcto
+
+Los dos ítems sin marcar quedan para el siguiente plan: dependen de la pantalla de consentimiento, que necesita sesión de `apps/web` y no se puede probar de punta a punta sin ella.
 
 ## Preguntas abiertas
 
@@ -66,3 +78,4 @@ Ninguna — se prueba con `@modelcontextprotocol/inspector` (tool oficial de Ant
 - [modelcontextprotocol/typescript-sdk](https://github.com/modelcontextprotocol/typescript-sdk) — SDK oficial, `mcpAuthRouter`/`requireBearerAuth`/`OAuthServerProvider`
 - Interfaces `OAuthServerProvider`, `OAuthRegisteredClientsStore`, `AuthInfo` confirmadas contra el paquete publicado en npm (`@modelcontextprotocol/sdk`, `dist/esm/server/auth/{provider,clients,types}.d.ts`), no de memoria ni de documentación de terceros
 - [node-oidc-provider](https://github.com/panva/node-oidc-provider) — alternativa considerada y descartada, referencia si en algún momento el `OAuthServerProvider` a mano se vuelve difícil de mantener
+- [Upgrading from v1.x to v2](https://ts.sdk.modelcontextprotocol.io/v2/migration/upgrade-to-v2) y [Authorization en v2](https://ts.sdk.modelcontextprotocol.io/v2/serving/authorization.html) — confirman que los helpers de AS del SDK (`mcpAuthRouter`, `OAuthServerProvider`, etc.) pasaron a `@modelcontextprotocol/server-legacy/auth` (deprecado), origen de la nota de actualización de arriba

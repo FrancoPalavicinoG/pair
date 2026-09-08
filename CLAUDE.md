@@ -19,7 +19,7 @@ Caso de uso guía: el entrenador manda una foto del entrenamiento → Claude la 
 
 ## Estado
 
-Fase actual: **P4 (dashboard personalizable)**. Ver `docs/roadmap.md`.
+Fase actual: **P3 (MCP y conectores)**. Ver `docs/roadmap.md`.
 Nada de lo que está fuera de la fase actual debe implementarse sin discutirlo primero.
 
 ---

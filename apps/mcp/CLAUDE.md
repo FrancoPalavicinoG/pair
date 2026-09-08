@@ -2,7 +2,7 @@
 
 Servidor MCP remoto + Authorization Server OAuth. Es lo que el usuario pega en Claude Desktop / Claude Code como URL de conector.
 
-Stack: Node + TypeScript, `@modelcontextprotocol/sdk`, transport Streamable HTTP.
+Stack: Node + TypeScript + Hono. El transport MCP (Streamable HTTP) llega con las tools, vía `@modelcontextprotocol/hono`/`@modelcontextprotocol/server` — no instalado todavía.
 
 ## Tools
 
@@ -38,7 +38,7 @@ Tabla viva. Toda tool nueva se añade aquí en el mismo cambio que la implementa
 
 ## OAuth
 
-Claude Desktop requiere OAuth 2.1 con **Dynamic Client Registration** (RFC 7591) y **PKCE**. No lo implementes a mano: usa la librería elegida y limítate a la pantalla de consentimiento y al mapeo scope → tools. Cualquier desviación aquí se paga en horas de depuración a ciegas contra un cliente que no puedes instrumentar.
+Claude Desktop requiere OAuth 2.1 con **Dynamic Client Registration** (RFC 7591) y **PKCE**. El Authorization Server (`src/oauth/`) está implementado a mano: metadatos (RFC 8414), DCR, `/authorize` y `/token` como rutas Hono propias, sin depender de ningún paquete de auth del SDK de MCP. Los helpers del SDK para esto (`mcpAuthRouter`, `OAuthServerProvider`) quedaron congelados/deprecados en `@modelcontextprotocol/server-legacy/auth` (v1, sin mantenimiento) y además son Express, no Hono — la recomendación oficial pasó a ser "usar un IdP dedicado", que para un círculo cerrado de amigos es más peso del que hace falta. Detalle de diseño en `docs/specs/mcp-oauth-server.md`.
 
 ## Añadir una tool
 
