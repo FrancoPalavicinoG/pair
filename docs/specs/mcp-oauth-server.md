@@ -1,7 +1,7 @@
 # Spec: Authorization Server OAuth 2.1 (DCR + PKCE) para apps/mcp
 
 Roadmap: P3 (MCP y conectores), primer ítem ("Authorization Server OAuth 2.1 con DCR + PKCE")
-Estado: draft
+Estado: hecho
 
 ## Objetivo
 
@@ -62,15 +62,19 @@ Tokens y authorization codes se guardan **hasheados con SHA-256** (`hashToken` e
 - [x] `packages/db/src/repositories/oauth.ts`: repository nuevo
 - [x] `getClient`/`registerClient` (`apps/mcp/src/oauth/provider.ts`)
 - [x] Lógica de `OAuthServerProvider` a mano (`apps/mcp/src/oauth/provider.ts`): `buildConsentRedirect`, `exchangeAuthorizationCode`, `exchangeRefreshToken`, `verifyAccessToken`
-- [ ] `/oauth/consent` mínimo en `apps/web`
+- [x] `/oauth/consent` mínimo en `apps/web` (route group `(oauth-consent)`, servicio `oauth-service.ts`)
 - [x] Rutas HTTP del AS montadas en `apps/mcp` (`src/oauth/routes.ts`, sin `mcpAuthRouter` — ver nota arriba)
-- [ ] Probado end-to-end: un cliente OAuth de prueba (no Claude Desktop todavía, algo más simple/controlado) completa DCR + PKCE + consentimiento + intercambio de código, y `verifyAccessToken` resuelve el `userId` correcto
+- [x] Probado end-to-end con `curl` manejando cookie de sesión real y el HTML real de `/oauth/consent` (ver nota de testing más abajo): registro → `/authorize` → consentimiento real (aprobar y denegar) → `/token` → `verifyAccessToken` resuelve el `userId` correcto. Incluye una prueba de que un `redirect_uri` alterado a mano en el POST de aprobación se rechaza (revalidación server-side, no confía en los hidden inputs que vuelven del navegador).
 
-Los dos ítems sin marcar quedan para el siguiente plan: dependen de la pantalla de consentimiento, que necesita sesión de `apps/web` y no se puede probar de punta a punta sin ella.
+## Actualización (2026-09-08): cómo se probó de punta a punta, sin el inspector
+
+El plan original de esta sección era probar con `@modelcontextprotocol/inspector`. No se usó: ese cliente descubre OAuth a partir de un 401 del endpoint real de MCP (RFC 9728, Protected Resource Metadata) — intenta usar el recurso primero, y recién ahí arranca DCR/consentimiento/token. `apps/mcp` todavía no tiene ningún endpoint MCP (`/mcp` llega en el próximo ítem del roadmap, con las tools), así que no había garantía de que el inspector supiera descubrir el AS apuntándolo a un servidor que hoy solo tiene rutas OAuth.
+
+En cambio, se probó con `curl` haciendo de cliente OAuth real (exactamente lo que pedía el checklist: "algo más simple/controlado"): sesión de `apps/web` minteada vía el repository (sin pelear la codificación de Server Actions del login), registro real, `/authorize` real, HTML real de `/oauth/consent` parseado para extraer los campos del formulario (incluido lo que Next.js inyecta para el fallback sin JS de la Server Action), POST real de aprobar/denegar, code real, canje real, `verifyAccessToken` real. La prueba con el inspector contra un cliente de terceros de verdad queda para cuando exista `/mcp`.
 
 ## Preguntas abiertas
 
-Ninguna — se prueba con `@modelcontextprotocol/inspector` (tool oficial de Anthropic para MCP, soporta OAuth 2.1 + PKCE + DCR + descubrimiento de metadata). Requiere Node ≥22.19.0; la máquina de desarrollo solo tiene Node 20.19.0 (`docs/setup.md`) — hace falta `nvm`/`fnm` para tener los dos sin reemplazar el que usa el resto del proyecto. Resolver esto es un paso previo al testing, no bloquea escribir el código.
+Ninguna.
 
 ## Fuentes de la investigación
 

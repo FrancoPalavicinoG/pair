@@ -16,9 +16,6 @@ import { env } from "../env";
 import { verifyPkce } from "./pkce";
 import type { AuthInfo, AuthorizeParams, TokenResponse } from "./types";
 
-// El authorization code lo emite apps/web al aprobar el consentimiento
-// (Plan 2), no este archivo — se exporta para que esa pieza use la misma TTL.
-export const AUTHORIZATION_CODE_TTL_MS = 60 * 1000;
 const ACCESS_TOKEN_TTL_SECONDS = 60 * 60;
 const REFRESH_TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
