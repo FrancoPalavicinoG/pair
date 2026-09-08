@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef } from "react";
 import { PairButton } from "@/components/pair-button";
+import { PasswordField } from "@/components/password-field";
 
 export type AuthFormState = { error?: string } | undefined;
 
@@ -42,19 +43,7 @@ export function AuthForm({ action, submitLabel, passwordAutoComplete }: AuthForm
         </span>
       </label>
 
-      <label className="block space-y-1.5">
-        <span className="font-mono text-xs uppercase tracking-[0.1em] text-graphite">Password</span>
-        <span className="flex items-center gap-2 border border-bone/20 bg-panel px-3 py-2.5 font-mono text-bone transition-colors focus-within:border-ember">
-          <span aria-hidden>$</span>
-          <input
-            type="password"
-            name="password"
-            autoComplete={passwordAutoComplete}
-            required
-            className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-graphite"
-          />
-        </span>
-      </label>
+      <PasswordField label="Password" name="password" autoComplete={passwordAutoComplete} />
 
       {state?.error && (
         <p role="alert" className="text-sm text-ink">

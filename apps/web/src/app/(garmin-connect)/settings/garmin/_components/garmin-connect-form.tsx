@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { connectGarminAction } from "../actions";
 import { PairButton } from "@/components/pair-button";
+import { PasswordField } from "@/components/password-field";
 
 // Un solo formulario para los dos pasos (credenciales, y código MFA si Garmin
 // lo pide) — qué campos mostrar depende de state?.status.
@@ -50,21 +51,7 @@ export function GarminConnectForm() {
             </span>
           </label>
 
-          <label className="block space-y-1.5">
-            <span className="font-mono text-xs uppercase tracking-[0.1em] text-graphite">
-              Garmin password
-            </span>
-            <span className="flex items-center gap-2 border border-bone/20 bg-panel px-3 py-2.5 font-mono text-bone transition-colors focus-within:border-ember">
-              <span aria-hidden>$</span>
-              <input
-                type="password"
-                name="password"
-                autoComplete="current-password"
-                required
-                className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-graphite"
-              />
-            </span>
-          </label>
+          <PasswordField label="Garmin password" name="password" autoComplete="current-password" />
         </>
       )}
 
