@@ -14,6 +14,8 @@ Tabla viva. Toda tool nueva se añade aquí en el mismo cambio que la implementa
 | `list_activities` | `activities:read` | Actividades por rango de fechas y categoría, resumidas (una línea c/u, con `garminActivityId`) |
 | `get_activity` | `activities:read` | Detalle de una actividad puntual (a partir del id de `list_activities`) |
 | `get_daily_metrics` | `metrics:read` | Sueño, FC en reposo, pasos, body battery, HRV, estado de entreno/ACWR, readiness, VO2 max, por día |
+| `get_training_load` | `activities:read` | Volumen por deporte, esta semana vs la anterior (envuelve `findWeeklySummary`) |
+| `get_recovery_trend` | `metrics:read` | FC en reposo/HRV/sueño/readiness/ACWR: valor reciente + tendencia (sube/baja/estable) sobre una ventana de días |
 | `list_workouts` | `workouts:read` | Entrenamientos creados y agendados |
 | `workout_preview` | `workouts:write` | Valida un PairWorkout y devuelve resumen + `preview_token`. Sin efecto |
 | `workout_create` | `workouts:write` | Consume el token y crea el workout en Garmin |

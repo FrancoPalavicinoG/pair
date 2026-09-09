@@ -4,6 +4,8 @@ import { registerGetStartedTool } from "./tools/get-started";
 import { registerListActivitiesTool } from "./tools/list-activities";
 import { registerGetActivityTool } from "./tools/get-activity";
 import { registerGetDailyMetricsTool } from "./tools/get-daily-metrics";
+import { registerGetTrainingLoadTool } from "./tools/get-training-load";
+import { registerGetRecoveryTrendTool } from "./tools/get-recovery-trend";
 
 // createMcpHandler() (la opción simple) sirve el protocolo 2025-11-25 en modo
 // "stateless": cada request es una instancia nueva, sin sesión. Eso responde
@@ -28,6 +30,8 @@ function buildServer(): McpServer {
   registerListActivitiesTool(server);
   registerGetActivityTool(server);
   registerGetDailyMetricsTool(server);
+  registerGetTrainingLoadTool(server);
+  registerGetRecoveryTrendTool(server);
   return server;
 }
 

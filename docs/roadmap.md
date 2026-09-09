@@ -61,7 +61,7 @@ Objetivo: el gateway funcionando de punta a punta con la infraestructura mínima
 - [x] Authorization Server OAuth 2.1 con DCR + PKCE, a mano (sin librería — ver `docs/specs/mcp-oauth-server.md`; los helpers de auth del SDK de MCP están deprecados/congelados y son Express, no Hono).
 - [x] `apps/mcp` sobre Streamable HTTP, sesión → usuario. Primera tool: `get_started`. Ver `docs/specs/mcp-transport.md`.
 - [x] Tools de lectura: actividades y métricas diarias (`list_activities`, `get_activity`, `get_daily_metrics`). Ver `docs/specs/mcp-read-tools.md`.
-- [ ] Tools de "insight" que traducen los datos crudos (carga, HRV, readiness, dog factor de P5) en algo que Claude pueda razonar — no un dump plano de columnas. Pospuesto a propósito del ítem anterior: confirmado con Claude Desktop que la lectura de datos anda bien, pero Claude todavía no sabe interpretarlos (tendencias, carga) sin esta capa.
+- [x] Tools de "insight" que traducen los datos crudos (carga, HRV, readiness) en algo que Claude pueda razonar — `get_training_load` y `get_recovery_trend`. Ver `docs/specs/mcp-insight-tools.md`. Dog factor queda afuera (P5 no arrancó todavía).
 - [ ] DSL `PairWorkout` + traductor + tests.
 - [ ] Tools de escritura con preview → confirm: crear/agendar workouts, y registrar sets de ejercicio (peso, reps) a partir de lo que Claude interpreta de una foto de rutina — el parseo de la imagen lo hace Claude (visión), PAIR solo persiste contra el perfil de ejercicio de P5.
 - [ ] Vista `/settings/connectors` (dentro de `Connections`): URL de conexión, instrucciones por cliente, sesiones activas, revocación.
