@@ -26,12 +26,20 @@ const VARIANT_CLASSES: Record<Variant, string> = {
 type CommonProps = { variant?: Variant; className?: string; children: ReactNode };
 
 type PairButtonProps =
-  | (CommonProps & { href: string } & Omit<ComponentPropsWithoutRef<typeof Link>, "href" | "className">)
+  | (CommonProps & { href: string } & Omit<
+        ComponentPropsWithoutRef<typeof Link>,
+        "href" | "className"
+      >)
   | (CommonProps & { href?: undefined } & Omit<ComponentPropsWithoutRef<"button">, "className">);
 
 // Botón único del proyecto: variantes primary/outline/confirm de docs/style.md.
 // `href` renderiza <Link>, si no renderiza <button>.
-export function PairButton({ variant = "primary", className, children, ...props }: PairButtonProps) {
+export function PairButton({
+  variant = "primary",
+  className,
+  children,
+  ...props
+}: PairButtonProps) {
   const classes = [BASE, VARIANT_CLASSES[variant], className].filter(Boolean).join(" ");
 
   if (props.href !== undefined) {

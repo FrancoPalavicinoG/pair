@@ -10,7 +10,7 @@ import type { DashboardWidgets } from "@pair/db";
 import { updateDashboardLayout } from "../actions";
 import type { WidgetKey } from "./widgets/registry";
 
-export type WidgetItem = { key: WidgetKey; label: string; node: ReactNode };
+export type WidgetItem = { key: WidgetKey; label: string; node: ReactNode; href: string };
 
 const GRID_GAP = 16;
 // Piso de tile: por debajo de esto el contenido de un StatTile se amontona (confirmado
@@ -113,11 +113,18 @@ export function DashboardLayoutEditor({
   }
 
   return (
-    <div ref={containerRef} style={{ height: box.height || undefined }} className="w-full overflow-y-auto">
+    <div
+      ref={containerRef}
+      style={{ height: box.height || undefined }}
+      className="w-full overflow-y-auto"
+    >
       <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
         <SortableContext items={items.map((item) => item.key)} strategy={rectSortingStrategy}>
+          {/* justify-start (no center): arranca desde el borde izquierdo, igual que "Edit
+              widgets" arriba a la derecha — así ese link cae arriba de la última tile de
+              una fila completa en vez de flotar más allá de una grilla centrada y angosta. */}
           <div
-            className="grid w-full justify-center content-center"
+            className="grid w-full justify-start content-center"
             style={{
               height: box.height || undefined,
               gridTemplateColumns: `repeat(${grid.cols}, ${grid.tileSize}px)`,
@@ -154,7 +161,7 @@ function SortableWidgetTile({ item }: { item: WidgetItem }) {
       >
         ⋮⋮
       </span>
-      <Link href={`/dashboard/metrics/${encodeURIComponent(item.key)}`} className="block">
+      <Link href={item.href} className="block">
         {item.node}
       </Link>
     </div>

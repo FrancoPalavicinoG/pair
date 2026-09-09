@@ -13,7 +13,11 @@ function weekOverWeekDelta(thisWeek: number, lastWeek: number): string {
   return `${sign}${Math.abs(changePercent).toFixed(0)}% vs last week`;
 }
 
-export async function renderWeeklyDistance(userId: string, sportType: string): Promise<ReactNode> {
+export async function renderWeeklyDistance(
+  userId: string,
+  sportType: string,
+  square = true,
+): Promise<ReactNode> {
   const { bySport } = await findWeeklySummary(userId);
   const bucket = bySport[sportType];
   if (!bucket) return null;
@@ -24,7 +28,7 @@ export async function renderWeeklyDistance(userId: string, sportType: string): P
   if (bucket.thisWeek.distanceMeters === 0) {
     return (
       <StatTile
-        square
+        square={square}
         label={label}
         value={formatDuration(bucket.thisWeek.durationSeconds)}
         delta={weekOverWeekDelta(bucket.thisWeek.durationSeconds, bucket.lastWeek.durationSeconds)}
@@ -34,7 +38,7 @@ export async function renderWeeklyDistance(userId: string, sportType: string): P
 
   return (
     <StatTile
-      square
+      square={square}
       label={label}
       value={formatDistance(bucket.thisWeek.distanceMeters)}
       delta={weekOverWeekDelta(bucket.thisWeek.distanceMeters, bucket.lastWeek.distanceMeters)}

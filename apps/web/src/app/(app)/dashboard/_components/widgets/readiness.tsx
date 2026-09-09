@@ -4,7 +4,7 @@ import { formatLabel } from "@/lib/format";
 import { TileShell } from "./stat-tile";
 import { GaugeChart } from "@/components/gauge-chart";
 
-export async function renderReadiness(userId: string): Promise<ReactNode> {
+export async function renderReadiness(userId: string, square = true): Promise<ReactNode> {
   const today = await findTodayMetrics(userId);
   if (!today) return null;
 
@@ -14,7 +14,7 @@ export async function renderReadiness(userId: string): Promise<ReactNode> {
   const label = today.readinessLevel ? formatLabel(today.readinessLevel) : "Today";
 
   return (
-    <TileShell label="Readiness">
+    <TileShell label="Readiness" square={square}>
       <GaugeChart value={value} max={100} label={label} />
     </TileShell>
   );

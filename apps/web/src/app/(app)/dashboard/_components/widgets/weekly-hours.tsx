@@ -3,7 +3,7 @@ import { findWeeklySummary } from "@pair/db";
 import { formatDuration } from "@/lib/format";
 import { StatTile } from "./stat-tile";
 
-export async function renderWeeklyHours(userId: string): Promise<ReactNode> {
+export async function renderWeeklyHours(userId: string, square = true): Promise<ReactNode> {
   const { totalDurationSeconds } = await findWeeklySummary(userId);
   const thisWeek = totalDurationSeconds.thisWeek;
   const lastWeek = totalDurationSeconds.lastWeek;
@@ -18,5 +18,5 @@ export async function renderWeeklyHours(userId: string): Promise<ReactNode> {
     delta = `${sign}${Math.abs(changePercent).toFixed(0)}% vs last week`;
   }
 
-  return <StatTile square label="Training hours" value={formatDuration(thisWeek)} delta={delta} />;
+  return <StatTile square={square} label="Training hours" value={formatDuration(thisWeek)} delta={delta} />;
 }

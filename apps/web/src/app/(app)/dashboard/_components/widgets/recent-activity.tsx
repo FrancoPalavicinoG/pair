@@ -7,7 +7,7 @@ import { StatTile } from "./stat-tile";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-export async function renderRecentActivity(userId: string): Promise<ReactNode> {
+export async function renderRecentActivity(userId: string, square = true): Promise<ReactNode> {
   const [activity] = await findRecentActivities(userId, 1);
   if (!activity) return null;
 
@@ -21,10 +21,14 @@ export async function renderRecentActivity(userId: string): Promise<ReactNode> {
   const today = localDateString(now, timezone);
   const yesterday = localDateString(new Date(now.getTime() - DAY_MS), timezone);
 
+  // Nombre real del entrenamiento primero (mismo criterio que /activities), el deporte
+  // solo como fallback — así se distingue de "es esta actividad reciente" y no solo "Running".
+  const label = activity.name ?? (activity.sportType ? formatLabel(activity.sportType) : "Activity");
+
   return (
     <StatTile
-      square
-      label={activity.sportType ? formatLabel(activity.sportType) : "Activity"}
+      square={square}
+      label={label}
       value={value}
       delta={dayLabel(localDateFromTimestamp(activity.startTimeLocal), today, yesterday)}
     />

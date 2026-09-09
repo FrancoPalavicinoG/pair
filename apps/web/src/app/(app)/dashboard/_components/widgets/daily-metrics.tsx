@@ -54,6 +54,7 @@ async function renderMetric(
   userId: string,
   key: MetricKey,
   options: RenderMetricOptions = {},
+  square = true,
 ): Promise<ReactNode> {
   const {
     historyDays = HISTORY_DAYS,
@@ -84,26 +85,38 @@ async function renderMetric(
 
   const sparkline = buildSparkline(series.map((row) => row[key] ?? null));
 
-  return <StatTile square label={label} value={format(value)} unit={unit} delta={delta} sparkline={sparkline} />;
+  return (
+    <StatTile square={square} label={label} value={format(value)} unit={unit} delta={delta} sparkline={sparkline} />
+  );
 }
 
-export const renderSteps = (userId: string) => renderMetric(userId, "steps");
-export const renderRestingHr = (userId: string) => renderMetric(userId, "restingHeartRate");
-export const renderSleep = (userId: string) => renderMetric(userId, "sleepSeconds");
-export const renderBodyBattery = (userId: string) => renderMetric(userId, "bodyBattery");
-export const renderSpo2 = (userId: string) => renderMetric(userId, "spo2Average");
-export const renderRespiration = (userId: string) => renderMetric(userId, "respirationAvg");
-export const renderHillScore = (userId: string) => renderMetric(userId, "hillScore");
-export const renderEnduranceScore = (userId: string) => renderMetric(userId, "enduranceScore");
-export const renderVo2MaxRunning = (userId: string) =>
-  renderMetric(userId, "vo2MaxRunning", {
-    historyDays: 30,
-    compareLabel: "last month",
-    compareToRangeStart: true,
-    noDataLabel: "First month with data",
-  });
-export const renderVo2MaxCycling = (userId: string) => renderMetric(userId, "vo2MaxCycling");
-export const renderAltitudeAcclimation = (userId: string) =>
-  renderMetric(userId, "altitudeAcclimationMeters");
-export const renderWeight = (userId: string) => renderMetric(userId, "weight");
-export const renderBmi = (userId: string) => renderMetric(userId, "bmi");
+export const renderSteps = (userId: string, square?: boolean) => renderMetric(userId, "steps", {}, square);
+export const renderRestingHr = (userId: string, square?: boolean) =>
+  renderMetric(userId, "restingHeartRate", {}, square);
+export const renderSleep = (userId: string, square?: boolean) => renderMetric(userId, "sleepSeconds", {}, square);
+export const renderBodyBattery = (userId: string, square?: boolean) =>
+  renderMetric(userId, "bodyBattery", {}, square);
+export const renderSpo2 = (userId: string, square?: boolean) => renderMetric(userId, "spo2Average", {}, square);
+export const renderRespiration = (userId: string, square?: boolean) =>
+  renderMetric(userId, "respirationAvg", {}, square);
+export const renderHillScore = (userId: string, square?: boolean) => renderMetric(userId, "hillScore", {}, square);
+export const renderEnduranceScore = (userId: string, square?: boolean) =>
+  renderMetric(userId, "enduranceScore", {}, square);
+export const renderVo2MaxRunning = (userId: string, square?: boolean) =>
+  renderMetric(
+    userId,
+    "vo2MaxRunning",
+    {
+      historyDays: 30,
+      compareLabel: "last month",
+      compareToRangeStart: true,
+      noDataLabel: "First month with data",
+    },
+    square,
+  );
+export const renderVo2MaxCycling = (userId: string, square?: boolean) =>
+  renderMetric(userId, "vo2MaxCycling", {}, square);
+export const renderAltitudeAcclimation = (userId: string, square?: boolean) =>
+  renderMetric(userId, "altitudeAcclimationMeters", {}, square);
+export const renderWeight = (userId: string, square?: boolean) => renderMetric(userId, "weight", {}, square);
+export const renderBmi = (userId: string, square?: boolean) => renderMetric(userId, "bmi", {}, square);

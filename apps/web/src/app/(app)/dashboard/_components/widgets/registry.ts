@@ -1,5 +1,10 @@
 import type { ReactNode } from "react";
-import { findDashboardLayout, findWeeklySummary, type DashboardWidgetConfig } from "@pair/db";
+import {
+  findDashboardLayout,
+  findRecentActivities,
+  findWeeklySummary,
+  type DashboardWidgetConfig,
+} from "@pair/db";
 import { formatLabel } from "@/lib/format";
 import { renderBodyBattery, renderEnduranceScore, renderVo2MaxRunning } from "./daily-metrics";
 import { renderWeeklyHours } from "./weekly-hours";
@@ -34,13 +39,23 @@ export type WidgetKey = FixedWidgetKey | `weekly_distance:${string}`;
 export type WidgetEntry = {
   key: WidgetKey;
   label: string;
-  render: (userId: string) => Promise<ReactNode>;
+  render: (userId: string, square?: boolean) => Promise<ReactNode>;
+  // Override del link de la tile en /dashboard (default: /dashboard/metrics/[key]).
+  // Caso único hoy: "Most recent activity" lleva a la ficha real de esa actividad.
+  href?: (userId: string) => Promise<string>;
 };
 
 const FIXED_WIDGET_REGISTRY: Record<FixedWidgetKey, Omit<WidgetEntry, "key">> = {
   body_battery: { label: "Body battery", render: renderBodyBattery },
   weekly_hours: { label: "Training hours", render: renderWeeklyHours },
-  recent_activity: { label: "Most recent activity", render: renderRecentActivity },
+  recent_activity: {
+    label: "Most recent activity",
+    render: renderRecentActivity,
+    href: async (userId) => {
+      const [activity] = await findRecentActivities(userId, 1);
+      return activity ? `/activities/${activity.garminActivityId}` : "/dashboard/metrics/recent_activity";
+    },
+  },
   endurance_score: { label: "Endurance score", render: renderEnduranceScore },
   vo2_max_running: { label: "VO2 Max Running", render: renderVo2MaxRunning },
   hrv: { label: "HRV", render: renderHrv },
@@ -71,7 +86,7 @@ export async function getWidgetEntries(userId: string): Promise<WidgetEntry[]> {
     .map((sportType) => ({
       key: `weekly_distance:${sportType}` as const,
       label: formatLabel(sportType),
-      render: (uid: string) => renderWeeklyDistance(uid, sportType),
+      render: (uid: string, square?: boolean) => renderWeeklyDistance(uid, sportType, square),
     }));
 
   return [...fixed, ...sportEntries];

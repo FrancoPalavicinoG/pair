@@ -1,12 +1,16 @@
 import Link from "next/link";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
-const CLASSES = "font-mono text-xs uppercase tracking-[0.1em] text-graphite transition-colors hover:text-ink";
+const CLASSES =
+  "font-mono text-xs uppercase tracking-[0.1em] text-graphite transition-colors hover:text-ink";
 
 type CommonProps = { className?: string; children: ReactNode };
 
 type QuietActionProps =
-  | (CommonProps & { href: string } & Omit<ComponentPropsWithoutRef<typeof Link>, "href" | "className">)
+  | (CommonProps & { href: string } & Omit<
+        ComponentPropsWithoutRef<typeof Link>,
+        "href" | "className"
+      >)
   | (CommonProps & { href?: undefined } & Omit<ComponentPropsWithoutRef<"button">, "className">);
 
 // Acción secundaria discreta (editar, volver, cerrar sesión): mono chico uppercase,

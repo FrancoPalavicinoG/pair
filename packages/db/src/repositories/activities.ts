@@ -40,7 +40,11 @@ export async function insertActivity(activity: NewActivity): Promise<void> {
     .onConflictDoNothing({ target: [activities.userId, activities.garminActivityId] });
 }
 
-export type WeeklySportBucket = { distanceMeters: number; durationSeconds: number; activityCount: number };
+export type WeeklySportBucket = {
+  distanceMeters: number;
+  durationSeconds: number;
+  activityCount: number;
+};
 
 export type WeeklySummary = {
   totalDurationSeconds: { thisWeek: number; lastWeek: number };
@@ -169,7 +173,9 @@ export async function findActivities(
     const timezone = await findUserTimezone(userId);
     const now = new Date();
     const cutoff =
-      range === "this_week" ? getWeekBounds(now, timezone).thisWeekStart : getMonthStart(now, timezone);
+      range === "this_week"
+        ? getWeekBounds(now, timezone).thisWeekStart
+        : getMonthStart(now, timezone);
     conditions.push(gte(activities.startTimeUtc, cutoff));
   }
 

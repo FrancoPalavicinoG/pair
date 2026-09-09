@@ -1,31 +1,50 @@
 import type { ReactNode } from "react";
 import type { Sparkline } from "@/lib/sparkline";
 
-// Marco compartido de una tile cuadrada: fondo, hover, label arriba. `StatTile` lo usa
-// por dentro para su anatomía fija (label/valor/delta/sparkline); widgets con contenido
-// propio (sleep phases, training load) lo usan directo con children.
+// Marco compartido de una tile: fondo, hover, label arriba. `StatTile` lo usa por dentro
+// para su anatomía fija (label/valor/delta/sparkline); widgets con contenido propio (sleep
+// phases, training load) lo usan directo con children. `square` (default `true`) recorta a
+// `aspect-square` para la grilla del dashboard; en `false` (vista de detalle de
+// `/dashboard/metrics/[key]`) es un bloque de ancho libre con el mismo fondo/hover/label.
 export function TileShell({
   label,
   flagged = false,
+  square = true,
   children,
 }: {
   label: string;
   flagged?: boolean;
+  square?: boolean;
   children: ReactNode;
 }) {
-  return (
-    <div
-      className={`group relative flex aspect-square flex-col overflow-hidden p-5 transition-colors duration-[250ms] ${
-        flagged ? "bg-panel" : "bg-lcd hover:bg-panel"
+  const labelEl = (
+    <p
+      className={`mb-2.5 font-mono text-[10.5px] uppercase tracking-[0.1em] transition-colors duration-[250ms] ${
+        flagged ? "text-panel-muted" : "text-graphite group-hover:text-panel-muted"
       }`}
     >
-      <p
-        className={`mb-2.5 font-mono text-[10.5px] uppercase tracking-[0.1em] transition-colors duration-[250ms] ${
-          flagged ? "text-panel-muted" : "text-graphite group-hover:text-panel-muted"
+      {label}
+    </p>
+  );
+
+  if (square) {
+    return (
+      <div
+        className={`group relative flex aspect-square flex-col overflow-hidden p-5 transition-colors duration-[250ms] ${
+          flagged ? "bg-panel" : "bg-lcd hover:bg-panel"
         }`}
       >
-        {label}
-      </p>
+        {labelEl}
+        {children}
+      </div>
+    );
+  }
+
+  // Vista de detalle (/dashboard/metrics/[key]): ya es el destino, no hay a dónde llevar —
+  // sin `group`/`hover:bg-panel`, nada debería reaccionar al mouse acá.
+  return (
+    <div className={`relative p-5 ${flagged ? "bg-panel" : "bg-lcd"}`}>
+      {labelEl}
       {children}
     </div>
   );
@@ -90,7 +109,10 @@ export function StatTile({
             className={`absolute -translate-x-1/2 -translate-y-1/2 ${
               flagged ? "h-2.5 w-2.5 bg-ember" : "h-2 w-2 bg-graphite group-hover:bg-panel-muted"
             }`}
-            style={{ left: `${sparkline.lastPoint.xPercent}%`, top: `${sparkline.lastPoint.yPercent}%` }}
+            style={{
+              left: `${sparkline.lastPoint.xPercent}%`,
+              top: `${sparkline.lastPoint.yPercent}%`,
+            }}
           />
         </div>
       )}
@@ -105,16 +127,12 @@ export function StatTile({
     );
   }
 
+  // Vista de detalle (/dashboard/metrics/[key]): ya es el destino, no hay a dónde llevar —
+  // sin `group`/`hover:bg-panel`, nada debería reaccionar al mouse acá.
   return (
-    <div
-      className={`group relative px-5 pt-5 pb-0 transition-colors duration-[250ms] ${
-        flagged ? "bg-panel" : "bg-lcd hover:bg-panel"
-      }`}
-    >
+    <div className={`relative px-5 pt-5 pb-0 ${flagged ? "bg-panel" : "bg-lcd"}`}>
       <p
-        className={`mb-2.5 font-mono text-[10.5px] uppercase tracking-[0.1em] transition-colors duration-[250ms] ${
-          flagged ? "text-panel-muted" : "text-graphite group-hover:text-panel-muted"
-        }`}
+        className={`mb-2.5 font-mono text-[10.5px] uppercase tracking-[0.1em] ${flagged ? "text-panel-muted" : "text-graphite"}`}
       >
         {label}
       </p>
