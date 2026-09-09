@@ -21,7 +21,7 @@ export function ActivityRow({ activity }: { activity: Activity }) {
       className={`group grid items-center gap-3 ${ROW_CHROME}`}
       style={{ gridTemplateColumns: GRID_COLUMNS }}
     >
-      <Icon className="shrink-0 text-ember" />
+      <Icon className="size-[18px] shrink-0 text-ember" />
 
       <span className="flex min-w-0 items-baseline gap-2">
         <span className="truncate">{activity.name ?? ACTIVITY_CATEGORY_LABEL[category]}</span>
