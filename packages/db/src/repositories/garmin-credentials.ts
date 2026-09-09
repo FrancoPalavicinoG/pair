@@ -14,6 +14,29 @@ export async function findCredentialsByUserId(userId: string) {
   return row ?? null;
 }
 
+export type GarminStatus =
+  | { state: "not_connected" }
+  | { state: "needs_reconnect" }
+  | { state: "syncing" }
+  | { state: "synced"; lastSyncedAt: Date | null };
+
+type Credentials = Awaited<ReturnType<typeof findCredentialsByUserId>>;
+
+// Usado por apps/web ((app)/layout.tsx, dashboard/page.tsx) y apps/mcp (tool
+// get_started) — misma derivacion en los tres lugares, vive aca una sola vez.
+export function deriveGarminStatus(credentials: Credentials): GarminStatus {
+  if (!credentials) {
+    return { state: "not_connected" };
+  }
+  if (credentials.syncInProgress) {
+    return { state: "syncing" };
+  }
+  if (credentials.status !== "active") {
+    return { state: "needs_reconnect" };
+  }
+  return { state: "synced", lastSyncedAt: credentials.lastSyncedAt };
+}
+
 export async function updateSyncStatus(
   userId: string,
   fields: Partial<{ lastSyncedAt: Date; syncInProgress: boolean; status: GarminCredentialStatus }>,

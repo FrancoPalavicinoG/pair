@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { requireSession } from "@/lib/session";
-import { findCredentialsByUserId } from "@pair/db";
-import { deriveGarminStatus } from "@/lib/garmin-status";
+import { findCredentialsByUserId, deriveGarminStatus } from "@pair/db";
 import {
   getEffectiveLayout,
   getWidgetEntries,

@@ -59,7 +59,7 @@ Objetivo: el gateway funcionando de punta a punta con la infraestructura mínima
 
 - [x] Gate de conexión Garmin + hub "Connections": sacar `Connect Garmin` del nav fijo del sidebar. La conexión con Garmin pasa a ser un gate, no una vista navegable — mismo patrón que `requireSession()` → `/login`: si no hay credenciales o el token expiró, se redirige directo a la vista de login de Garmin antes de renderizar cualquier ruta de `(app)`; conectado, no se vuelve a ver. El tab `Connections` del sidebar queda para el conector MCP (placeholder hasta que exista). Spec: `docs/specs/app-connections.md`.
 - [x] Authorization Server OAuth 2.1 con DCR + PKCE, a mano (sin librería — ver `docs/specs/mcp-oauth-server.md`; los helpers de auth del SDK de MCP están deprecados/congelados y son Express, no Hono).
-- [ ] `apps/mcp` sobre Streamable HTTP, sesión → usuario.
+- [x] `apps/mcp` sobre Streamable HTTP, sesión → usuario. Primera tool: `get_started`. Ver `docs/specs/mcp-transport.md`.
 - [ ] Tools de lectura: actividades y métricas diarias, más tools de "insight" que traducen los datos crudos (carga, HRV, readiness, dog factor de P5) en algo que Claude pueda razonar — no un dump plano de columnas.
 - [ ] DSL `PairWorkout` + traductor + tests.
 - [ ] Tools de escritura con preview → confirm: crear/agendar workouts, y registrar sets de ejercicio (peso, reps) a partir de lo que Claude interpreta de una foto de rutina — el parseo de la imagen lo hace Claude (visión), PAIR solo persiste contra el perfil de ejercicio de P5.

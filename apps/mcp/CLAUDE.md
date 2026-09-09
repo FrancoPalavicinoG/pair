@@ -2,7 +2,7 @@
 
 Servidor MCP remoto + Authorization Server OAuth. Es lo que el usuario pega en Claude Desktop / Claude Code como URL de conector.
 
-Stack: Node + TypeScript + Hono. El transport MCP (Streamable HTTP) llega con las tools, vía `@modelcontextprotocol/hono`/`@modelcontextprotocol/server` — no instalado todavía.
+Stack: Node + TypeScript + Hono. Transport MCP (Streamable HTTP) montado a mano en `src/mcp-session.ts` con sesión real (`WebStandardStreamableHTTPServerTransport` de `@modelcontextprotocol/server`, no el `createMcpHandler` de conveniencia — ver nota en OAuth más abajo, mismo motivo).
 
 ## Tools
 
@@ -10,7 +10,7 @@ Tabla viva. Toda tool nueva se añade aquí en el mismo cambio que la implementa
 
 | Tool | Scope | Efecto |
 |---|---|---|
-| `garmin_status` | — | Estado de la conexión del usuario con Garmin |
+| `get_started` | — | Orienta a Claude sobre cómo razonar/interactuar con Garmin a través de PAIR (preview→confirm, scopes vigentes) y da el estado real de la conexión Garmin. Llamarla siempre primero |
 | `list_activities` | `activities:read` | Actividades por rango de fechas, resumidas |
 | `get_activity` | `activities:read` | Detalle de una actividad |
 | `get_daily_metrics` | `metrics:read` | Sueño, FC en reposo, pasos, body battery por día |
@@ -39,6 +39,12 @@ Tabla viva. Toda tool nueva se añade aquí en el mismo cambio que la implementa
 ## OAuth
 
 Claude Desktop requiere OAuth 2.1 con **Dynamic Client Registration** (RFC 7591) y **PKCE**. El Authorization Server (`src/oauth/`) está implementado a mano: metadatos (RFC 8414), DCR, `/authorize` y `/token` como rutas Hono propias, sin depender de ningún paquete de auth del SDK de MCP. Los helpers del SDK para esto (`mcpAuthRouter`, `OAuthServerProvider`) quedaron congelados/deprecados en `@modelcontextprotocol/server-legacy/auth` (v1, sin mantenimiento) y además son Express, no Hono — la recomendación oficial pasó a ser "usar un IdP dedicado", que para un círculo cerrado de amigos es más peso del que hace falta. Detalle de diseño en `docs/specs/mcp-oauth-server.md`.
+
+## Transport
+
+`src/mcp-session.ts` arma la sesión a mano con `WebStandardStreamableHTTPServerTransport` (`sessionIdGenerator`, `enableJsonResponse: true`, `Map` en memoria de `sessionId → transport`), en vez de usar el atajo `createMcpHandler` del mismo paquete. Motivo confirmado contra el `.d.ts` real del paquete instalado: `createMcpHandler` sirve el protocolo 2025-11-25 (el que negocian el inspector y, hasta donde sabemos, Claude Desktop/Code) en modo `legacy: 'stateless'` — sin sesión, y por diseño devuelve `405` a `GET`/`DELETE`. Un cliente real abre ese `GET` para el canal de push del servidor y no tolera el rechazo. `enableJsonResponse: true` evita además una demora de streaming SSE (5-60s, inconsistente) que se vio contra el inspector corriendo en un navegador real — no reproducida con `curl`, Node `http.Agent` con keep-alive, ni `fetch` nativo de Node, así que puede ser algo específico de ese cliente/entorno, no de este servidor.
+
+Limitación conocida y aceptada por ahora: sin expiración de sesiones abandonadas en el `Map` (sin TTL). Para el volumen de este proyecto no es un problema hoy.
 
 ## Añadir una tool
 

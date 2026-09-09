@@ -1,6 +1,6 @@
 import { Wordmark } from "@/components/wordmark";
 import { PairButton } from "@/components/pair-button";
-import type { GarminStatus } from "@/lib/garmin-status";
+import type { GarminStatus } from "@pair/db";
 import { logout, syncNowAction } from "../actions";
 import { NavLink } from "./nav-link";
 import { SyncStatusPoller } from "./sync-status-poller";

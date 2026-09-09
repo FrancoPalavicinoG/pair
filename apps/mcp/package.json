@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@hono/node-server": "^2.1.1",
+    "@modelcontextprotocol/hono": "^2.0.0",
+    "@modelcontextprotocol/server": "^2.0.0",
     "hono": "^4.13.7",
     "zod": "^3.25.76",
     "@pair/core": "workspace:*",
