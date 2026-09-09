@@ -42,8 +42,7 @@ export default async function DashboardPage() {
       <Eyebrow>Dashboard</Eyebrow>
 
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <p className="font-mono text-xs uppercase tracking-[0.1em] text-graphite">Widgets</p>
+        <div className="flex justify-end">
           <QuietAction href="/dashboard/widgets">Edit widgets</QuietAction>
         </div>
 
