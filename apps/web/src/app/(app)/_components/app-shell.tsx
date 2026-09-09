@@ -9,7 +9,6 @@ const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/activities", label: "Activities" },
   { href: "/connections", label: "Connections" },
-  { href: "/dashboard/widgets", label: "Widgets" },
 ];
 
 // Shell de escritorio: sidebar fijo + contenido a la derecha (docs/style.md).
