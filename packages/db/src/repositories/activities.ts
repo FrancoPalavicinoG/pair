@@ -40,7 +40,7 @@ export async function insertActivity(activity: NewActivity): Promise<void> {
     .onConflictDoNothing({ target: [activities.userId, activities.garminActivityId] });
 }
 
-export type WeeklySportBucket = { distanceMeters: number; activityCount: number };
+export type WeeklySportBucket = { distanceMeters: number; durationSeconds: number; activityCount: number };
 
 export type WeeklySummary = {
   totalDurationSeconds: { thisWeek: number; lastWeek: number };
@@ -121,18 +121,20 @@ export async function findWeeklySummary(userId: string): Promise<WeeklySummary> 
   for (const row of rows) {
     const sport = row.sportType ?? "other";
     summary.bySport[sport] ??= {
-      thisWeek: { distanceMeters: 0, activityCount: 0 },
-      lastWeek: { distanceMeters: 0, activityCount: 0 },
+      thisWeek: { distanceMeters: 0, durationSeconds: 0, activityCount: 0 },
+      lastWeek: { distanceMeters: 0, durationSeconds: 0, activityCount: 0 },
     };
 
     if (row.startTimeUtc >= bounds.thisWeekStart) {
       summary.bySport[sport].thisWeek.distanceMeters += row.distanceMeters ?? 0;
+      summary.bySport[sport].thisWeek.durationSeconds += row.durationSeconds ?? 0;
       summary.bySport[sport].thisWeek.activityCount += 1;
       summary.totalDurationSeconds.thisWeek += row.durationSeconds ?? 0;
     } else {
       // El WHERE ya acota las filas a [lastWeekStart, thisWeekEnd]: cualquier fila que
       // no sea "esta semana" cae necesariamente en la semana pasada completa (lunes-domingo).
       summary.bySport[sport].lastWeek.distanceMeters += row.distanceMeters ?? 0;
+      summary.bySport[sport].lastWeek.durationSeconds += row.durationSeconds ?? 0;
       summary.bySport[sport].lastWeek.activityCount += 1;
       summary.totalDurationSeconds.lastWeek += row.durationSeconds ?? 0;
     }

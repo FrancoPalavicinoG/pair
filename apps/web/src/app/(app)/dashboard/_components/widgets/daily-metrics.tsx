@@ -37,7 +37,31 @@ const METRICS: Record<MetricKey, { label: string; unit?: string; format: (v: num
   bmi: { label: "BMI", format: (v) => v.toFixed(1) },
 };
 
-async function renderMetric(userId: string, key: MetricKey): Promise<ReactNode> {
+type RenderMetricOptions = {
+  historyDays?: number;
+  compareLabel?: string;
+  // Compara contra el punto más viejo de la ventana que sí tenga el dato (no necesariamente
+  // el primer día de la ventana: si la métrica empezó a registrarse a mitad de la ventana,
+  // los días anteriores existen en `daily_metrics` para otras métricas pero vienen null acá)
+  // en vez de contra ayer — para métricas que casi no varían día a día (ej. VO2 Max), donde
+  // "vs yesterday" no dice nada útil y conviene una ventana más larga
+  // (docs/specs/app-dashboard-widgets-v2.md).
+  compareToRangeStart?: boolean;
+  noDataLabel?: string;
+};
+
+async function renderMetric(
+  userId: string,
+  key: MetricKey,
+  options: RenderMetricOptions = {},
+): Promise<ReactNode> {
+  const {
+    historyDays = HISTORY_DAYS,
+    compareLabel = "yesterday",
+    compareToRangeStart = false,
+    noDataLabel = "First day with data",
+  } = options;
+
   const today = await findTodayMetrics(userId);
   if (!today) return null;
 
@@ -45,16 +69,18 @@ async function renderMetric(userId: string, key: MetricKey): Promise<ReactNode> 
   if (value == null) return null;
 
   // Descarta filas con fecha posterior a "hoy" (residuo de un bug de sync ya corregido).
-  const series = (await findRecentDailyMetrics(userId, HISTORY_DAYS)).filter(
+  const series = (await findRecentDailyMetrics(userId, historyDays)).filter(
     (row) => row.date <= today.date,
   );
-  const yesterday: DailyMetricsRow | undefined = series[series.length - 2];
-  const previous = yesterday?.[key];
+  const comparisonRow: DailyMetricsRow | undefined = compareToRangeStart
+    ? series.slice(0, -1).find((row) => row[key] != null)
+    : series[series.length - 2];
+  const previous = comparisonRow?.[key];
   const { label, unit, format } = METRICS[key];
   const delta =
     previous == null
-      ? "First day with data"
-      : `${value >= previous ? "+" : "−"}${format(Math.abs(value - previous))} vs yesterday`;
+      ? noDataLabel
+      : `${value >= previous ? "+" : "−"}${format(Math.abs(value - previous))} vs ${compareLabel}`;
 
   const sparkline = buildSparkline(series.map((row) => row[key] ?? null));
 
@@ -69,7 +95,13 @@ export const renderSpo2 = (userId: string) => renderMetric(userId, "spo2Average"
 export const renderRespiration = (userId: string) => renderMetric(userId, "respirationAvg");
 export const renderHillScore = (userId: string) => renderMetric(userId, "hillScore");
 export const renderEnduranceScore = (userId: string) => renderMetric(userId, "enduranceScore");
-export const renderVo2MaxRunning = (userId: string) => renderMetric(userId, "vo2MaxRunning");
+export const renderVo2MaxRunning = (userId: string) =>
+  renderMetric(userId, "vo2MaxRunning", {
+    historyDays: 30,
+    compareLabel: "last month",
+    compareToRangeStart: true,
+    noDataLabel: "First month with data",
+  });
 export const renderVo2MaxCycling = (userId: string) => renderMetric(userId, "vo2MaxCycling");
 export const renderAltitudeAcclimation = (userId: string) =>
   renderMetric(userId, "altitudeAcclimationMeters");
