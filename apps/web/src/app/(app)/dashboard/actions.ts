@@ -22,3 +22,12 @@ export async function toggleWidgetVisibility(key: WidgetKey): Promise<void> {
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/widgets");
 }
+
+export async function showAllWidgets(): Promise<void> {
+  const session = await requireSession();
+  const current = await getEffectiveLayout(session.userId);
+  const allVisible = current.map((w) => ({ ...w, visible: true }));
+  await upsertDashboardLayout(session.userId, allVisible);
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/widgets");
+}

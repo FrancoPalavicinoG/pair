@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { requireSession } from "@/lib/session";
-import { toggleWidgetVisibility } from "../actions";
+import { showAllWidgets, toggleWidgetVisibility } from "../actions";
 import { getEffectiveLayout, getWidgetEntries, type WidgetKey } from "../_components/widgets/registry";
 import { Eyebrow } from "@/components/eyebrow";
 import { ListRow } from "@/components/list-row";
+import { QuietAction } from "@/components/quiet-action";
 
 export default async function DashboardWidgetsPage() {
   const session = await requireSession();
@@ -21,7 +21,12 @@ export default async function DashboardWidgetsPage() {
 
   return (
     <div className="space-y-6">
-      <Eyebrow>Dashboard widgets</Eyebrow>
+      <div className="flex items-center justify-between">
+        <Eyebrow>Dashboard widgets</Eyebrow>
+        <form action={showAllWidgets}>
+          <QuietAction type="submit">Select all</QuietAction>
+        </form>
+      </div>
 
       <ul className="space-y-2">
         {rows.map((row) => (
@@ -38,12 +43,9 @@ export default async function DashboardWidgetsPage() {
         ))}
       </ul>
 
-      <Link
-        href="/dashboard"
-        className="block font-mono text-xs uppercase tracking-[0.1em] text-graphite transition-colors hover:text-ink"
-      >
+      <QuietAction href="/dashboard" className="block">
         Back to dashboard
-      </Link>
+      </QuietAction>
     </div>
   );
 }

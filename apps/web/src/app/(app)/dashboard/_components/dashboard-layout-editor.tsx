@@ -92,12 +92,6 @@ export function DashboardLayoutEditor({
     return [...visibleWidgets, ...hiddenWidgets];
   }
 
-  function handleHide(key: WidgetKey) {
-    const remainingItems = items.filter((item) => item.key !== key);
-    setItems(remainingItems);
-    updateDashboardLayout(buildLayout(remainingItems));
-  }
-
   function handleDragEnd(event: DragEndEvent) {
     const activeKey = event.active.id as WidgetKey;
     const overKey = event.over?.id as WidgetKey | undefined;
@@ -132,7 +126,7 @@ export function DashboardLayoutEditor({
             }}
           >
             {items.map((item) => (
-              <SortableWidgetTile key={item.key} item={item} onHide={handleHide} />
+              <SortableWidgetTile key={item.key} item={item} />
             ))}
           </div>
         </SortableContext>
@@ -141,13 +135,7 @@ export function DashboardLayoutEditor({
   );
 }
 
-function SortableWidgetTile({
-  item,
-  onHide,
-}: {
-  item: WidgetItem;
-  onHide: (key: WidgetKey) => void;
-}) {
+function SortableWidgetTile({ item }: { item: WidgetItem }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: item.key,
   });
@@ -166,14 +154,6 @@ function SortableWidgetTile({
       >
         ⋮⋮
       </span>
-      <button
-        type="button"
-        aria-label={`Hide ${item.label}`}
-        className="absolute right-2 top-2 z-10 font-mono text-xs leading-none text-graphite opacity-0 transition-colors duration-[250ms] hover:text-bone focus-visible:opacity-100 focus-visible:text-ink group-hover:text-panel-muted group-hover:opacity-100 group-focus-within:opacity-100"
-        onClick={() => onHide(item.key)}
-      >
-        ×
-      </button>
       <Link href={`/dashboard/metrics/${encodeURIComponent(item.key)}`} className="block">
         {item.node}
       </Link>

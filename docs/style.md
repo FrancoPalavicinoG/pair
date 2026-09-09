@@ -117,6 +117,8 @@ Implementación de referencia: `apps/web/src/components/pair-button.tsx` (`PairB
 - **Confirm** (escritura a Garmin): mismo look que Primary, con un gate extra. Regla dura del proyecto (`CLAUDE.md` raíz, regla 4): toda escritura a Garmin pasa por preview → confirm, así que este botón **solo** se habilita una vez que hay un preview generado. Antes de eso está inerte: borde `--rule-soft`, texto grafito apagado, `cursor: not-allowed`, no clickeable.
 - Nunca colapsar el flujo de escritura a Garmin a un solo botón, y nunca saltarse el gate de preview en Confirm: ese gate es del flujo de escritura, no una restricción de color.
 
+**Acción discreta** (ej. "Edit widgets", "Back to dashboard", "Log out", "Select all"): no es un `PairButton` — no lleva borde ni fondo propio, es texto mono chico uppercase (`text-xs`, `tracking-[0.1em]`), `--graphite` que pasa a `--ink` en hover. Para una utilidad de navegación o una acción de apoyo que no compite por atención con la acción primaria de la vista, no para un CTA. Implementación de referencia: `apps/web/src/components/quiet-action.tsx` (`QuietAction`, mismo patrón dual `href`/botón que `PairButton`).
+
 ### Foco / interacción — nunca el color nativo del sistema
 
 Todo elemento clickeable define su propio `:focus-visible` explícito (`outline: 2px solid var(--ember)`) y resetea el outline nativo del navegador (`outline: none` en el estado base). Nunca dejar el foco nativo sin resetear: en macOS/Safari hereda el color de acento del sistema del usuario, y si ese acento no es ember el foco se ve inconsistente con el resto del sistema de interacción.
@@ -136,7 +138,6 @@ Anatomía: label (mono, mayúscula chica, graphite) → valor (Archivo `wght 800
 - Monocromas por defecto (línea graphite sobre fondo transparente que hereda el de la tile) — los hues vívidos del sistema de gráficos no se duplican acá. Extenderlos a las tiles fue una decisión que se probó y se revirtió por dos motivos: rompía la separación validada bajo daltonismo simulado (ver techo de hues en Gráficos), y diluía el significado de "un color por gráfico".
 - El delta de una tile solo pasa a `--ember` cuando esa métrica es la que pair está comentando activamente — como mucho una tile así por vista. Esa tile además pasa toda su superficie a `--panel` (label, valor y fondo incluidos) para que se lea como "la que tiene algo que decir".
 - **Hover**: la tile completa —fondo, label, valor y el área de la curva, todo junto, sin una franja con fondo propio— pasa a `--panel` con transición de 250ms. Es preview de interacción, nunca recolorea el delta a ember: hover es affordance de UI, no una señal de que pair hizo algo.
-- **Cierre (`×`)**: botón en la esquina superior derecha, oculto (`opacity: 0`) hasta hover o foco del contenedor (`:focus-within`), color `--graphite` → `--ink` en su propio hover. Nunca ember: no es la acción primaria de la vista, y reservar ember para esa evita que compita visualmente con lo que sí importa. Es el patrón que usa el dashboard configurable (P4) para sacar un widget de la vista.
 - **Drag handle**: glyph mono `⋮⋮` a la izquierda de la tile, color `--graphite`. `cursor: grab` en reposo, `grabbing` mientras se arrastra. Mismo tratamiento de foco que cualquier elemento interactivo (`:focus-visible` con outline ember). Usado por el dashboard configurable (P4) para reordenar widgets.
 
 ### Gráficos
