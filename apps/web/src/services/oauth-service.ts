@@ -1,12 +1,13 @@
 import { randomBytes } from "node:crypto";
 import { z } from "zod";
 import { findOAuthClient, createAuthorizationCodeGrant, hashToken, type OAuthClientMetadata } from "@pair/db";
-import { OAuthError } from "@pair/core";
+import { OAuthError, PAIR_OAUTH_SCOPES, type PairOAuthScope } from "@pair/core";
 
-// Las 4 scopes de apps/mcp/CLAUDE.md, en lenguaje llano — sin jerga de OAuth
-// (regla dura de apps/web/CLAUDE.md). Object.keys(SCOPE_LABELS) es la lista
-// canonica de scopes validas para este archivo.
-export const SCOPE_LABELS: Record<string, string> = {
+// Traduccion a lenguaje llano de PAIR_OAUTH_SCOPES (@pair/core) — sin jerga
+// de OAuth (regla dura de apps/web/CLAUDE.md). Tipado con PairOAuthScope
+// para que el compilador exija las 4 y ninguna de mas: no se puede
+// desalinear en silencio con lo que apps/mcp anuncia.
+export const SCOPE_LABELS: Record<PairOAuthScope, string> = {
   "activities:read": "Ver tus actividades y su detalle",
   "metrics:read": "Ver tus métricas diarias y su detalle",
   "workouts:read": "Ver tus entrenamientos creados y agendados",
@@ -30,7 +31,7 @@ export type ConsentRequest = {
   clientId: string;
   redirectUri: string;
   codeChallenge: string;
-  scopes: string[];
+  scopes: PairOAuthScope[];
   state?: string;
 };
 
@@ -60,9 +61,15 @@ export async function validateConsentRequest(
     throw new OAuthError("invalid_request", "redirect_uri not registered for this client");
   }
 
+  // Un cliente que no pide ningun scope (RFC 9728, protected resource sin
+  // scopes_supported, o simplemente un cliente que omite el parametro) pide
+  // "todo lo que este AS ofrece" por default, no "nada".
   const requestedScopes = parsed.data.scope ? parsed.data.scope.split(" ") : [];
-  const scopes = requestedScopes.filter((scope) => scope in SCOPE_LABELS);
-  if (scopes.length !== requestedScopes.length) {
+  const effectiveScopes: string[] = requestedScopes.length > 0 ? requestedScopes : [...PAIR_OAUTH_SCOPES];
+  const scopes = effectiveScopes.filter((scope): scope is PairOAuthScope =>
+    (PAIR_OAUTH_SCOPES as readonly string[]).includes(scope),
+  );
+  if (scopes.length !== effectiveScopes.length) {
     throw new OAuthError("invalid_scope", "Unknown scope requested");
   }
 

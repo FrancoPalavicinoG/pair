@@ -1,6 +1,6 @@
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
 import { z } from "zod";
-import { OAuthError } from "@pair/core";
+import { OAuthError, PAIR_OAUTH_SCOPES } from "@pair/core";
 import { env } from "../env";
 import {
   getClient,
@@ -30,8 +30,25 @@ oauthRoutes.get("/.well-known/oauth-authorization-server", (c) => {
     grant_types_supported: ["authorization_code", "refresh_token"],
     code_challenge_methods_supported: ["S256"],
     token_endpoint_auth_methods_supported: ["none", "client_secret_post"],
+    scopes_supported: PAIR_OAUTH_SCOPES,
   });
 });
+
+// RFC 9728. Sin esto, un cliente que no conoce de antemano los scopes de
+// PAIR (mcp-remote, por ejemplo) cae a un scope fallback propio (tipo
+// "openid email profile") que /oauth/consent rechaza. Se sirve en las dos
+// rutas que un cliente puede probar: la que sigue la convención de RFC 9728
+// (sufijo del path del recurso) y la bare como fallback.
+function protectedResourceMetadata(c: Context) {
+  const issuer = env.OAUTH_ISSUER_URL;
+  return c.json({
+    resource: `${issuer}/mcp`,
+    authorization_servers: [issuer],
+    scopes_supported: PAIR_OAUTH_SCOPES,
+  });
+}
+oauthRoutes.get("/.well-known/oauth-protected-resource/mcp", protectedResourceMetadata);
+oauthRoutes.get("/.well-known/oauth-protected-resource", protectedResourceMetadata);
 
 const registerSchema = z.object({
   redirect_uris: z.array(z.string().url()).min(1),

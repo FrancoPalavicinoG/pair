@@ -22,7 +22,7 @@ Tabla viva. Toda tool nueva se añade aquí en el mismo cambio que la implementa
 
 ## Scopes
 
-`activities:read`, `metrics:read`, `workouts:read`, `workouts:write`. El usuario los ve en la pantalla de consentimiento en lenguaje llano, no con estos identificadores.
+`activities:read`, `metrics:read`, `workouts:read`, `workouts:write` — fuente única `PAIR_OAUTH_SCOPES` en `packages/core/src/oauth-scopes.ts` (no solo texto acá: `apps/mcp` la anuncia en `/.well-known/oauth-authorization-server` y `/.well-known/oauth-protected-resource[/mcp]`, `apps/web` la usa para validar el consentimiento). El usuario ve la traducción a lenguaje llano en la pantalla de consentimiento (`SCOPE_LABELS` en `apps/web/src/services/oauth-service.ts`), no estos identificadores.
 
 ## Reglas
 

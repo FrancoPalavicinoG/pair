@@ -2,10 +2,12 @@ import { serve } from "@hono/node-server";
 import { cors } from "hono/cors";
 import { createMcpHonoApp } from "@modelcontextprotocol/hono";
 import { OAuthError } from "@pair/core";
-import "./env";
+import { env } from "./env";
 import { oauthRoutes } from "./oauth/routes";
 import { verifyAccessToken } from "./oauth/provider";
 import { handleMcpRequest } from "./mcp-session";
+
+const PROTECTED_RESOURCE_METADATA_URL = `${env.OAUTH_ISSUER_URL}/.well-known/oauth-protected-resource/mcp`;
 
 const app = createMcpHonoApp();
 app.route("/", oauthRoutes);
@@ -23,7 +25,7 @@ app.use(
     origin: "*",
     allowMethods: ["GET", "POST", "DELETE", "OPTIONS"],
     allowHeaders: ["Authorization", "Content-Type", "Mcp-Session-Id", "mcp-protocol-version"],
-    exposeHeaders: ["Mcp-Session-Id"],
+    exposeHeaders: ["Mcp-Session-Id", "WWW-Authenticate"],
   }),
 );
 
@@ -31,10 +33,17 @@ app.use(
 // verifica el token por su cuenta. La verificación es nuestra — se le pasa
 // el AuthInfo ya resuelto por handleRequest().
 app.all("/mcp", async (c) => {
+  // RFC 9728 §5.1: un recurso protegido apunta a su propia metadata en el
+  // 401, para que un cliente que no hace path-guessing la encuentre igual.
+  const unauthorized = (body: Record<string, string>) =>
+    c.json(body, 401, {
+      "WWW-Authenticate": `Bearer resource_metadata="${PROTECTED_RESOURCE_METADATA_URL}"`,
+    });
+
   const authHeader = c.req.header("Authorization");
   const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : undefined;
   if (!token) {
-    return c.json({ error: "invalid_token", error_description: "Missing bearer token" }, 401);
+    return unauthorized({ error: "invalid_token", error_description: "Missing bearer token" });
   }
 
   try {
@@ -47,7 +56,7 @@ app.all("/mcp", async (c) => {
     return await handleMcpRequest(c.req.raw, { authInfo, parsedBody: getVar("parsedBody") });
   } catch (err) {
     if (err instanceof OAuthError) {
-      return c.json({ error: err.oauthErrorCode, error_description: err.message }, 401);
+      return unauthorized({ error: err.oauthErrorCode, error_description: err.message });
     }
     throw err;
   }

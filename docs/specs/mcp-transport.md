@@ -59,6 +59,19 @@ CORS: `/mcp` necesita `hono/cors` explícito. Un cliente MCP corriendo en un nav
 - [x] Probado de punta a punta: DCR + PKCE + consentimiento + token + `initialize`/`GET`/`notifications`/`tools/list`/`tools/call`/`DELETE` reales, contenido y estado correctos, con un cliente automatizado real (`fetch` nativo de Node). El inspector corriendo en un navegador real también completó el flujo (incluida la parte de OAuth) pero con demoras inconsistentes de 5-60s en las llamadas al protocolo MCP en sí — no reproducidas con `curl`, Node `http.Agent` ni `fetch` nativo contra el mismo servidor, mismo token, mismo flujo. Documentado como posible problema del cliente/entorno, no bloqueante — se revisita si vuelve a aparecer probando con Claude Desktop/Code real.
 - [x] Marcar el ítem de `docs/roadmap.md` como hecho
 
+## Actualización (2026-09-09): RFC 9728 (Protected Resource Metadata)
+
+Probando con Claude Desktop real (vía `mcp-remote` como bridge stdio, ya que Claude Desktop exige `https` incluso para `localhost` en conectores custom — `--allow-http` lo resuelve), el flujo llegó hasta `/oauth/consent` y falló: `OAuthError: Unknown scope requested`.
+
+Causa confirmada leyendo el bundle real de `mcp-remote` instalado: sin `/.well-known/oauth-protected-resource` (RFC 9728), el cliente no sabe qué scopes existen y cae a un fallback hardcodeado (`"openid email profile"`), que `/oauth/consent` rechaza por no ser scopes de PAIR. `docs/specs/mcp-oauth-server.md` ya había diferido esto explícitamente "hasta que exista el recurso `/mcp` real" — ya existe, así que se implementó:
+
+- `packages/core/src/oauth-scopes.ts`: `PAIR_OAUTH_SCOPES`/`PairOAuthScope`, fuente única (antes vivía solo como claves de `SCOPE_LABELS` en `apps/web`). `apps/mcp` no puede importar de `apps/web`, y ahora los dos consumen la misma lista.
+- `apps/mcp/src/oauth/routes.ts`: `/.well-known/oauth-protected-resource[/mcp]` (las dos variantes de ruta que un cliente puede probar), y `scopes_supported` agregado a la metadata del AS existente.
+- `apps/mcp/src/index.ts`: header `WWW-Authenticate` en los 401 de `/mcp` (RFC 9728 §5.1), apuntando a la metadata — por si algún cliente confía en el header en vez de adivinar la ruta.
+- `apps/web/src/services/oauth-service.ts`: un scope vacío/ausente en el consentimiento ahora se interpreta como "todos los scopes de PAIR", no como ninguno — defensivo para cualquier cliente que tampoco mande `scope`, no solo `mcp-remote`.
+
+Probado de nuevo con Claude Desktop tras el fix: ver checklist.
+
 ## Preguntas abiertas
 
 Ninguna.
