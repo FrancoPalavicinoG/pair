@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { findTodayMetrics } from "@pair/db";
-import { formatLabel } from "@/lib/format";
+import { formatLabel } from "@pair/core";
 import { TileShell } from "./stat-tile";
 
 // Frase de Garmin ("STRAINED_1"), largo variable y sin confirmar — StatTile's fixed

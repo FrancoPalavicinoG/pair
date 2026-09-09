@@ -1,5 +1,5 @@
 import type { ReactElement, SVGProps } from "react";
-import type { ActivityCategory } from "@/lib/activity-category";
+import type { ActivityCategory } from "@pair/core";
 
 // Set de íconos por categoría de actividad (docs/style.md, "Iconos"): trazo fino,
 // sin relleno, `stroke="currentColor"` para heredar color/hover de quien lo use

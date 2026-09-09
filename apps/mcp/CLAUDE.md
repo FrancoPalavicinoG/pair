@@ -11,9 +11,9 @@ Tabla viva. Toda tool nueva se añade aquí en el mismo cambio que la implementa
 | Tool | Scope | Efecto |
 |---|---|---|
 | `get_started` | — | Orienta a Claude sobre cómo razonar/interactuar con Garmin a través de PAIR (preview→confirm, scopes vigentes) y da el estado real de la conexión Garmin. Llamarla siempre primero |
-| `list_activities` | `activities:read` | Actividades por rango de fechas, resumidas |
-| `get_activity` | `activities:read` | Detalle de una actividad |
-| `get_daily_metrics` | `metrics:read` | Sueño, FC en reposo, pasos, body battery por día |
+| `list_activities` | `activities:read` | Actividades por rango de fechas y categoría, resumidas (una línea c/u, con `garminActivityId`) |
+| `get_activity` | `activities:read` | Detalle de una actividad puntual (a partir del id de `list_activities`) |
+| `get_daily_metrics` | `metrics:read` | Sueño, FC en reposo, pasos, body battery, HRV, estado de entreno/ACWR, readiness, VO2 max, por día |
 | `list_workouts` | `workouts:read` | Entrenamientos creados y agendados |
 | `workout_preview` | `workouts:write` | Valida un PairWorkout y devuelve resumen + `preview_token`. Sin efecto |
 | `workout_create` | `workouts:write` | Consume el token y crea el workout en Garmin |
@@ -45,6 +45,8 @@ Claude Desktop requiere OAuth 2.1 con **Dynamic Client Registration** (RFC 7591)
 `src/mcp-session.ts` arma la sesión a mano con `WebStandardStreamableHTTPServerTransport` (`sessionIdGenerator`, `enableJsonResponse: true`, `Map` en memoria de `sessionId → transport`), en vez de usar el atajo `createMcpHandler` del mismo paquete. Motivo confirmado contra el `.d.ts` real del paquete instalado: `createMcpHandler` sirve el protocolo 2025-11-25 (el que negocian el inspector y, hasta donde sabemos, Claude Desktop/Code) en modo `legacy: 'stateless'` — sin sesión, y por diseño devuelve `405` a `GET`/`DELETE`. Un cliente real abre ese `GET` para el canal de push del servidor y no tolera el rechazo. `enableJsonResponse: true` evita además una demora de streaming SSE (5-60s, inconsistente) que se vio contra el inspector corriendo en un navegador real — no reproducida con `curl`, Node `http.Agent` con keep-alive, ni `fetch` nativo de Node, así que puede ser algo específico de ese cliente/entorno, no de este servidor.
 
 Limitación conocida y aceptada por ahora: sin expiración de sesiones abandonadas en el `Map` (sin TTL). Para el volumen de este proyecto no es un problema hoy.
+
+**Zod v4 solo para `inputSchema` de tools**: `registerTool` exige que el schema implemente `~standard.jsonSchema` (Standard Schema + JSON Schema), que Zod v3 no tiene — confirmado contra el `.d.ts` del paquete ("Zod v4, ArkType, and Valibot... implement both interfaces", v3 no aparece). El resto de `apps/mcp` (rutas OAuth, ya probadas end-to-end) sigue en Zod v3 (`"zod"`, igual que el resto del monorepo) sin tocarse. Los archivos de tools con `inputSchema` importan de `"zod4"` (alias de `package.json`, `zod@^4`) — ver comentario en `src/tools/require-scope.ts`.
 
 ## Añadir una tool
 

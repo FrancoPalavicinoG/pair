@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { findTodayMetrics } from "@pair/db";
-import { formatLabel } from "@/lib/format";
+import { formatLabel } from "@pair/core";
 import { StatTile } from "./stat-tile";
 
 export async function renderHrv(userId: string): Promise<ReactNode> {
