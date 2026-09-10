@@ -97,17 +97,13 @@ export function StatTile({
               vectorEffect="non-scaling-stroke"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className={
-                flagged
-                  ? "stroke-panel-muted"
-                  : "stroke-graphite opacity-70 transition-colors duration-[250ms] group-hover:stroke-panel-muted"
-              }
+              className={flagged ? "stroke-panel-muted" : "stroke-ember opacity-70"}
             />
           </svg>
           <span
             aria-hidden
             className={`absolute -translate-x-1/2 -translate-y-1/2 ${
-              flagged ? "h-2.5 w-2.5 bg-ember" : "h-2 w-2 bg-graphite group-hover:bg-panel-muted"
+              flagged ? "h-2.5 w-2.5 bg-ember" : "h-2 w-2 bg-ember"
             }`}
             style={{
               left: `${sparkline.lastPoint.xPercent}%`,

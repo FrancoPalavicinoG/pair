@@ -11,8 +11,10 @@ export async function renderRecentActivity(userId: string, square = true): Promi
   const [activity] = await findRecentActivities(userId, 1);
   if (!activity) return null;
 
+  // Sin distancia GPS (0 o null, ej. HIIT): el tiempo entrenado aporta más que "0 m"
+  // (mismo criterio que weekly-distance.tsx).
   const value =
-    activity.distanceMeters != null
+    activity.distanceMeters != null && activity.distanceMeters > 0
       ? formatDistance(activity.distanceMeters)
       : formatDuration(activity.durationSeconds ?? 0);
 
@@ -23,7 +25,8 @@ export async function renderRecentActivity(userId: string, square = true): Promi
 
   // Nombre real del entrenamiento primero (mismo criterio que /activities), el deporte
   // solo como fallback — así se distingue de "es esta actividad reciente" y no solo "Running".
-  const label = activity.name ?? (activity.sportType ? formatLabel(activity.sportType) : "Activity");
+  const label =
+    activity.name ?? (activity.sportType ? formatLabel(activity.sportType) : "Activity");
 
   return (
     <StatTile
