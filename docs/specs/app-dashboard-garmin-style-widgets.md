@@ -102,29 +102,29 @@ Son cortes nuestros (Garmin no los expone para Readiness) — coherente con `rea
 
 **Comparación**: `ref1.png`, primera tile — ícono + label de estado grande, "Desde [fecha]", y abajo una barra de chips de color, uno por estado de las últimas 4 semanas.
 
-**Datos**: `trainingStatusPhrase` ya se guarda un valor por día en `daily_metrics` — "desde cuándo" y el historial de 4 semanas son **derivables de lo que ya sincronizamos**, sin Garmin nuevo: `findRecentDailyMetrics(userId, 28)` (ya existe) trae los últimos 28 días; "desde" es la fecha más vieja de la racha actual (escanear hacia atrás mientras la frase no cambia), el historial es esos mismos 28 días agrupados. Decisión pendiente de implementación, no de datos: ¿un chip por semana (4 chips) o un chip por día/racha (variable, como parecen ser los 7 de la referencia)? Propongo 4 chips (uno por semana calendario, coloreado por el estado más reciente de esa semana) — más simple, coincide con el label "últimas 4 semanas" literal; Garmin no documenta cómo arma sus 7.
+**Datos**: `trainingStatusPhrase` ya se guarda un valor por día en `daily_metrics` — "desde cuándo" y el historial de 4 semanas son **derivables de lo que ya sincronizamos**, sin Garmin nuevo: `findRecentDailyMetrics(userId, 28)` (ya existe) trae los últimos 28 días; "desde" es la fecha más vieja de la racha actual (escanear hacia atrás mientras el estado base no cambia — el sufijo de severidad, ej. "PRODUCTIVE_1" → "PRODUCTIVE_5", cambia día a día sin que el estado cambie, así que compararlo entero cortaba la racha en el primer paso). **Resuelta la pregunta de 4 vs. 7 chips**: ninguna de las dos — la barra corre los 28 días agrupando corridas consecutivas del mismo estado base y dibuja un segmento por corrida, con ancho proporcional a cuántos días duró y el corte exactamente en la fecha real de cambio (no baldes de calendario). El label junto al estado (ej. "Productive") también muestra el estado base, sin el sufijo de severidad.
 
-**Espacio completo de estados, confirmado por Franco** (10 categorías):
+**Espacio completo de estados, confirmado por Franco** (10 categorías) — colores redefinidos por Franco en la sesión de implementación (categórico, no una escala de "peor a mejor"):
 
-| Estado | Zona propuesta |
+| Estado | Color |
 |---|---|
-| Sobreentrenamiento | `--zone1` rojo (el peor) |
-| Sobrecarga | `--zone2` naranja |
-| No productivo | `--zone2` naranja |
-| Pérdida de forma | `--zone2` naranja |
-| Recuperación | `--zone3` verde |
-| Mantenimiento | `--zone3` verde |
-| Productivo | `--zone4` azul |
-| Pico de forma | `--zone5` violeta (el mejor) |
-| Sin estado | gris neutro (`--graphite`), fuera de la rampa — no es "malo", es "no hay dato" |
-| En pausa | gris neutro (`--graphite`), fuera de la rampa — pausa deliberada, no un juicio de calidad |
+| Sobreentrenamiento (`OVERTRAINING`) | `--zone1` rojo |
+| Sobrecarga (`STRAINED`) | `--status-strained` magenta (hue nuevo) |
+| No productivo (`UNPRODUCTIVE`) | `--zone2` naranja |
+| Pérdida de forma (`DETRAINING`) | gris |
+| Recuperación (`RECOVERY`) | `--zone4` azul |
+| Mantenimiento (`MAINTAINING`) | `--status-maintaining` amarillo/oliva — **no pasa el validador, aceptado por Franco a sabiendas** (mejor candidato real disponible, no existe un amarillo que libre el piso conviviendo con el naranja y el verde ya shippeados; detalle y números exactos en `docs/style.md`) |
+| Productivo (`PRODUCTIVE`) | `--zone3` verde |
+| Pico de forma (`PEAKING`) | `--zone5` violeta |
+| Sin estado (`NO_STATUS`) | gris |
+| En pausa (`PAUSED`) | gris |
 
-Mapeo nuestro (Garmin no publica qué color usa para cada uno) — pensado igual que el resto de la rampa de zona: de "esto no ayuda al entrenamiento" (rojo) a "esto es lo mejor que se puede estar" (violeta), con Recuperación/Mantenimiento como punto medio neutro-positivo (son fases normales del plan, no un problema). Ajustable si al verlo armado alguna categoría no lee bien.
+`--status-strained` valida completo con `scripts/validate_palette.js --pairs all` contra `--lcd`/`--panel`; `--status-maintaining` no pasa (excepción aceptada, detalle y números exactos en `docs/style.md`, Gráficos).
 
 **Cambios**:
 - Debajo del label de estado: `"Desde " + formatDate(inicio de la racha)`.
-- Divisor + fila de 4 chips de color (cuadrados, mismo criterio geométrico de "Chip de estado" en `docs/style.md`) + label "Últimas 4 semanas". Un chip por semana calendario, coloreado por el estado más reciente de esa semana (ver pregunta abierta sobre 4 vs. 7 chips).
-- Color por chip: la tabla de arriba, reusando `--zone1`…`--zone5` (no una paleta categórica aparte — al tener el espacio completo de estados confirmado, ordenarlos en la misma rampa de "qué tan favorable" es consistente con Readiness/VO2 Max/Endurance score, un solo sistema de color en vez de dos).
+- Divisor + barra de segmentos de ancho proporcional (uno por corrida de estado dentro de los últimos 28 días, `flex-grow` = días de esa corrida, gap de 2px entre segmentos) + label "Últimas 4 semanas".
+- Color por segmento: la tabla de arriba.
 
 ### Sleep score (`sleep-phases.tsx`)
 
@@ -173,7 +173,7 @@ No viene de `maxmet` (que solo trae `maxMetCategory` como id sin decodificar, `d
 - [ ] `HrvTimelineChart` (componente nuevo).
 - [ ] `sleep-phase-bar.tsx`: alturas variables por stage.
 - [ ] `readiness.tsx`: gauge de zona (cortes ya definidos) + grilla de 6 factores.
-- [ ] `training-status.tsx`: "desde" + barra de 4 semanas (estados y zonas ya definidos).
+- [x] `training-status.tsx`: "desde" (racha por estado base, sin sufijo de severidad) + barra de segmentos proporcional por corrida real. Los 10 colores definidos, incluida la excepción aceptada de Mantenimiento.
 - [ ] `hrv.tsx`: rango de color + timeline de 4 semanas + valor de 7 días además del de anoche.
 - [ ] `daily-metrics.tsx` (`renderVo2MaxRunning`): gauge de zona (tabla de hombres ya definida, como constante extensible).
 - [ ] `docs/style.md`: documentar la rampa de zona nueva, el tipo de marca "gauge de zona" y el tipo "timeline de puntos" en Gráficos, antes o en el mismo cambio que el primer componente que los use.
@@ -184,4 +184,4 @@ Resuelto por Franco: cortes de Readiness, tabla de zonas de VO2 Max (hombres), e
 
 - Confirmar espacio completo de valores de `level`/`*FactorFeedback` de readiness y de `hrvStatus` (hoy "MODERATE"/"GOOD"/"UNBALANCED" son los únicos vistos) — no bloquea, pero conviene saberlo antes de asumir que el texto que aparezca siempre entra en el layout de la grilla de 6 factores.
 - Nombres finales de los tokens de color (`--zone1`…`--zone5` es nombre de trabajo) y de los componentes nuevos (`ZoneGaugeChart`/`HrvTimelineChart`): a confirmar en plan mode de la sesión de implementación, no bloquean el spec.
-- Training status: 4 chips (uno por semana calendario) sigue siendo una decisión nuestra, no una réplica confirmada de los 7 que arma Garmin — si al verlo armado se prefiere otra granularidad, se ajusta ahí.
+- Training status: resuelto — barra de segmentos por corrida real (ver tabla de colores arriba), no chips de calendario. Color de Mantenimiento resuelto: amarillo/oliva aceptado como excepción al validador (no hay alternativa que pase, ver `docs/style.md`).
