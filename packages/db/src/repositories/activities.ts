@@ -134,9 +134,14 @@ export async function findWeeklySummary(userId: string): Promise<WeeklySummary> 
       summary.bySport[sport].thisWeek.durationSeconds += row.durationSeconds ?? 0;
       summary.bySport[sport].thisWeek.activityCount += 1;
       summary.totalDurationSeconds.thisWeek += row.durationSeconds ?? 0;
-    } else {
-      // El WHERE ya acota las filas a [lastWeekStart, thisWeekEnd]: cualquier fila que
-      // no sea "esta semana" cae necesariamente en la semana pasada completa (lunes-domingo).
+    } else if (row.startTimeUtc <= bounds.lastWeekEnd) {
+      // "Esta semana" corre lunes -> ahora, un tramo parcial casi todos los días. Comparar
+      // contra la semana pasada completa (lunes-domingo) hace que el % vs. semana pasada dé
+      // negativo casi siempre aunque el ritmo sea igual — se acota "semana pasada" al mismo
+      // tramo transcurrido (lunes -> el mismo instante, una semana antes), mismo criterio
+      // "jueves a esta hora vs. jueves pasado a esta hora". Las filas entre lastWeekEnd y
+      // thisWeekStart (el resto de la semana pasada que todavía no pasó esta semana) quedan
+      // afuera a propósito: no son comparables todavía.
       summary.bySport[sport].lastWeek.distanceMeters += row.distanceMeters ?? 0;
       summary.bySport[sport].lastWeek.durationSeconds += row.durationSeconds ?? 0;
       summary.bySport[sport].lastWeek.activityCount += 1;
