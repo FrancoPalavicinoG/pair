@@ -101,7 +101,7 @@ export async function renderHrv(userId: string, square = true): Promise<ReactNod
         </div>
       )}
       {sparkline && (
-        <div className="mt-6">
+        <div className="mt-5">
           <p className="mb-1.5 font-mono text-[10.5px] uppercase tracking-[0.1em] text-graphite transition-colors duration-[250ms] group-hover:text-panel-muted">
             Last 4 weeks
           </p>
