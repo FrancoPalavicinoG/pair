@@ -102,6 +102,9 @@ export async function renderHrv(userId: string, square = true): Promise<ReactNod
       )}
       {sparkline && (
         <div className="mt-3">
+          <p className="mb-1.5 font-mono text-[10.5px] uppercase tracking-[0.1em] text-graphite transition-colors duration-[250ms] group-hover:text-panel-muted">
+            Last 4 weeks
+          </p>
           <div className="relative h-7">
             <svg
               viewBox="0 0 100 28"
@@ -127,9 +130,6 @@ export async function renderHrv(userId: string, square = true): Promise<ReactNod
               }}
             />
           </div>
-          <p className="mt-1 font-mono text-[10.5px] uppercase tracking-[0.1em] text-graphite transition-colors duration-[250ms] group-hover:text-panel-muted">
-            Last 4 weeks
-          </p>
         </div>
       )}
     </TileShell>
