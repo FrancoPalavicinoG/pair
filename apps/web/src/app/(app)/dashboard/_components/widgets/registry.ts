@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { findDashboardLayout, findWeeklySummary, type DashboardWidgetConfig } from "@pair/db";
-import { formatLabel } from "@/lib/format";
+import { formatLabel } from "@pair/core";
 import {
   renderSteps,
   renderRestingHr,

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { findTodayMetrics } from "@pair/db";
-import { formatLabel } from "@/lib/format";
+import { formatLabel } from "@pair/core";
 import { TileShell } from "./stat-tile";
 import { GaugeChart } from "@/components/gauge-chart";
 

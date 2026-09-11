@@ -60,7 +60,8 @@ Objetivo: el gateway funcionando de punta a punta con la infraestructura mínima
 - [x] Gate de conexión Garmin + hub "Connections": sacar `Connect Garmin` del nav fijo del sidebar. La conexión con Garmin pasa a ser un gate, no una vista navegable — mismo patrón que `requireSession()` → `/login`: si no hay credenciales o el token expiró, se redirige directo a la vista de login de Garmin antes de renderizar cualquier ruta de `(app)`; conectado, no se vuelve a ver. El tab `Connections` del sidebar queda para el conector MCP (placeholder hasta que exista). Spec: `docs/specs/app-connections.md`.
 - [x] Authorization Server OAuth 2.1 con DCR + PKCE, a mano (sin librería — ver `docs/specs/mcp-oauth-server.md`; los helpers de auth del SDK de MCP están deprecados/congelados y son Express, no Hono).
 - [x] `apps/mcp` sobre Streamable HTTP, sesión → usuario. Primera tool: `get_started`. Ver `docs/specs/mcp-transport.md`.
-- [ ] Tools de lectura: actividades y métricas diarias, más tools de "insight" que traducen los datos crudos (carga, HRV, readiness, dog factor de P5) en algo que Claude pueda razonar — no un dump plano de columnas.
+- [x] Tools de lectura: actividades y métricas diarias (`list_activities`, `get_activity`, `get_daily_metrics`). Ver `docs/specs/mcp-read-tools.md`.
+- [x] Tools de "insight" que traducen los datos crudos (carga, HRV, readiness) en algo que Claude pueda razonar — `get_training_load` y `get_recovery_trend`. Ver `docs/specs/mcp-insight-tools.md`. Dog factor queda afuera (P5 no arrancó todavía).
 - [ ] DSL `PairWorkout` + traductor + tests.
 - [ ] Tools de escritura con preview → confirm: crear/agendar workouts, y registrar sets de ejercicio (peso, reps) a partir de lo que Claude interpreta de una foto de rutina — el parseo de la imagen lo hace Claude (visión), PAIR solo persiste contra el perfil de ejercicio de P5.
 - [ ] Vista `/settings/connectors` (dentro de `Connections`): URL de conexión, instrucciones por cliente, sesiones activas, revocación.
@@ -91,7 +92,7 @@ Objetivo: el gateway funcionando de punta a punta con la infraestructura mínima
 Corre en paralelo a P3: es storage + UI propia, no depende de que el MCP exista, y las tools de "insight" de P3 leen de acá.
 
 - [ ] Datos físicos básicos (altura, peso): sync desde Garmin cuando esté disponible, edición manual como fallback.
-- [ ] Zonas de esfuerzo por deporte: ritmo de carrera, FTP de ciclismo — sync desde Garmin cuando esté disponible, manual si no.
+- [ ] Zonas de esfuerzo por deporte: ritmo de carrera, FTP de ciclismo — sync desde Garmin cuando esté disponible, manual si no. **Confirmado contra Garmin real (2026-09-10, `docs/garmin-api.md`)**: zonas de FC por deporte y FTP de ciclismo se sincronizan tal cual, Garmin ya los calcula — no hace falta una fórmula propia. La velocidad de umbral de running existe pero su unidad no está confirmada, queda pendiente de verificar antes de usarla. Diseño completo (cómo se guardan, cómo las resuelve la tool sin romper la pureza del traductor) en `docs/architecture.md`, "Flujo: plan de entrenamiento conversacional".
 - [ ] Historial de ejercicio de fuerza: un registro por fecha y ejercicio (peso, reps), no un número suelto. No depende del catálogo de ejercicios de Garmin — eso sigue fuera de alcance. El máximo vigente se deriva del historial con su fecha; un máximo de hace 6+ meses no cuenta como vigente (umbral exacto a definir en el spec).
 - [ ] "Dog factor": input diario manual (escala 1-10) que el usuario reporta en PAIR. Actúa como override en las decisiones de ajuste de plan (P7): un dog factor alto sostiene la carga aunque las métricas de Garmin digan lo contrario; uno bajo la baja aunque las métricas estén bien. Seguimiento de qué lo explica (journaling) queda para una iteración futura.
 
@@ -105,9 +106,12 @@ No entra en esta iteración — elegido explícitamente afuera para priorizar el
 
 Objetivo: el plan que arma Claude vía el DSL de P3 se ve y se edita en PAIR, no solo en el chat. Depende de que P3 tenga el DSL y las tools de escritura funcionando — sin eso no hay plan que mostrar.
 
+**Alcance ampliado (2026-09-10)**: el caso de uso ya no es solo "un workout suelto que se ve en la web" — es que Claude arme un plan completo conversacionalmente (ej. "método noruego para tal carrera", ajustado con la carga real del usuario, revisable con feedback tipo "no me gustó cómo encaraste esto"), y ese plan tiene que sobrevivir entre conversaciones distintas, no solo vivir en la memoria del chat activo. Diseño de las tablas (`training_plans`/`planned_sessions`) y de cuándo se resuelven los targets por zona en `docs/architecture.md`, "Flujo: plan de entrenamiento conversacional".
+
 - [ ] Modelo de datos del plan (agenda de sesiones, no solo el workout suelto que P3 ya agenda en Garmin)
 - [ ] Vista de plan en la web: calendario/lista de sesiones, detalle por sesión
 - [ ] Edición manual desde la web, reflejada de vuelta en Garmin (mismo patrón preview → confirm que las escrituras vía MCP)
+- [ ] Tools de MCP para que Claude proponga/edite sesiones de un plan (borrador en la DB de PAIR, sin gate de preview→confirm hasta que la sesión puntual se agenda de verdad en Garmin)
 
 **Salida**: el plan que Claude arma se puede ver y ajustar sin volver al chat.
 

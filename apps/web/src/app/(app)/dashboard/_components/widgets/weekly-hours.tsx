@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { findWeeklySummary } from "@pair/db";
-import { formatDuration } from "@/lib/format";
+import { formatDuration } from "@pair/core";
 import { StatTile } from "./stat-tile";
 
 export async function renderWeeklyHours(userId: string): Promise<ReactNode> {

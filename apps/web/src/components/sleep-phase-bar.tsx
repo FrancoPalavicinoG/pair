@@ -1,5 +1,5 @@
 import type { SleepStage, SleepStageSegment } from "@pair/core";
-import { formatClockTime } from "@/lib/format";
+import { formatClockTime } from "@pair/core";
 
 // Timeline cronológico de docs/style.md, Gráficos: a diferencia de una barra apilada por
 // proporción, acá el orden y el ancho de cada segmento son el orden y la duración reales

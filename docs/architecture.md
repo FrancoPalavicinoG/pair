@@ -91,8 +91,31 @@ Postgres. Tablas principales:
 - `oauth_clients`, `oauth_grants`, `oauth_tokens` — Authorization Server del MCP.
 - `sync_jobs` — trazabilidad de sincronizaciones.
 - `audit_log` — toda escritura hacia Garmin: quién, qué, desde qué cliente MCP, cuándo.
+- `user_profile`, `sport_zones` (P5, prefiguradas 2026-09-10, no creadas todavía) — perfil físico y zonas de esfuerzo por deporte. Ver "Flujo: plan de entrenamiento conversacional" más abajo.
+- `training_plans`, `planned_sessions` (P6, prefiguradas 2026-09-10, no creadas todavía) — el plan como objeto persistente, no solo el workout suelto que P3 agenda en Garmin. Mismo criterio de `packages/db/CLAUDE.md`: no se crean de antemano, se crean cuando el ítem del roadmap las necesita.
 
 Guardar siempre el `raw jsonb`: la API no es oficial, y cuando algo se rompa el payload original es la única forma de entender qué cambió.
+
+## Flujo: plan de entrenamiento conversacional (P5+P6, diseñado 2026-09-10, sin implementar)
+
+Diseño acordado con el usuario para el caso de uso "armame un plan de running para tal carrera siguiendo el método noruego, ajustalo según mi carga real, dejame darte feedback e iterar" — más grande que el caso guía original (una foto → un workout). Tres capas, cada una en la fase del roadmap que le corresponde:
+
+```
+TrainingPlan (P6)      — objetivo (fecha de carrera, metodología en texto libre),
+     │                    muchas sesiones planeadas, persistente entre conversaciones
+     │  contiene muchos...
+PairWorkout (P3)       — un entrenamiento puntual, targets absolutos o por zona
+     │  sus targets por zona se resuelven contra...
+sport_zones (P5)       — zonas de FC/potencia/ritmo por deporte, sync desde Garmin
+```
+
+**Zonas de esfuerzo, confirmado contra Garmin real (2026-09-10, ver `docs/garmin-api.md`)**: Garmin ya calcula y guarda zonas de FC por deporte (`GET /biometric-service/heartRateZones`, un array con una entrada por deporte configurado — running/general y ciclismo vistos en la cuenta de prueba, cada una con el piso de sus 5 zonas en bpm absolutos) y FTP de ciclismo con historial (`GET /biometric-service/stats/functionalThresholdPower/range/...`). **Se sincronizan desde Garmin, no se calculan con una fórmula propia** (ej. Karvonen) — Garmin ya lo resuelve mejor, a partir del umbral de lactato real del usuario. La velocidad de umbral de running también existe en la API pero su unidad no está confirmada (da un ritmo imposible si se asume m/s literal) — no se usa hasta confirmarla contra lo que la app de Garmin le muestra al usuario.
+
+**Dónde resuelve la tool los targets por zona, no el traductor**: `packages/core` es puro (`packages/core/CLAUDE.md`: "sin acceso a DB, sin `process.env`"), así que el traductor de `workout-dsl.md` nunca consulta `sport_zones` él mismo. La resolución ("zona 3 de FC" → "150-159 bpm") la hace la tool de MCP (`workout_preview`/`workout_create`, capa de servicio) antes de llamar al traductor: lee `sport_zones` vía `packages/db`, arma un `PairWorkout` con targets ya absolutos, y ese es el que entra al traductor puro. Un `PairWorkout` guardado dentro de un plan (`planned_sessions`, ver abajo) sí puede quedar con targets por zona sin resolver — recién se resuelven a números concretos en el momento de agendarlo de verdad en Garmin (preview→confirm), nunca antes: las zonas cambian con el tiempo (un FTP nuevo), y resolver en el momento del draft dejaría el plan con números viejos.
+
+**El plan como objeto persistente (P6)**: confirmado con el usuario que necesita sobrevivir entre conversaciones distintas (no alcanza con la memoria del chat). `training_plans` (objetivo, fecha target, metodología en texto libre — no es una constante nuestra, es contexto para que Claude razone) + `planned_sessions` (un `PairWorkout` en estado `draft` hasta que se aprueba, `approved` una vez creado en Garmin con su `garmin_workout_id`, `completed` una vez que la sesión real ya pasó y se puede linkear a la `activity` correspondiente — ese link es lo que P7 va a necesitar para comparar planeado vs. ejecutado). Editar un `draft` (Claude propone, el usuario da feedback, Claude ajusta) es una escritura normal a la DB de PAIR, sin el gate de preview→confirm — ese gate es específicamente para escrituras a Garmin (`CLAUDE.md` raíz, regla 4), y un draft todavía no tocó Garmin.
+
+No cambia nada de lo ya implementado en P3 (transport, tools, AS). Es diseño para cuando toque especificar P5 y P6 en serio — spec propio de cada uno, plan mode recién ahí.
 
 ## Despliegue
 

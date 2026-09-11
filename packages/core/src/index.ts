@@ -1,5 +1,7 @@
+export * from "./activity-category";
 export * from "./date";
 export * from "./errors";
+export * from "./format";
 export * from "./oauth-scopes";
 export * from "./garmin/client";
 export * from "./garmin/limiter";

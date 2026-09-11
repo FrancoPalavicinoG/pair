@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { findWeeklySummary } from "@pair/db";
-import { formatDistance, formatLabel } from "@/lib/format";
+import { formatDistance, formatLabel } from "@pair/core";
 import { StatTile } from "./stat-tile";
 
 export async function renderWeeklyDistance(userId: string, sportType: string): Promise<ReactNode> {
