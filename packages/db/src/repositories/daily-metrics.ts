@@ -1,5 +1,5 @@
 import { eq, desc, asc, and, gte } from "drizzle-orm";
-import { localDateString, trainingReadinessListSchema } from "@pair/core";
+import { localDateString, trainingReadinessListSchema, trainingLoadBalanceSchema } from "@pair/core";
 import { db } from "../client";
 import { dailyMetrics } from "../schema/daily-metrics";
 import { findUserTimezone } from "./users";
@@ -69,6 +69,58 @@ export async function findReadinessFactors(userId: string): Promise<ReadinessFac
     acwr: latest.acwrFactorFeedback ?? null,
     recoveryTime: latest.recoveryTimeFactorFeedback ?? null,
     stressHistory: latest.stressHistoryFactorFeedback ?? null,
+  };
+}
+
+export type LoadBalanceBucket = { value: number; targetMin: number; targetMax: number };
+
+export type LoadBalance = {
+  feedbackPhrase: string | null;
+  anaerobic: LoadBalanceBucket | null;
+  aerobicLow: LoadBalanceBucket | null;
+  aerobicHigh: LoadBalanceBucket | null;
+};
+
+// El foco de carga crudo de hoy vive en daily_metrics.raw.trainingStatus.mostRecentTraining-
+// LoadBalance (mismo agregador que ya usa findTodayMetrics/trainingStatusPhrase, packages/sync
+// lo guarda sin recortar) — igual que findReadinessFactors, es dato que el dashboard solo
+// muestra, nunca filtra ni ordena, así que queda en el JSONB en vez de columnas nuevas
+// (packages/db/CLAUDE.md).
+export async function findLoadBalance(userId: string): Promise<LoadBalance | null> {
+  const today = await findTodayMetrics(userId);
+  const raw = today?.raw as { trainingStatus?: { mostRecentTrainingLoadBalance?: unknown } } | undefined;
+  const aggregate = raw?.trainingStatus?.mostRecentTrainingLoadBalance;
+  if (!aggregate) return null;
+
+  const parsed = trainingLoadBalanceSchema.safeParse(aggregate);
+  const map = parsed.success ? parsed.data.payload?.metricsTrainingLoadBalanceDTOMap : undefined;
+  const entry = map ? Object.values(map)[0] : undefined;
+  if (!entry) return null;
+
+  const bucket = (
+    value: number | undefined,
+    targetMin: number | undefined,
+    targetMax: number | undefined,
+  ): LoadBalanceBucket | null =>
+    value != null && targetMin != null && targetMax != null ? { value, targetMin, targetMax } : null;
+
+  return {
+    feedbackPhrase: entry.trainingBalanceFeedbackPhrase ?? null,
+    anaerobic: bucket(
+      entry.monthlyLoadAnaerobic,
+      entry.monthlyLoadAnaerobicTargetMin,
+      entry.monthlyLoadAnaerobicTargetMax,
+    ),
+    aerobicLow: bucket(
+      entry.monthlyLoadAerobicLow,
+      entry.monthlyLoadAerobicLowTargetMin,
+      entry.monthlyLoadAerobicLowTargetMax,
+    ),
+    aerobicHigh: bucket(
+      entry.monthlyLoadAerobicHigh,
+      entry.monthlyLoadAerobicHighTargetMin,
+      entry.monthlyLoadAerobicHighTargetMax,
+    ),
   };
 }
 
