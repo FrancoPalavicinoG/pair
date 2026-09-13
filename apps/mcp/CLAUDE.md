@@ -16,6 +16,7 @@ Tabla viva. Toda tool nueva se añade aquí en el mismo cambio que la implementa
 | `get_daily_metrics` | `metrics:read` | Sueño, FC en reposo, pasos, body battery, HRV, estado de entreno/ACWR, readiness, VO2 max, por día |
 | `get_training_load` | `activities:read` | Volumen por deporte, esta semana vs la anterior (envuelve `findWeeklySummary`) |
 | `get_recovery_trend` | `metrics:read` | FC en reposo/HRV/sueño/readiness/ACWR: valor reciente + tendencia (sube/baja/estable) sobre una ventana de días |
+| `get_user_profile` | `profile:read` | Altura, peso, días de entreno preferidos, zonas de FC y FTP por deporte — sincronizado desde Garmin |
 | `list_workouts` | `workouts:read` | Entrenamientos creados y agendados |
 | `workout_preview` | `workouts:write` | Valida un PairWorkout y devuelve resumen + `preview_token`. Sin efecto |
 | `workout_create` | `workouts:write` | Consume el token y crea el workout en Garmin |
@@ -24,7 +25,7 @@ Tabla viva. Toda tool nueva se añade aquí en el mismo cambio que la implementa
 
 ## Scopes
 
-`activities:read`, `metrics:read`, `workouts:read`, `workouts:write` — fuente única `PAIR_OAUTH_SCOPES` en `packages/core/src/oauth-scopes.ts` (no solo texto acá: `apps/mcp` la anuncia en `/.well-known/oauth-authorization-server` y `/.well-known/oauth-protected-resource[/mcp]`, `apps/web` la usa para validar el consentimiento). El usuario ve la traducción a lenguaje llano en la pantalla de consentimiento (`SCOPE_LABELS` en `apps/web/src/services/oauth-service.ts`), no estos identificadores.
+`activities:read`, `metrics:read`, `workouts:read`, `workouts:write`, `profile:read` — fuente única `PAIR_OAUTH_SCOPES` en `packages/core/src/oauth-scopes.ts` (no solo texto acá: `apps/mcp` la anuncia en `/.well-known/oauth-authorization-server` y `/.well-known/oauth-protected-resource[/mcp]`, `apps/web` la usa para validar el consentimiento). El usuario ve la traducción a lenguaje llano en la pantalla de consentimiento (`SCOPE_LABELS` en `apps/web/src/services/oauth-service.ts`), no estos identificadores.
 
 ## Reglas
 

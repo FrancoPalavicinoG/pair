@@ -7,6 +7,7 @@ import {
   createSyncClient,
   syncActivities,
   syncDailyMetrics,
+  syncUserProfile,
   getDisplayName,
   type StoredCredentials,
 } from "@pair/sync";
@@ -85,6 +86,9 @@ async function main() {
 
   const syncedDays = await syncDailyMetrics(user.id, displayName, client);
   console.log(`Métricas diarias sincronizadas: ${syncedDays} día(s).`);
+
+  await syncUserProfile(user.id, client);
+  console.log("Perfil y zonas de esfuerzo sincronizados.");
 
   console.log("Sync terminado.");
   process.exit(0);

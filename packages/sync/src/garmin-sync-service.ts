@@ -6,6 +6,8 @@ import {
   insertActivity,
   findMostRecentMetricsDate,
   upsertDailyMetrics,
+  upsertUserProfile,
+  upsertSportZone,
   seal,
   open,
   updateSyncStatus,
@@ -30,6 +32,9 @@ const GARMIN_AUTH_SHARED_SECRET = process.env.GARMIN_AUTH_SHARED_SECRET ?? "";
 const MAX_ACTIVITY_PAGES = 25;
 const ACTIVITY_PAGE_SIZE = 20;
 const FIRST_SYNC_DAILY_METRICS_DAYS = 30;
+// Rango amplio para no perderse un cambio de FTP viejo; aggregationStrategy=LATEST
+// + aggregation=daily ya colapsa a un evento por cambio real, no por día (docs/garmin-api.md).
+const FTP_HISTORY_YEARS = 3;
 
 export type Oauth1 = {
   oauth_token: string;
@@ -333,6 +338,71 @@ export async function syncDailyMetrics(
   return count;
 }
 
+// Sync una vez por corrida, no por día como syncDailyMetrics — altura, peso
+// y zonas de esfuerzo casi no cambian (docs/specs/garmin-user-profile.md).
+export async function syncUserProfile(
+  userId: string,
+  client: ReturnType<typeof createGarminClient>,
+): Promise<void> {
+  const settings = await tryFetch<Record<string, unknown>>(
+    client,
+    "/userprofile-service/userprofile/user-settings",
+  );
+  const userData = obj(settings?.userData);
+
+  await upsertUserProfile({
+    userId,
+    heightCm: (userData?.height as number) ?? null,
+    weightGrams: (userData?.weight as number) ?? null,
+    availableTrainingDays: (userData?.availableTrainingDays as string[]) ?? null,
+    preferredLongTrainingDays: (userData?.preferredLongTrainingDays as string[]) ?? null,
+    syncedAt: new Date(),
+  });
+
+  const heartRateZones = await tryFetch<Record<string, unknown>[]>(
+    client,
+    "/biometric-service/heartRateZones",
+  );
+
+  const today = new Date().toISOString().slice(0, 10);
+  const rangeStart = new Date(Date.now() - FTP_HISTORY_YEARS * 365 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10);
+  const ftpHistory = await tryFetch<Record<string, unknown>[]>(
+    client,
+    `/biometric-service/stats/functionalThresholdPower/range/${rangeStart}/${today}?sport=CYCLING&aggregation=daily&aggregationStrategy=LATEST`,
+  );
+  const latestFtp = ftpHistory?.length
+    ? ftpHistory.reduce((latest, entry) =>
+        (entry.updatedDate as string) > (latest.updatedDate as string) ? entry : latest,
+      )
+    : null;
+
+  // Union de deportes vistos en zonas de FC y en FTP — un deporte puede tener uno sin el otro.
+  const sports = new Set<string>([
+    ...(heartRateZones?.map((z) => z.sport as string) ?? []),
+    ...(latestFtp ? ["CYCLING"] : []),
+  ]);
+
+  for (const sport of sports) {
+    const zone = heartRateZones?.find((z) => z.sport === sport);
+    await upsertSportZone({
+      userId,
+      sport,
+      hrZone1Floor: (zone?.zone1Floor as number) ?? null,
+      hrZone2Floor: (zone?.zone2Floor as number) ?? null,
+      hrZone3Floor: (zone?.zone3Floor as number) ?? null,
+      hrZone4Floor: (zone?.zone4Floor as number) ?? null,
+      hrZone5Floor: (zone?.zone5Floor as number) ?? null,
+      restingHeartRate: (zone?.restingHeartRateUsed as number) ?? null,
+      maxHeartRate: (zone?.maxHeartRateUsed as number) ?? null,
+      lactateThresholdHeartRate: (zone?.lactateThresholdHeartRateUsed as number) ?? null,
+      ftpWatts: sport === "CYCLING" ? ((latestFtp?.value as number) ?? null) : null,
+      syncedAt: new Date(),
+    });
+  }
+}
+
 export async function getDisplayName(client: ReturnType<typeof createGarminClient>) {
   const profile = await client.connectapi<{ displayName: string }>(
     "/userprofile-service/socialProfile",
@@ -357,6 +427,7 @@ export async function runFullSync(userId: string): Promise<void> {
     const displayName = await getDisplayName(client);
     await syncActivities(userId, client);
     await syncDailyMetrics(userId, displayName, client);
+    await syncUserProfile(userId, client);
     await updateSyncStatus(userId, { lastSyncedAt: new Date(), syncInProgress: false });
   } catch (err) {
     if (err instanceof GarminApiError) {

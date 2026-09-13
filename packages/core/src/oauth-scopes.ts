@@ -6,6 +6,7 @@ export const PAIR_OAUTH_SCOPES = [
   "metrics:read",
   "workouts:read",
   "workouts:write",
+  "profile:read",
 ] as const;
 
 export type PairOAuthScope = (typeof PAIR_OAUTH_SCOPES)[number];

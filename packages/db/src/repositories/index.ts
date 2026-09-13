@@ -5,3 +5,5 @@ export * from "./activities";
 export * from "./daily-metrics";
 export * from "./dashboard-layouts";
 export * from "./oauth";
+export * from "./user-profile";
+export * from "./sport-zones";

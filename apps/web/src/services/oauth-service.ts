@@ -12,6 +12,7 @@ export const SCOPE_LABELS: Record<PairOAuthScope, string> = {
   "metrics:read": "Ver tus métricas diarias y su detalle",
   "workouts:read": "Ver tus entrenamientos creados y agendados",
   "workouts:write": "Crear, agendar y borrar entrenamientos (siempre con tu confirmación en cada uno)",
+  "profile:read": "Ver tu altura, peso y zonas de esfuerzo por deporte",
 };
 
 // Solo este servicio crea authorization codes (al aprobar el consentimiento),

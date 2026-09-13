@@ -1,7 +1,7 @@
 # Spec: Perfil físico y zonas de esfuerzo (sync desde Garmin)
 
 Roadmap: P5 (Perfil de usuario y señales diarias), ítems "Datos físicos básicos" y "Zonas de esfuerzo por deporte"
-Estado: draft
+Estado: en progreso — código hecho y typecheck en verde; falta probar contra cuenta real y con Claude Desktop (sin credenciales reales disponibles en esta sesión)
 
 ## Objetivo
 
@@ -87,15 +87,15 @@ Sin input. Devuelve: altura/peso (convertido a unidades humanas — kg desde gra
 
 ## Checklist de implementación
 
-- [ ] `packages/db/src/schema/user-profile.ts`, `sport-zones.ts` + migración
-- [ ] `packages/db/src/repositories/user-profile.ts`, `sport-zones.ts`
-- [ ] `packages/sync/src/garmin-sync-service.ts`: `syncUserProfile`, llamada desde el flujo de sync completo
-- [ ] `packages/core/src/oauth-scopes.ts`: agregar `"profile:read"` a `PAIR_OAUTH_SCOPES`
-- [ ] `apps/web/src/services/oauth-service.ts`: label de `profile:read` en `SCOPE_LABELS`
-- [ ] `apps/mcp/src/tools/get-user-profile.ts` + registrar en `mcp-session.ts`
-- [ ] Actualizar tabla de tools de `apps/mcp/CLAUDE.md`
-- [ ] Sync probado contra la cuenta real: correr una sync completa, confirmar que `user_profile`/`sport_zones` quedan pobladas con los valores ya vistos en la investigación
-- [ ] Tool probada con Claude Desktop real
+- [x] `packages/db/src/schema/user-profile.ts`, `sport-zones.ts` + migración (`drizzle/0011_stiff_fantastic_four.sql`, aplicada contra el Postgres local de `docker-compose.yml`)
+- [x] `packages/db/src/repositories/user-profile.ts`, `sport-zones.ts`
+- [x] `packages/sync/src/garmin-sync-service.ts`: `syncUserProfile`, llamada desde `runFullSync`
+- [x] `packages/core/src/oauth-scopes.ts`: agregar `"profile:read"` a `PAIR_OAUTH_SCOPES`
+- [x] `apps/web/src/services/oauth-service.ts`: label de `profile:read` en `SCOPE_LABELS`
+- [x] `apps/mcp/src/tools/get-user-profile.ts` + registrar en `mcp-session.ts`
+- [x] Actualizar tabla de tools de `apps/mcp/CLAUDE.md`
+- [ ] Sync probado contra la cuenta real: correr una sync completa, confirmar que `user_profile`/`sport_zones` quedan pobladas con los valores ya vistos en la investigación. **Pendiente**: esta sesión no tiene credenciales de una cuenta Garmin real ni `DATABASE_URL`/`.env` de producción — lo corre el usuario.
+- [ ] Tool probada con Claude Desktop real — mismo motivo, pendiente del usuario
 
 ## Preguntas abiertas
 
