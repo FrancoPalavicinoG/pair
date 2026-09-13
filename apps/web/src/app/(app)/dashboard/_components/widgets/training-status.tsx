@@ -90,9 +90,11 @@ export async function renderTrainingStatus(userId: string, square = true): Promi
         {formatLabel(base)}
       </p>
       <p className="mt-1 font-mono text-xs text-graphite transition-colors duration-[250ms] group-hover:text-panel-muted">
-        Since {formatShortDate(since)}
+        Since {formatShortDate(since, Number(today.date.slice(0, 4)))}
       </p>
-      <div className="mt-auto border-t border-rule-soft pt-2.5">
+      {/* mt-auto solo empuja hacia abajo en modo cuadrado (TileShell ahí es flex-col); en la
+          vista de detalle no cuadrada es un div normal, mt-auto no hace nada ahí. */}
+      <div className={`${square ? "mt-auto" : "mt-2"} border-t border-rule-soft pt-2.5`}>
         <div className="flex gap-[2px]">
           {segments.map((segment, i) => (
             <span

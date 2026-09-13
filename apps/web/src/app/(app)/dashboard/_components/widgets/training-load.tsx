@@ -19,7 +19,9 @@ type LoadBalanceRows = { anaerobic: LoadBalanceBucket | null; aerobicHigh: LoadB
 // objetivo, naranjo = por debajo o por encima (mismo hue de "atención" que ya usa el resto
 // del sistema de zona, sin agregar un color nuevo).
 function LoadBalanceRow({ label, bucket }: { label: string; bucket: LoadBalanceBucket }) {
-  const scaleMax = Math.max(bucket.targetMax, bucket.value) * 1.05;
+  // Piso de 1 para no dividir por cero si Garmin todavía no calculó un target (cuenta nueva:
+  // targetMax y value pueden llegar los dos en 0).
+  const scaleMax = Math.max(bucket.targetMax, bucket.value, 1) * 1.05;
   const targetStartPercent = (bucket.targetMin / scaleMax) * 100;
   const targetWidthPercent = ((bucket.targetMax - bucket.targetMin) / scaleMax) * 100;
   const valuePercent = (bucket.value / scaleMax) * 100;

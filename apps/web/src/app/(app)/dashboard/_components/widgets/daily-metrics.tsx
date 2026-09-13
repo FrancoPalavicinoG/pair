@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { findRecentDailyMetrics, findTodayMetrics, type DailyMetricsRow } from "@pair/db";
+import { findRecentDailyMetrics, findTodayMetrics } from "@pair/db";
 import { formatDuration } from "@/lib/format";
 import { buildSparkline } from "@/lib/sparkline";
 import { StatTile, TileShell } from "./stat-tile";
@@ -41,32 +41,7 @@ const METRICS: Record<MetricKey, { label: string; unit?: string; format: (v: num
     bmi: { label: "BMI", format: (v) => v.toFixed(1) },
   };
 
-type RenderMetricOptions = {
-  historyDays?: number;
-  compareLabel?: string;
-  // Compara contra el punto más viejo de la ventana que sí tenga el dato (no necesariamente
-  // el primer día de la ventana: si la métrica empezó a registrarse a mitad de la ventana,
-  // los días anteriores existen en `daily_metrics` para otras métricas pero vienen null acá)
-  // en vez de contra ayer — para métricas que casi no varían día a día (ej. VO2 Max), donde
-  // "vs yesterday" no dice nada útil y conviene una ventana más larga
-  // (docs/specs/app-dashboard-widgets-v2.md).
-  compareToRangeStart?: boolean;
-  noDataLabel?: string;
-};
-
-async function renderMetric(
-  userId: string,
-  key: MetricKey,
-  options: RenderMetricOptions = {},
-  square = true,
-): Promise<ReactNode> {
-  const {
-    historyDays = HISTORY_DAYS,
-    compareLabel = "yesterday",
-    compareToRangeStart = false,
-    noDataLabel = "First day with data",
-  } = options;
-
+async function renderMetric(userId: string, key: MetricKey, square = true): Promise<ReactNode> {
   const today = await findTodayMetrics(userId);
   if (!today) return null;
 
@@ -74,18 +49,15 @@ async function renderMetric(
   if (value == null) return null;
 
   // Descarta filas con fecha posterior a "hoy" (residuo de un bug de sync ya corregido).
-  const series = (await findRecentDailyMetrics(userId, historyDays)).filter(
+  const series = (await findRecentDailyMetrics(userId, HISTORY_DAYS)).filter(
     (row) => row.date <= today.date,
   );
-  const comparisonRow: DailyMetricsRow | undefined = compareToRangeStart
-    ? series.slice(0, -1).find((row) => row[key] != null)
-    : series[series.length - 2];
-  const previous = comparisonRow?.[key];
+  const previous = series[series.length - 2]?.[key];
   const { label, unit, format } = METRICS[key];
   const delta =
     previous == null
-      ? noDataLabel
-      : `${value >= previous ? "+" : "−"}${format(Math.abs(value - previous))} vs ${compareLabel}`;
+      ? "First day with data"
+      : `${value >= previous ? "+" : "−"}${format(Math.abs(value - previous))} vs yesterday`;
 
   const sparkline = buildSparkline(series.map((row) => row[key] ?? null));
 
@@ -102,21 +74,21 @@ async function renderMetric(
 }
 
 export const renderSteps = (userId: string, square?: boolean) =>
-  renderMetric(userId, "steps", {}, square);
+  renderMetric(userId, "steps", square);
 export const renderRestingHr = (userId: string, square?: boolean) =>
-  renderMetric(userId, "restingHeartRate", {}, square);
+  renderMetric(userId, "restingHeartRate", square);
 export const renderSleep = (userId: string, square?: boolean) =>
-  renderMetric(userId, "sleepSeconds", {}, square);
+  renderMetric(userId, "sleepSeconds", square);
 export const renderBodyBattery = (userId: string, square?: boolean) =>
-  renderMetric(userId, "bodyBattery", {}, square);
+  renderMetric(userId, "bodyBattery", square);
 export const renderSpo2 = (userId: string, square?: boolean) =>
-  renderMetric(userId, "spo2Average", {}, square);
+  renderMetric(userId, "spo2Average", square);
 export const renderRespiration = (userId: string, square?: boolean) =>
-  renderMetric(userId, "respirationAvg", {}, square);
+  renderMetric(userId, "respirationAvg", square);
 export const renderHillScore = (userId: string, square?: boolean) =>
-  renderMetric(userId, "hillScore", {}, square);
+  renderMetric(userId, "hillScore", square);
 export const renderEnduranceScore = (userId: string, square?: boolean) =>
-  renderMetric(userId, "enduranceScore", {}, square);
+  renderMetric(userId, "enduranceScore", square);
 // Tabla pública de Garmin, VO2 max de carrera, hombres — dada por Franco, no viene de
 // `maxmet` (que solo trae `maxMetCategory` sin decodificar, docs/garmin-api.md). Constante
 // nombrada y exportada a propósito: cuando haga falta la tabla femenina se agrega
@@ -162,10 +134,10 @@ export async function renderVo2MaxRunning(userId: string, square = true): Promis
 }
 
 export const renderVo2MaxCycling = (userId: string, square?: boolean) =>
-  renderMetric(userId, "vo2MaxCycling", {}, square);
+  renderMetric(userId, "vo2MaxCycling", square);
 export const renderAltitudeAcclimation = (userId: string, square?: boolean) =>
-  renderMetric(userId, "altitudeAcclimationMeters", {}, square);
+  renderMetric(userId, "altitudeAcclimationMeters", square);
 export const renderWeight = (userId: string, square?: boolean) =>
-  renderMetric(userId, "weight", {}, square);
+  renderMetric(userId, "weight", square);
 export const renderBmi = (userId: string, square?: boolean) =>
-  renderMetric(userId, "bmi", {}, square);
+  renderMetric(userId, "bmi", square);
