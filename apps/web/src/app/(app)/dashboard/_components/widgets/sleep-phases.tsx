@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { findTodayMetrics } from "@pair/db";
-import { formatDuration } from "@/lib/format";
+import { formatDuration } from "@pair/core";
 import { TileShell } from "./stat-tile";
 import { SleepPhaseBar } from "@/components/sleep-phase-bar";
 

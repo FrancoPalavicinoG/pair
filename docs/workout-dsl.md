@@ -46,6 +46,7 @@ type Duration =
 type Target =
   | { type: 'none' }
   | { type: 'pace'; minPerKm: [number, number] }   // [rápido, lento]
+  | { type: 'paceZone'; zone: 1 | 2 | 3 | 4 | 5 }
   | { type: 'speed'; kmh: [number, number] }
   | { type: 'hr'; bpm: [number, number] }
   | { type: 'hrZone'; zone: 1 | 2 | 3 | 4 | 5 }
@@ -53,6 +54,8 @@ type Target =
   | { type: 'powerZone'; zone: number }
   | { type: 'cadence'; spm: [number, number] };
 ```
+
+**Targets por zona (`hrZone`/`powerZone`/`paceZone`) no se resuelven acá.** El traductor de este archivo es puro (`packages/core/CLAUDE.md`), no consulta la base de datos. La resolución a un valor absoluto ("zona 3 de FC" → "150-159 bpm") la hace la tool de MCP antes de llamar al traductor, leyendo las zonas del usuario (`sport_zones`, P5 — ver `docs/architecture.md`, "Flujo: plan de entrenamiento conversacional"). Un `PairWorkout` dentro de un plan (P6) puede guardarse con zonas sin resolver; se resuelve recién al agendarlo de verdad en Garmin, no antes (las zonas cambian con el tiempo).
 
 Reglas de validación:
 

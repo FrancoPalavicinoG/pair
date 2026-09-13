@@ -15,6 +15,7 @@
     "@modelcontextprotocol/server": "^2.0.0",
     "hono": "^4.13.7",
     "zod": "^3.25.76",
+    "zod4": "npm:zod@^4.5.4",
     "@pair/core": "workspace:*",
     "@pair/db": "workspace:*"
   },

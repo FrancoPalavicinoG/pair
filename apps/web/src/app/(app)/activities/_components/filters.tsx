@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ACTIVITY_CATEGORIES, ACTIVITY_CATEGORY_LABEL, type ActivityCategory } from "@/lib/activity-category";
+import { ACTIVITY_CATEGORIES, ACTIVITY_CATEGORY_LABEL, type ActivityCategory } from "@pair/core";
 import type { ActivityRange } from "@pair/db";
 
 const RANGE_LABEL: Record<ActivityRange, string> = {

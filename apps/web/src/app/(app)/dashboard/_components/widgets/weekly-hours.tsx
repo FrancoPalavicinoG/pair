@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { findWeeklySummary } from "@pair/db";
-import { formatDuration } from "@/lib/format";
+import { formatDuration } from "@pair/core";
 import { TileShell, TileValue } from "./stat-tile";
 import { WeeklyBarChart } from "./weekly-bar-chart";
 

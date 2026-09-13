@@ -1,8 +1,8 @@
 import Link from "next/link";
 import type { Activity } from "@pair/db";
-import { formatDistance, formatDuration, formatLabel } from "@/lib/format";
+import { formatDistance, formatDuration, formatLabel } from "@pair/core";
 import { formatActivityTime } from "@/lib/activity-date";
-import { getActivityCategory, getSpeedDisplay, ACTIVITY_CATEGORY_LABEL } from "@/lib/activity-category";
+import { getActivityCategory, getSpeedDisplay, ACTIVITY_CATEGORY_LABEL } from "@pair/core";
 import { ACTIVITY_ICON } from "@/components/icons/activity-icons";
 import { ROW_CHROME } from "@/components/list-row";
 

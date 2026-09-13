@@ -3,9 +3,9 @@ import { requireSession } from "@/lib/session";
 import { findActivityByGarminId, findUserTimezone } from "@pair/db";
 import { fetchActivityDetail } from "@pair/sync";
 import { GarminApiError, localDateString } from "@pair/core";
-import { formatDistance, formatDuration } from "@/lib/format";
+import { formatDistance, formatDuration } from "@pair/core";
 import { dayLabel, localDateFromTimestamp } from "@/lib/activity-date";
-import { getActivityCategory, getSpeedDisplay } from "@/lib/activity-category";
+import { getActivityCategory, getSpeedDisplay } from "@pair/core";
 import { Eyebrow } from "@/components/eyebrow";
 
 const DAY_MS = 24 * 60 * 60 * 1000;

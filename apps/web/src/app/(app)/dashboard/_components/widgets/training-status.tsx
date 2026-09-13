@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { findRecentDailyMetrics, findTodayMetrics, type DailyMetricsRow } from "@pair/db";
-import { formatLabel } from "@/lib/format";
+import { formatLabel } from "@pair/core";
 import { formatShortDate } from "@/lib/activity-date";
 import { TileShell } from "./stat-tile";
 

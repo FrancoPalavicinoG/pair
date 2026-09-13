@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { findRecentActivities, findUserTimezone } from "@pair/db";
 import { localDateString } from "@pair/core";
-import { formatDistance, formatDuration, formatLabel } from "@/lib/format";
+import { formatDistance, formatDuration, formatLabel } from "@pair/core";
 import { dayLabel, localDateFromTimestamp } from "@/lib/activity-date";
 import { StatTile } from "./stat-tile";
 

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { findReadinessFactors } from "@pair/db";
-import { formatLabel } from "@/lib/format";
+import { formatLabel } from "@pair/core";
 import { TileShell } from "./stat-tile";
 import { ZoneGaugeChart, type ZoneGaugeZone } from "@/components/zone-gauge-chart";
 

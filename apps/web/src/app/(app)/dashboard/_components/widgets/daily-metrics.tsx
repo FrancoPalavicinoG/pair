@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { findRecentDailyMetrics, findTodayMetrics } from "@pair/db";
-import { formatDuration } from "@/lib/format";
+import { formatDuration } from "@pair/core";
 import { buildSparkline } from "@/lib/sparkline";
 import { StatTile, TileShell } from "./stat-tile";
 import { ZoneGaugeChart, type ZoneGaugeZone } from "@/components/zone-gauge-chart";

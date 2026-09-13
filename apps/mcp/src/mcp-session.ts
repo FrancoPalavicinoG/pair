@@ -1,6 +1,11 @@
 import { randomUUID } from "node:crypto";
 import { McpServer, WebStandardStreamableHTTPServerTransport, type AuthInfo } from "@modelcontextprotocol/server";
 import { registerGetStartedTool } from "./tools/get-started";
+import { registerListActivitiesTool } from "./tools/list-activities";
+import { registerGetActivityTool } from "./tools/get-activity";
+import { registerGetDailyMetricsTool } from "./tools/get-daily-metrics";
+import { registerGetTrainingLoadTool } from "./tools/get-training-load";
+import { registerGetRecoveryTrendTool } from "./tools/get-recovery-trend";
 
 // createMcpHandler() (la opción simple) sirve el protocolo 2025-11-25 en modo
 // "stateless": cada request es una instancia nueva, sin sesión. Eso responde
@@ -22,6 +27,11 @@ function buildServer(): McpServer {
     { instructions: "Antes de usar cualquier otra tool de PAIR, llamá a get_started." },
   );
   registerGetStartedTool(server);
+  registerListActivitiesTool(server);
+  registerGetActivityTool(server);
+  registerGetDailyMetricsTool(server);
+  registerGetTrainingLoadTool(server);
+  registerGetRecoveryTrendTool(server);
   return server;
 }
 

@@ -5,7 +5,7 @@ import {
   findWeeklySummary,
   type DashboardWidgetConfig,
 } from "@pair/db";
-import { formatLabel } from "@/lib/format";
+import { formatLabel } from "@pair/core";
 import { renderBodyBattery, renderEnduranceScore, renderVo2MaxRunning } from "./daily-metrics";
 import { renderWeeklyHours } from "./weekly-hours";
 import { renderWeeklyDistance } from "./weekly-distance";

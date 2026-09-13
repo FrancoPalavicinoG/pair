@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { findRecentDailyMetrics, findTodayMetrics } from "@pair/db";
-import { formatLabel } from "@/lib/format";
+import { formatLabel } from "@pair/core";
 import { buildSparkline } from "@/lib/sparkline";
 import { TileShell } from "./stat-tile";
 

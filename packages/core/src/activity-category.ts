@@ -1,4 +1,4 @@
-import { formatPace, formatSpeed } from "@/lib/format";
+import { formatPace, formatSpeed } from "./format";
 
 export const ACTIVITY_CATEGORIES = [
   "running",
