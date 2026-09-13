@@ -6,6 +6,8 @@ Regla: no se empieza una fase sin cumplir el criterio de salida de la anterior. 
 
 **Reordenamiento (2026-09-02)**: P3 se retoma y pasa a ser la fase activa — `docs/specs/mcp-oauth-server.md` deja de estar pausado. La visión del proyecto se precisó en esta sesión (ver `CLAUDE.md`): sin P3 no existe el harness Garmin↔Claude, que es la razón de ser central del proyecto. En paralelo, P5 se adelanta: el "dog factor" y el historial de ejercicio no dependen de que el MCP exista (son storage + UI propia) y además son la data que las tools de P3 van a exponer, así que conviene construirlos a la vez, no en secuencia. Se agregan P6 (vista de plan) y P7 (ajuste automático diario) como fases nuevas, explícitamente **fuera de esta iteración** — quedan documentadas para no perder las decisiones ya tomadas (sobre todo la de P7: cron server-side, ver más abajo) sin comprometernos a construirlas ahora. El último ítem de P4 (comparación plan vs. ejecutado) pasa a depender de P3: sin un plan real no hay contra qué comparar lo ejecutado.
 
+**Reordenamiento (2026-09-13)**: con P3 (lectura + insight) mergeado y el diseño de capas de P5/P6 ya confirmado contra Garmin real (`3200c5f`, 2026-09-10), el usuario pide adelantar **P6** (antes explícitamente fuera de esta iteración) para progresar en una sola sesión el flujo completo: plan multi-sesión conversacional → zonas reales → workout agendado en Garmin. El modelo de datos y las tools de MCP de P6 pasan a construirse ahora, en paralelo con lo que falta de P3 (DSL + tools de escritura) y P5 (zonas/perfil) — los tres specs están escritos y se revisan juntos antes de plan mode: `docs/specs/garmin-user-profile.md` (P5, ya draft), `docs/specs/mcp-workout-tools.md` (P3, nuevo) y `docs/specs/training-plan.md` (P6, nuevo, acotado a modelo + tools — la vista en la web y la edición reflejada a Garmin siguen fuera, su propio spec cuando corresponda). P7 sigue explícitamente fuera.
+
 ---
 
 ## P0 — Spike de autenticación
@@ -62,11 +64,11 @@ Objetivo: el gateway funcionando de punta a punta con la infraestructura mínima
 - [x] `apps/mcp` sobre Streamable HTTP, sesión → usuario. Primera tool: `get_started`. Ver `docs/specs/mcp-transport.md`.
 - [x] Tools de lectura: actividades y métricas diarias (`list_activities`, `get_activity`, `get_daily_metrics`). Ver `docs/specs/mcp-read-tools.md`.
 - [x] Tools de "insight" que traducen los datos crudos (carga, HRV, readiness) en algo que Claude pueda razonar — `get_training_load` y `get_recovery_trend`. Ver `docs/specs/mcp-insight-tools.md`. Dog factor queda afuera (P5 no arrancó todavía).
-- [ ] DSL `PairWorkout` + traductor + tests.
-- [ ] Tools de escritura con preview → confirm: crear/agendar workouts, y registrar sets de ejercicio (peso, reps) a partir de lo que Claude interpreta de una foto de rutina — el parseo de la imagen lo hace Claude (visión), PAIR solo persiste contra el perfil de ejercicio de P5.
+- [ ] DSL `PairWorkout` + traductor + tests. Spec: `docs/specs/mcp-workout-tools.md`.
+- [ ] Tools de escritura con preview → confirm: crear/agendar workouts. Mismo spec. **Registrar sets de ejercicio** (peso, reps) queda fuera de ese spec — depende del historial de P5, que todavía no tiene spec propio.
 - [ ] Vista `/settings/connectors` (dentro de `Connections`): URL de conexión, instrucciones por cliente, sesiones activas, revocación.
 - [ ] Pantalla de consentimiento con scopes legibles.
-- [ ] `audit_log` de toda escritura.
+- [ ] `audit_log` de toda escritura. Spec: `docs/specs/mcp-workout-tools.md` (se agrega junto con las tools de escritura, y de paso cubre retroactivamente las tools de lectura ya mergeadas).
 
 **Salida**: foto de un entrenamiento en Claude Desktop → confirmación → workout en el reloj.
 
@@ -102,16 +104,16 @@ Corre en paralelo a P3: es storage + UI propia, no depende de que el MCP exista,
 
 ## P6 — Vista de plan de entrenamiento
 
-No entra en esta iteración — elegido explícitamente afuera para priorizar el harness (P3) y las señales (P5) primero. Queda documentado para no perder de vista la segunda razón de ser del proyecto (ver `CLAUDE.md`).
+**Adelantado (2026-09-13)**: el modelo de datos y las tools de MCP se adelantan, en paralelo con lo que falta de P3/P5 — ver nota de reordenamiento arriba y `docs/specs/training-plan.md`. La vista en la web y la edición manual reflejada a Garmin siguen fuera de esta iteración: dependen de tener el modelo+tools funcionando primero, y son su propio spec (drill-down de superficie visual, no se diseña junto con el modelo — `feedback_spec_phasing`).
 
 Objetivo: el plan que arma Claude vía el DSL de P3 se ve y se edita en PAIR, no solo en el chat. Depende de que P3 tenga el DSL y las tools de escritura funcionando — sin eso no hay plan que mostrar.
 
 **Alcance ampliado (2026-09-10)**: el caso de uso ya no es solo "un workout suelto que se ve en la web" — es que Claude arme un plan completo conversacionalmente (ej. "método noruego para tal carrera", ajustado con la carga real del usuario, revisable con feedback tipo "no me gustó cómo encaraste esto"), y ese plan tiene que sobrevivir entre conversaciones distintas, no solo vivir en la memoria del chat activo. Diseño de las tablas (`training_plans`/`planned_sessions`) y de cuándo se resuelven los targets por zona en `docs/architecture.md`, "Flujo: plan de entrenamiento conversacional".
 
-- [ ] Modelo de datos del plan (agenda de sesiones, no solo el workout suelto que P3 ya agenda en Garmin)
-- [ ] Vista de plan en la web: calendario/lista de sesiones, detalle por sesión
-- [ ] Edición manual desde la web, reflejada de vuelta en Garmin (mismo patrón preview → confirm que las escrituras vía MCP)
-- [ ] Tools de MCP para que Claude proponga/edite sesiones de un plan (borrador en la DB de PAIR, sin gate de preview→confirm hasta que la sesión puntual se agenda de verdad en Garmin)
+- [ ] Modelo de datos del plan (agenda de sesiones, no solo el workout suelto que P3 ya agenda en Garmin) — spec: `docs/specs/training-plan.md`
+- [ ] Tools de MCP para que Claude proponga/edite sesiones de un plan (borrador en la DB de PAIR, sin gate de preview→confirm hasta que la sesión puntual se agenda de verdad en Garmin) — mismo spec
+- [ ] Vista de plan en la web: calendario/lista de sesiones, detalle por sesión — **fuera de esta iteración**, spec propio cuando corresponda
+- [ ] Edición manual desde la web, reflejada de vuelta en Garmin (mismo patrón preview → confirm que las escrituras vía MCP) — **fuera de esta iteración**, depende del ítem anterior
 
 **Salida**: el plan que Claude arma se puede ver y ajustar sin volver al chat.
 
