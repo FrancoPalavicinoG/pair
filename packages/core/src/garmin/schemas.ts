@@ -16,6 +16,58 @@ export const activityDetailSchema = z
   })
   .passthrough();
 
+// Campos confirmados contra una cuenta real (docs/fixtures/training-readiness.anon.json,
+// docs/garmin-api.md). Garmin recalcula el readiness varias veces al dia — esto es UNA
+// entrada de la lista que devuelve el endpoint, no la respuesta completa; quien la usa
+// se queda con la de mayor `timestampLocal` (mismo criterio que packages/sync).
+export const trainingReadinessEntrySchema = z
+  .object({
+    timestampLocal: z.string(),
+    score: z.number().optional(),
+    level: z.string().optional(),
+    feedbackShort: z.string().optional(),
+    feedbackLong: z.string().optional(),
+    sleepScoreFactorFeedback: z.string().optional(),
+    sleepHistoryFactorFeedback: z.string().optional(),
+    hrvFactorFeedback: z.string().optional(),
+    acwrFactorFeedback: z.string().optional(),
+    recoveryTimeFactorFeedback: z.string().optional(),
+    stressHistoryFactorFeedback: z.string().optional(),
+  })
+  .passthrough();
+
+export const trainingReadinessListSchema = z.array(trainingReadinessEntrySchema);
+
+// Campos confirmados contra una cuenta real (docs/garmin-api.md, foco de carga). Vive
+// anidado dentro del agregador de estado de entreno (`mostRecentTrainingLoadBalance`),
+// una entrada por dispositivo en `metricsTrainingLoadBalanceDTOMap` — quien la usa se queda
+// con la primera (mismo criterio que `packages/sync` para el resto de este agregador).
+export const trainingLoadBalanceEntrySchema = z
+  .object({
+    monthlyLoadAnaerobic: z.number().optional(),
+    monthlyLoadAerobicLow: z.number().optional(),
+    monthlyLoadAerobicHigh: z.number().optional(),
+    monthlyLoadAnaerobicTargetMin: z.number().optional(),
+    monthlyLoadAnaerobicTargetMax: z.number().optional(),
+    monthlyLoadAerobicLowTargetMin: z.number().optional(),
+    monthlyLoadAerobicLowTargetMax: z.number().optional(),
+    monthlyLoadAerobicHighTargetMin: z.number().optional(),
+    monthlyLoadAerobicHighTargetMax: z.number().optional(),
+    trainingBalanceFeedbackPhrase: z.string().optional(),
+  })
+  .passthrough();
+
+export const trainingLoadBalanceSchema = z
+  .object({
+    payload: z
+      .object({
+        metricsTrainingLoadBalanceDTOMap: z.record(z.string(), trainingLoadBalanceEntrySchema).optional(),
+      })
+      .passthrough()
+      .optional(),
+  })
+  .passthrough();
+
 // Campos confirmados contra una cuenta real (docs/fixtures/sleep-daily.anon.json).
 // `sleepLevels` no está documentado por Garmin — el bloque a bloque real de cada fase de
 // sueño, no solo movimiento (docs/garmin-api.md).

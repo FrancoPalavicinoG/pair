@@ -10,7 +10,7 @@ import type { DashboardWidgets } from "@pair/db";
 import { updateDashboardLayout } from "../actions";
 import type { WidgetKey } from "./widgets/registry";
 
-export type WidgetItem = { key: WidgetKey; label: string; node: ReactNode };
+export type WidgetItem = { key: WidgetKey; label: string; node: ReactNode; href: string };
 
 const GRID_GAP = 16;
 // Piso de tile: por debajo de esto el contenido de un StatTile se amontona (confirmado
@@ -92,12 +92,6 @@ export function DashboardLayoutEditor({
     return [...visibleWidgets, ...hiddenWidgets];
   }
 
-  function handleHide(key: WidgetKey) {
-    const remainingItems = items.filter((item) => item.key !== key);
-    setItems(remainingItems);
-    updateDashboardLayout(buildLayout(remainingItems));
-  }
-
   function handleDragEnd(event: DragEndEvent) {
     const activeKey = event.active.id as WidgetKey;
     const overKey = event.over?.id as WidgetKey | undefined;
@@ -119,11 +113,18 @@ export function DashboardLayoutEditor({
   }
 
   return (
-    <div ref={containerRef} style={{ height: box.height || undefined }} className="w-full overflow-y-auto">
+    <div
+      ref={containerRef}
+      style={{ height: box.height || undefined }}
+      className="w-full overflow-y-auto"
+    >
       <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
         <SortableContext items={items.map((item) => item.key)} strategy={rectSortingStrategy}>
+          {/* justify-start (no center): arranca desde el borde izquierdo, igual que "Edit
+              widgets" arriba a la derecha — así ese link cae arriba de la última tile de
+              una fila completa en vez de flotar más allá de una grilla centrada y angosta. */}
           <div
-            className="grid w-full justify-center content-center"
+            className="grid w-full justify-start content-center"
             style={{
               height: box.height || undefined,
               gridTemplateColumns: `repeat(${grid.cols}, ${grid.tileSize}px)`,
@@ -132,7 +133,7 @@ export function DashboardLayoutEditor({
             }}
           >
             {items.map((item) => (
-              <SortableWidgetTile key={item.key} item={item} onHide={handleHide} />
+              <SortableWidgetTile key={item.key} item={item} />
             ))}
           </div>
         </SortableContext>
@@ -141,13 +142,7 @@ export function DashboardLayoutEditor({
   );
 }
 
-function SortableWidgetTile({
-  item,
-  onHide,
-}: {
-  item: WidgetItem;
-  onHide: (key: WidgetKey) => void;
-}) {
+function SortableWidgetTile({ item }: { item: WidgetItem }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: item.key,
   });
@@ -166,15 +161,7 @@ function SortableWidgetTile({
       >
         ⋮⋮
       </span>
-      <button
-        type="button"
-        aria-label={`Hide ${item.label}`}
-        className="absolute right-2 top-2 z-10 font-mono text-xs leading-none text-graphite opacity-0 transition-colors duration-[250ms] hover:text-bone focus-visible:opacity-100 focus-visible:text-ink group-hover:text-panel-muted group-hover:opacity-100 group-focus-within:opacity-100"
-        onClick={() => onHide(item.key)}
-      >
-        ×
-      </button>
-      <Link href={`/dashboard/metrics/${encodeURIComponent(item.key)}`} className="block">
+      <Link href={item.href} className="block">
         {item.node}
       </Link>
     </div>

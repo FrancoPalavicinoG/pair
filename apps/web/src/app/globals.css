@@ -24,6 +24,8 @@
   /* Estado, paleta fija y reservada. */
   --status-ready: #3f9a5c;
   --status-attn: #3e6fd1;
+  --status-strained: #d84497;
+  --status-maintaining: #7a5800;
   /* Zonas de potencia (ciclismo) — ordinal, hue propio, validada con scripts/validate_palette.js. */
   --pw1: #f5a9d0;
   --pw2: #ed7cb3;
@@ -35,6 +37,13 @@
   --sleep2: #5fc9be;
   --sleep3: var(--chart-a);
   --sleep4: #0d6e66;
+  /* Rampa de zona — ordinal, multi-hue a proposito (no monotona como z1-z5/pw1-pw5),
+     validada con scripts/validate_palette.js --pairs all (docs/style.md, Graficos). */
+  --zone1: #b8362b;
+  --zone2: #c27f16;
+  --zone3: #2e8b5c;
+  --zone4: #2a5fc2;
+  --zone5: #8b3399;
 }
 
 @theme inline {
@@ -57,6 +66,8 @@
   --color-chart-b: var(--chart-b);
   --color-status-ready: var(--status-ready);
   --color-status-attn: var(--status-attn);
+  --color-status-strained: var(--status-strained);
+  --color-status-maintaining: var(--status-maintaining);
   --color-pw1: var(--pw1);
   --color-pw2: var(--pw2);
   --color-pw3: var(--pw3);
@@ -66,6 +77,11 @@
   --color-sleep2: var(--sleep2);
   --color-sleep3: var(--sleep3);
   --color-sleep4: var(--sleep4);
+  --color-zone1: var(--zone1);
+  --color-zone2: var(--zone2);
+  --color-zone3: var(--zone3);
+  --color-zone4: var(--zone4);
+  --color-zone5: var(--zone5);
   --font-sans: var(--font-archivo);
   --font-mono: var(--font-jetbrains-mono);
 }
@@ -86,10 +102,14 @@ body {
 
 /* Ejes wdth/wght del variable font (docs/style.md, Tipografia). */
 @utility font-display {
-  font-variation-settings: "wdth" 90, "wght" 800;
+  font-variation-settings:
+    "wdth" 90,
+    "wght" 800;
 }
 @utility font-body {
-  font-variation-settings: "wdth" 100, "wght" 400;
+  font-variation-settings:
+    "wdth" 100,
+    "wght" 400;
 }
 
 /* Dos puntos superpuestos del eyebrow (docs/style.md). */

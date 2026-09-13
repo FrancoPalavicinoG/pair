@@ -12,6 +12,16 @@ const STAGE_COLOR: Record<SleepStage, string> = {
   deep: "var(--sleep4)",
 };
 
+// Alto por profundidad, no solo color — decision de diseno propia (Garmin no documenta su
+// escala), el objetivo es que el orden se lea: despertar (pico al tope) > REM > ligero >
+// profundo (docs/style.md, "Barra de fases de sueño").
+const STAGE_HEIGHT: Record<SleepStage, string> = {
+  awake: "100%",
+  rem: "85%",
+  light: "55%",
+  deep: "30%",
+};
+
 const LEGEND: { stage: SleepStage; label: string }[] = [
   { stage: "awake", label: "Awake" },
   { stage: "light", label: "Light" },
@@ -30,14 +40,19 @@ export function SleepPhaseBar({ segments }: { segments: SleepStageSegment[] }) {
         <span>{formatClockTime(segments[0]!.startLocal)}</span>
         <span>{formatClockTime(segments[segments.length - 1]!.endLocal)}</span>
       </div>
-      <div className="flex h-8 bg-lcd transition-colors duration-[250ms] group-hover:bg-panel">
+      <div className="flex h-8 items-end bg-lcd transition-colors duration-[250ms] group-hover:bg-panel">
         {segments.map((segment, i) => {
-          const durationMs = new Date(segment.endLocal).getTime() - new Date(segment.startLocal).getTime();
+          const durationMs =
+            new Date(segment.endLocal).getTime() - new Date(segment.startLocal).getTime();
           if (windowMs <= 0 || durationMs <= 0) return null;
           return (
             <div
               key={i}
-              style={{ width: `${(durationMs / windowMs) * 100}%`, backgroundColor: STAGE_COLOR[segment.stage] }}
+              style={{
+                width: `${(durationMs / windowMs) * 100}%`,
+                height: STAGE_HEIGHT[segment.stage],
+                backgroundColor: STAGE_COLOR[segment.stage],
+              }}
             />
           );
         })}
@@ -48,7 +63,11 @@ export function SleepPhaseBar({ segments }: { segments: SleepStageSegment[] }) {
             key={entry.stage}
             className="flex items-center gap-1.5 font-mono text-[10.5px] text-graphite transition-colors duration-[250ms] group-hover:text-panel-muted"
           >
-            <i aria-hidden className="block h-2 w-2" style={{ backgroundColor: STAGE_COLOR[entry.stage] }} />
+            <i
+              aria-hidden
+              className="block h-2 w-2"
+              style={{ backgroundColor: STAGE_COLOR[entry.stage] }}
+            />
             {entry.label}
           </span>
         ))}

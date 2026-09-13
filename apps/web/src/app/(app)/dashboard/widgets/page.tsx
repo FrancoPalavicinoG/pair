@@ -1,14 +1,9 @@
-import Link from "next/link";
 import { requireSession } from "@/lib/session";
-import { toggleWidgetVisibility } from "../actions";
-import {
-  getEffectiveLayout,
-  getWidgetEntries,
-  MAX_VISIBLE_WIDGETS,
-  type WidgetKey,
-} from "../_components/widgets/registry";
+import { showAllWidgets, toggleWidgetVisibility } from "../actions";
+import { getEffectiveLayout, getWidgetEntries, type WidgetKey } from "../_components/widgets/registry";
 import { Eyebrow } from "@/components/eyebrow";
 import { ListRow } from "@/components/list-row";
+import { QuietAction } from "@/components/quiet-action";
 
 export default async function DashboardWidgetsPage() {
   const session = await requireSession();
@@ -24,18 +19,13 @@ export default async function DashboardWidgetsPage() {
     rows.push({ key: entry.key, label: entry.label, visible });
   }
 
-  const visibleCount = rows.filter((row) => row.visible).length;
-  const atLimit = visibleCount >= MAX_VISIBLE_WIDGETS;
-
   return (
-    <div className="max-w-md space-y-8">
-      <Eyebrow>Dashboard widgets</Eyebrow>
-
-      <div className="border border-rule-soft px-5 py-4">
-        <p className={`text-sm ${atLimit ? "text-ink" : "text-graphite"}`}>
-          {visibleCount}/{MAX_VISIBLE_WIDGETS} widgets visible on the dashboard.
-          {atLimit && " Hide one to enable another."}
-        </p>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Eyebrow>Dashboard widgets</Eyebrow>
+        <form action={showAllWidgets}>
+          <QuietAction type="submit">Select all</QuietAction>
+        </form>
       </div>
 
       <ul className="space-y-2">
@@ -53,12 +43,9 @@ export default async function DashboardWidgetsPage() {
         ))}
       </ul>
 
-      <Link
-        href="/dashboard"
-        className="block font-mono text-xs uppercase tracking-[0.1em] text-graphite transition-colors hover:text-ink"
-      >
+      <QuietAction href="/dashboard" className="block">
         Back to dashboard
-      </Link>
+      </QuietAction>
     </div>
   );
 }

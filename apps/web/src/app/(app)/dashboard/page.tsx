@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { requireSession } from "@/lib/session";
 import { findCredentialsByUserId, deriveGarminStatus } from "@pair/db";
 import {
@@ -8,6 +7,7 @@ import {
 } from "./_components/widgets/registry";
 import { DashboardLayoutEditor, type WidgetItem } from "./_components/dashboard-layout-editor";
 import { Eyebrow } from "@/components/eyebrow";
+import { QuietAction } from "@/components/quiet-action";
 
 export default async function DashboardPage() {
   const session = await requireSession();
@@ -30,8 +30,13 @@ export default async function DashboardPage() {
   for (const w of knownLayout) {
     if (w.visible) {
       const registryEntry = entryByKey.get(w.key)!;
-      const node = await registryEntry.render(session.userId);
-      if (node) visibleWidgets.push({ key: w.key, label: registryEntry.label, node });
+      const node = await registryEntry.render(session.userId, true);
+      if (node) {
+        const href = registryEntry.href
+          ? await registryEntry.href(session.userId)
+          : `/dashboard/metrics/${encodeURIComponent(w.key)}`;
+        visibleWidgets.push({ key: w.key, label: registryEntry.label, node, href });
+      }
     } else {
       hiddenKeys.push(w.key);
     }
@@ -43,23 +48,16 @@ export default async function DashboardPage() {
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <p className="font-mono text-xs uppercase tracking-[0.1em] text-graphite">Widgets</p>
-          <Link
-            href="/dashboard/widgets"
-            className="font-mono text-xs uppercase tracking-[0.1em] text-graphite transition-colors hover:text-ink"
-          >
-            Edit widgets
-          </Link>
+          {garminStatus.state === "syncing" && <p className="text-sm text-graphite">Syncing…</p>}
+          {garminStatus.state === "synced" && (
+            <p className="text-sm text-graphite">
+              {garminStatus.lastSyncedAt
+                ? `Synced ${garminStatus.lastSyncedAt.toLocaleString()}`
+                : "Never synced"}
+            </p>
+          )}
+          <QuietAction href="/dashboard/widgets">Edit widgets</QuietAction>
         </div>
-
-        {garminStatus.state === "syncing" && <p className="text-sm text-graphite">Syncing…</p>}
-        {garminStatus.state === "synced" && (
-          <p className="text-sm text-graphite">
-            {garminStatus.lastSyncedAt
-              ? `Synced ${garminStatus.lastSyncedAt.toLocaleString()}`
-              : "Never synced"}
-          </p>
-        )}
 
         <DashboardLayoutEditor initialWidgets={visibleWidgets} hiddenKeys={hiddenKeys} />
       </div>

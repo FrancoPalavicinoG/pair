@@ -18,10 +18,10 @@ export default async function DashboardMetricDetailPage({
     notFound();
   }
 
-  const node = await entry.render(session.userId);
+  const node = await entry.render(session.userId, false);
 
   return (
-    <div className="max-w-md space-y-8">
+    <div className="space-y-6">
       <Eyebrow>{entry.label}</Eyebrow>
       {node}
     </div>

@@ -15,7 +15,13 @@ export function formatActivityTime(date: Date): string {
   return `${hours}:${minutes}`;
 }
 
-function formatAbsoluteDate(dateStr: string, currentYear: number): string {
+// Fecha absoluta corta ("Aug 30", o "Aug 30, 2025" si no es el año actual) a partir de un
+// string "YYYY-MM-DD" (mismo formato que daily_metrics.date / activities.startTimeLocal
+// ya normalizado). `currentYear` opcional — si no se pasa, usa el año real de hoy.
+export function formatShortDate(
+  dateStr: string,
+  currentYear = new Date().getUTCFullYear(),
+): string {
   const parts = dateStr.split("-").map(Number);
   const year = parts[0] ?? currentYear;
   const month = parts[1] ?? 1;
@@ -27,10 +33,14 @@ function formatAbsoluteDate(dateStr: string, currentYear: number): string {
 }
 
 // "Today" / "Yesterday" / fecha absoluta ("Aug 30", o "Aug 30, 2025" si no es el año actual).
-export function dayLabel(dateStr: string, todayLocalDate: string, yesterdayLocalDate: string): string {
+export function dayLabel(
+  dateStr: string,
+  todayLocalDate: string,
+  yesterdayLocalDate: string,
+): string {
   if (dateStr === todayLocalDate) return "Today";
   if (dateStr === yesterdayLocalDate) return "Yesterday";
-  return formatAbsoluteDate(dateStr, Number(todayLocalDate.slice(0, 4)));
+  return formatShortDate(dateStr, Number(todayLocalDate.slice(0, 4)));
 }
 
 export type ActivityDateGroup<T> = { label: string; items: T[] };

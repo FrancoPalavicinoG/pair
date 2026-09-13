@@ -1,5 +1,6 @@
 import { Wordmark } from "@/components/wordmark";
 import { PairButton } from "@/components/pair-button";
+import { QuietAction } from "@/components/quiet-action";
 import type { GarminStatus } from "@pair/db";
 import { logout, syncNowAction } from "../actions";
 import { NavLink } from "./nav-link";
@@ -9,7 +10,6 @@ const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/activities", label: "Activities" },
   { href: "/connections", label: "Connections" },
-  { href: "/dashboard/widgets", label: "Widgets" },
 ];
 
 // Shell de escritorio: sidebar fijo + contenido a la derecha (docs/style.md).
@@ -43,12 +43,7 @@ export function AppShell({
           <div className="space-y-3">
             <p className="truncate font-mono text-xs text-graphite">{email}</p>
             <form action={logout}>
-              <button
-                type="submit"
-                className="font-mono text-xs uppercase tracking-[0.1em] text-graphite transition-colors hover:text-ink"
-              >
-                Log out
-              </button>
+              <QuietAction type="submit">Log out</QuietAction>
             </form>
           </div>
         </div>
