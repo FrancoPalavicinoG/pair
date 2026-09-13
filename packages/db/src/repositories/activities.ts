@@ -1,4 +1,5 @@
 import { eq, desc, and, gte, lte, isNull, inArray } from "drizzle-orm";
+import { localDateString } from "@pair/core";
 import { db } from "../client";
 import { activities } from "../schema/activities";
 import { findUserTimezone } from "./users";
@@ -46,9 +47,25 @@ export type WeeklySportBucket = {
   activityCount: number;
 };
 
+export type WeeklyDayBucket = { durationSeconds: number; distanceMeters: number };
+
+// Desglose diario de la semana EN CURSO (no la pasada) — para el mini gráfico de barras de
+// docs/specs/app-dashboard-weekly-bars.md. Siempre 7 entradas, lunes a domingo, incluidos los
+// días futuros (en 0, marcados `isFuture`) para que quien consuma esto no tenga que inferir
+// cuántas barras dibujar.
+export type WeekDay = {
+  date: string;
+  dayOfWeek: number; // 0=lunes .. 6=domingo
+  isFuture: boolean;
+  isToday: boolean;
+  total: WeeklyDayBucket;
+  bySport: Record<string, WeeklyDayBucket>;
+};
+
 export type WeeklySummary = {
   totalDurationSeconds: { thisWeek: number; lastWeek: number };
   bySport: Record<string, { thisWeek: WeeklySportBucket; lastWeek: WeeklySportBucket }>;
+  weekDays: WeekDay[];
 };
 
 // Offset UTC real (en minutos) de `timeZone` en el instante `date`. Usa el offset que ICU calcula
@@ -117,9 +134,26 @@ export async function findWeeklySummary(userId: string): Promise<WeeklySummary> 
       ),
     );
 
+  const now = new Date();
+  const todayDateString = localDateString(now, timezone);
+  const oneDayMs = 24 * 60 * 60 * 1000;
+  const weekDays: WeekDay[] = Array.from({ length: 7 }, (_, dayOfWeek) => {
+    const dayStart = new Date(bounds.thisWeekStart.getTime() + dayOfWeek * oneDayMs);
+    const date = localDateString(dayStart, timezone);
+    return {
+      date,
+      dayOfWeek,
+      isFuture: dayStart > now,
+      isToday: date === todayDateString,
+      total: { durationSeconds: 0, distanceMeters: 0 },
+      bySport: {},
+    };
+  });
+
   const summary: WeeklySummary = {
     totalDurationSeconds: { thisWeek: 0, lastWeek: 0 },
     bySport: {},
+    weekDays,
   };
 
   for (const row of rows) {
@@ -134,6 +168,17 @@ export async function findWeeklySummary(userId: string): Promise<WeeklySummary> 
       summary.bySport[sport].thisWeek.durationSeconds += row.durationSeconds ?? 0;
       summary.bySport[sport].thisWeek.activityCount += 1;
       summary.totalDurationSeconds.thisWeek += row.durationSeconds ?? 0;
+
+      const dayIndex = Math.min(
+        6,
+        Math.floor((row.startTimeUtc.getTime() - bounds.thisWeekStart.getTime()) / oneDayMs),
+      );
+      const day = weekDays[dayIndex]!;
+      day.total.durationSeconds += row.durationSeconds ?? 0;
+      day.total.distanceMeters += row.distanceMeters ?? 0;
+      day.bySport[sport] ??= { durationSeconds: 0, distanceMeters: 0 };
+      day.bySport[sport]!.durationSeconds += row.durationSeconds ?? 0;
+      day.bySport[sport]!.distanceMeters += row.distanceMeters ?? 0;
     } else if (row.startTimeUtc <= bounds.lastWeekEnd) {
       // "Esta semana" corre lunes -> ahora, un tramo parcial casi todos los días. Comparar
       // contra la semana pasada completa (lunes-domingo) hace que el % vs. semana pasada dé

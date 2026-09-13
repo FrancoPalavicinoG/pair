@@ -50,6 +50,44 @@ export function TileShell({
   );
 }
 
+// Valor grande + subtítulo mono chico: la anatomía que comparten StatTile y cualquier widget
+// con contenido propio que agrega algo debajo (training-load, weekly-hours, weekly-distance)
+// — un patrón usado 2+ veces se saca a componente propio en vez de repetirlo a mano
+// (apps/web/CLAUDE.md, regla de reuso). `tightSubtitle` saca el `mb-3.5` de abajo del
+// subtítulo para los widgets que ya controlan ese espacio con su propio contenido siguiente.
+export function TileValue({
+  value,
+  unit,
+  subtitle,
+  flagged = false,
+  tightSubtitle = false,
+}: {
+  value: string;
+  unit?: string;
+  subtitle: ReactNode;
+  flagged?: boolean;
+  tightSubtitle?: boolean;
+}) {
+  return (
+    <>
+      <p
+        className={`font-display mb-1.5 text-[32px] leading-none tracking-[-0.03em] transition-colors duration-[250ms] ${
+          flagged ? "text-bone" : "text-ink group-hover:text-bone"
+        }`}
+      >
+        {value}
+        {unit && <span className="ml-0.5 text-sm font-medium text-graphite">{unit}</span>}
+      </p>
+
+      <p
+        className={`font-mono text-xs ${tightSubtitle ? "" : "mb-3.5"} ${flagged ? "text-ember" : "text-graphite"}`}
+      >
+        {subtitle}
+      </p>
+    </>
+  );
+}
+
 // `flagged`: la unica tile por vista en la que pair esta comentando algo; ahi el delta pasa a ember.
 export function StatTile({
   label,
@@ -70,18 +108,7 @@ export function StatTile({
 }) {
   const content = (
     <>
-      <p
-        className={`font-display mb-1.5 text-[32px] leading-none tracking-[-0.03em] transition-colors duration-[250ms] ${
-          flagged ? "text-bone" : "text-ink group-hover:text-bone"
-        }`}
-      >
-        {value}
-        {unit && <span className="ml-0.5 text-sm font-medium text-graphite">{unit}</span>}
-      </p>
-
-      <p className={`mb-3.5 font-mono text-xs ${flagged ? "text-ember" : "text-graphite"}`}>
-        {delta}
-      </p>
+      <TileValue value={value} unit={unit} subtitle={delta} flagged={flagged} />
 
       {sparkline && (
         <div className={`relative h-7 ${square ? "mt-auto" : "mt-1.5"}`}>

@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
 import { findWeeklySummary } from "@pair/db";
 import { formatDuration } from "@/lib/format";
-import { StatTile } from "./stat-tile";
+import { TileShell, TileValue } from "./stat-tile";
+import { WeeklyBarChart } from "./weekly-bar-chart";
 
 export async function renderWeeklyHours(userId: string, square = true): Promise<ReactNode> {
-  const { totalDurationSeconds } = await findWeeklySummary(userId);
+  const { totalDurationSeconds, weekDays } = await findWeeklySummary(userId);
   const thisWeek = totalDurationSeconds.thisWeek;
   const lastWeek = totalDurationSeconds.lastWeek;
 
@@ -18,5 +19,17 @@ export async function renderWeeklyHours(userId: string, square = true): Promise<
     delta = `${sign}${Math.abs(changePercent).toFixed(0)}% vs last week`;
   }
 
-  return <StatTile square={square} label="Training hours" value={formatDuration(thisWeek)} delta={delta} />;
+  const chartDays = weekDays.map((day) => ({
+    dayOfWeek: day.dayOfWeek,
+    value: day.total.durationSeconds / 3600,
+    isFuture: day.isFuture,
+    isToday: day.isToday,
+  }));
+
+  return (
+    <TileShell label="Training hours" square={square}>
+      <TileValue value={formatDuration(thisWeek)} subtitle={delta} tightSubtitle />
+      <WeeklyBarChart days={chartDays} />
+    </TileShell>
+  );
 }

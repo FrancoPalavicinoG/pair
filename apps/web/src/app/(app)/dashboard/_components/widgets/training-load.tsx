@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { findLoadBalance, findTodayMetrics, type LoadBalanceBucket } from "@pair/db";
-import { TileShell } from "./stat-tile";
+import { TileShell, TileValue } from "./stat-tile";
 
 // Labels abreviados para que entren sin truncar en la tile mínima (180px, w-16 de columna
 // fija) — "Aerobic high/low" completo no entra a este tamaño de fuente.
@@ -64,12 +64,11 @@ export async function renderTrainingLoad(userId: string, square = true): Promise
 
   return (
     <TileShell label="Training load" square={square}>
-      <p className="font-display mb-1.5 text-[32px] leading-none tracking-[-0.03em] text-ink transition-colors duration-[250ms] group-hover:text-bone">
-        {acwr.toFixed(1)}
-      </p>
-      <p className="font-mono text-xs text-graphite transition-colors duration-[250ms] group-hover:text-panel-muted">
-        {today?.acuteLoad ?? "–"} acute / {today?.chronicLoad ?? "–"} chronic
-      </p>
+      <TileValue
+        value={acwr.toFixed(1)}
+        subtitle={`${today?.acuteLoad ?? "–"} acute / ${today?.chronicLoad ?? "–"} chronic`}
+        tightSubtitle
+      />
       {loadBalance && (
         <div className="mt-1.5 space-y-1 border-t border-rule-soft pt-1.5">
           {LOAD_BALANCE_ROWS.map(({ key, label }) => {
